@@ -1116,6 +1116,7 @@ a:hover {
     padding: 1.5rem;
     border: 1px solid var(--card-border);
     backdrop-filter: blur(10px);
+    min-width: 0; /* Fix for horizontal overflow */
 }
 .radio-search {
     position: relative;
