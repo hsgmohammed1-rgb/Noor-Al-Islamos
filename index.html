@@ -271,30 +271,69 @@
         </div>
     </section>
 
-    <!-- قسم المسبحة -->
+    <!-- قسم المسبحة الإلكترونية المطور -->
     <section id="tasbih-section" class="content-section">
-        <div class="tasbih-container">
-            <h2 class="section-title">المسبحة الإلكترونية</h2>
-            <div class="tasbih-content">
-                <div class="tasbih-display">
-                    <div id="score">0</div>
+        <h2 class="section-title">المسبحة الرقمية</h2>
+        <div class="tasbih-pro-container">
+            
+            <!-- العداد الرئيسي -->
+            <div class="tasbih-counter-area">
+                <div class="tasbih-goal-progress">
+                    <svg width="280" height="280" viewBox="0 0 280 280">
+                        <circle class="progress-ring-bg" cx="140" cy="140" r="130"></circle>
+                        <circle id="tasbih-progress-ring" class="progress-ring-fg" cx="140" cy="140" r="130"></circle>
+                    </svg>
                 </div>
-                <div id="circle" onclick="count()">سبح</div>
-                <div class="tasbih-controls">
-                    <button id="reset-tasbih" class="tasbih-btn">إعادة تعيين</button>
+                <div class="tasbih-display-pro">
+                    <div id="tasbih-score-pro">0</div>
+                    <div id="tasbih-goal-display">الهدف: 33</div>
                 </div>
-                <div class="tasbih-presets">
-                    <h3>تسبيحات شائعة</h3>
-                    <div class="preset-buttons">
-                        <button class="preset-btn" data-text="سبحان الله">سبحان الله</button>
-                        <button class="preset-btn" data-text="الحمد لله">الحمد لله</button>
-                        <button class="preset-btn" data-text="الله أكبر">الله أكبر</button>
-                        <button class="preset-btn" data-text="لا إله إلا الله">لا إله إلا الله</button>
-                        <button class="preset-btn" data-text="أستغفر الله">أستغفر الله</button>
-                    </div>
+                <div id="tasbih-main-button">
+                    <span id="tasbih-main-text">سبحان الله</span>
                 </div>
             </div>
+    
+            <!-- لوحة التحكم -->
+            <div class="tasbih-controls-panel">
+                <div class="control-group main-controls">
+                    <button id="tasbih-reset-pro" class="control-btn" title="إعادة تعيين"><i class="fas fa-undo"></i></button>
+                    <button id="tasbih-sound-toggle" class="control-btn active" title="كتم/تشغيل الصوت"><i class="fas fa-volume-up"></i></button>
+                    <button id="tasbih-auto-toggle" class="control-btn" title="تسبيح تلقائي"><i class="fas fa-robot"></i></button>
+                </div>
+                <div id="tasbih-auto-controls" class="control-group speed-controls hidden">
+                    <label>السرعة:</label>
+                    <button class="speed-btn" data-speed="2000">بطيء</button>
+                    <button class="speed-btn active" data-speed="1000">وسط</button>
+                    <button class="speed-btn" data-speed="500">سريع</button>
+                </div>
+                <div class="control-group goal-controls">
+                    <label>الهدف:</label>
+                    <button class="goal-btn active" data-goal="33">33</button>
+                    <button class="goal-btn" data-goal="100">100</button>
+                    <button class="goal-btn" data-goal="1000">1000</button>
+                    <button class="goal-btn" data-goal="0">∞</button>
+                </div>
+            </div>
+            
+            <!-- قائمة التسبيحات -->
+            <div class="tasbih-presets-container">
+                <h3>اختر تسبيحة</h3>
+                <div class="tasbih-presets-scroller">
+                    <button class="preset-btn-pro active" data-text="سبحان الله">سبحان الله</button>
+                    <button class="preset-btn-pro" data-text="الحمد لله">الحمد لله</button>
+                    <button class="preset-btn-pro" data-text="الله أكبر">الله أكبر</button>
+                    <button class="preset-btn-pro" data-text="لا إله إلا الله">لا إله إلا الله</button>
+                    <button class="preset-btn-pro" data-text="أستغفر الله">أستغفر الله</button>
+                    <button class="preset-btn-pro" data-text="لا حول ولا قوة إلا بالله">لا حول ولا قوة إلا بالله</button>
+                    <button class="preset-btn-pro" data-text="سبحان الله وبحمده">سبحان الله وبحمده</button>
+                    <button class="preset-btn-pro" data-text="سبحان الله العظيم">سبحان الله العظيم</button>
+                    <button class="preset-btn-pro" data-text="اللهم صل على محمد">اللهم صل على محمد</button>
+                    <button class="preset-btn-pro" data-text="حسبي الله ونعم الوكيل">حسبي الله ونعم الوكيل</button>
+                </div>
+            </div>
+    
         </div>
+        <audio id="tasbih-click-sound" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAEw//k0//lE//l0//mY//nE//n0//oY//p0//qg//rQ//sA//tI//uA//uw//vY//wQ//ww//x4//z4//0Q//1o//24//3w//4o//54//7A//8A//9Q//+I//+w//gA=" preload="auto"></audio>
     </section>
 
     <!-- قسم البث المباشر من الكعبة -->
