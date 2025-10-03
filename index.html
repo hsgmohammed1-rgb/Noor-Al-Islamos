@@ -343,33 +343,24 @@
     <!-- قسم اتجاه القبلة -->
     <section id="qibla-section" class="content-section">
         <h2 class="section-title">اتجاه القبلة</h2>
-        <div class="qibla-container">
-            <div class="qibla-info">
-                <h3>تحديد اتجاه القبلة</h3>
-                <p>اضغط على زر "تحديد موقعي" للحصول على اتجاه القبلة بناءً على موقعك الحالي.</p>
+        <div class="qibla-container-new">
+            <div class="qibla-map-area">
+                <div id="qibla-map">
+                     <div class="map-placeholder">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <p>سيتم عرض الخريطة هنا بعد تحديد موقعك</p>
+                    </div>
+                </div>
             </div>
-            <div class="qibla-finder">
-                <button id="get-location" class="qibla-btn">
-                    <i class="fas fa-location-arrow"></i> تحديد موقعي
-                </button>
-                <div class="compass-container">
-                    <div class="compass">
-                        <div class="compass-inner">
-                            <div class="compass-arrow"></div>
-                        </div>
-                        <div class="compass-markings">
-                            <span class="north">N</span>
-                            <span class="east">E</span>
-                            <span class="south">S</span>
-                            <span class="west">W</span>
-                        </div>
-                    </div>
-                    <div class="qibla-direction">
-                        <div class="direction-info">
-                            <span>اتجاه القبلة:</span>
-                            <span id="qibla-degree">-- درجة</span>
-                        </div>
-                    </div>
+            <div class="qibla-info-panel">
+                <h3><i class="fas fa-compass"></i> معلومات القبلة</h3>
+                <div id="qibla-results">
+                    <p class="initial-message">اضغط على الزر أدناه لبدء تحديد اتجاه القبلة.</p>
+                </div>
+                <div class="qibla-controls">
+                    <button id="get-location" class="qibla-btn">
+                        <i class="fas fa-location-arrow"></i> تحديد موقعي
+                    </button>
                 </div>
             </div>
         </div>

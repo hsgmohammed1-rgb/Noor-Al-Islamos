@@ -1,112 +1,100 @@
 document.addEventListener("DOMContentLoaded", function () {
     const getLocationButton = document.getElementById('get-location');
-    const qiblaDegreeElement = document.getElementById('qibla-degree');
-    const compassArrow = document.querySelector('.compass-arrow');
-    
+    const qiblaResultsContainer = document.getElementById('qibla-results');
+    const qiblaMapContainer = document.getElementById('qibla-map');
+
     // إحداثيات الكعبة المشرفة
     const KAABA_LAT = 21.422487;
     const KAABA_LNG = 39.826206;
-    
+
+    let map = null;
+    let userMarker = null;
+    let kaabaMarker = null;
+    let qiblaLine = null;
+
+    // أيقونات الخريطة
+    const icons = {
+        user: L.icon({
+            iconUrl: 'https://i.postimg.cc/G2fSBjPj/1000091987.png',
+            iconSize: [38, 38],
+            iconAnchor: [19, 38],
+            popupAnchor: [0, -38]
+        }),
+        kaaba: L.icon({
+            iconUrl: 'https://i.postimg.cc/T1ZSschF/1000091982.png',
+            iconSize: [38, 38],
+            iconAnchor: [19, 38],
+            popupAnchor: [0, -38]
+        })
+    };
+
+    // تهيئة الخريطة
+    function initMap() {
+        if (map) return;
+        qiblaMapContainer.innerHTML = ''; // إزالة الرسالة المؤقتة
+        map = L.map(qiblaMapContainer).setView([KAABA_LAT, KAABA_LNG], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+        }).addTo(map);
+    }
+
     // عند النقر على زر تحديد الموقع
-    getLocationButton.addEventListener('click', async function() {
-        // تغيير نص الزر ليظهر أنه يعمل
-        getLocationButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تحديد موقعك...';
-        getLocationButton.disabled = true;
-        
-        // التحقق من دعم المتصفح لخدمة تحديد الموقع
+    getLocationButton.addEventListener('click', function() {
+        showLoadingState();
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                // في حالة النجاح
-                async function(position) {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    
-                    try {
-                        const qiblaDirection = await calculateQiblaDirection(userLat, userLng);
-                        if (qiblaDirection !== null) {
-                            updateQiblaUI(qiblaDirection);
-                        }
-                    } catch (error) {
-                        console.error('خطأ أثناء حساب اتجاه القبلة:', error);
-                    }
-                    
-                    // إعادة الزر إلى حالته الأصلية
-                    getLocationButton.innerHTML = '<i class="fas fa-location-arrow"></i> تحديد موقعي';
-                    getLocationButton.disabled = false;
-                    
-                    // تفعيل البوصلة المباشرة إذا كان الجهاز يدعمها
-                    enableLiveCompass();
-                },
-                // في حالة الخطأ
-                function(error) {
-                    handleLocationError(error);
-                    
-                    // إعادة الزر إلى حالته الأصلية
-                    getLocationButton.innerHTML = '<i class="fas fa-location-arrow"></i> تحديد موقعي';
-                    getLocationButton.disabled = false;
-                },
-                // خيارات تحديد الموقع
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
+                handleLocationSuccess,
+                handleLocationError,
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         } else {
-            // المتصفح لا يدعم خدمة تحديد الموقع
             showError('عذراً، متصفحك لا يدعم خدمة تحديد الموقع.');
-            getLocationButton.innerHTML = '<i class="fas fa-location-arrow"></i> تحديد موقعي';
-            getLocationButton.disabled = false;
         }
     });
-    
-    // تعديل دالة حساب اتجاه القبلة لاستخدام API
-    async function calculateQiblaDirection(lat, lng) {
+
+    // في حالة نجاح تحديد الموقع
+    async function handleLocationSuccess(position) {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+
         try {
-            // استخدام API للحصول على اتجاه القبلة
-            const apiUrl = `https://api.aladhan.com/v1/qibla/${lat}/${lng}`;
-            const response = await fetch(apiUrl);
-    
-            if (!response.ok) {
-                throw new Error('فشل في جلب بيانات اتجاه القبلة من API');
+            // جلب البيانات بشكل متزامن
+            const [qiblaData, locationData] = await Promise.all([
+                fetchQiblaDirection(userLat, userLng),
+                fetchLocationName(userLat, userLng)
+            ]);
+
+            if (!qiblaData) {
+                throw new Error('فشل في الحصول على بيانات القبلة');
             }
-    
-            const data = await response.json();
-    
-            if (data && data.data && data.data.direction) {
-                return data.data.direction; // زاوية القبلة من API
-            } else {
-                throw new Error('البيانات المستلمة من API غير صالحة');
-            }
+
+            const distance = calculateDistance(userLat, userLng, KAABA_LAT, KAABA_LNG);
+            
+            // تحديث واجهة المستخدم بالبيانات
+            updateInfoPanel({
+                latitude: userLat,
+                longitude: userLng,
+                direction: qiblaData.direction,
+                distance: distance,
+                locationName: locationData
+            });
+
+            // تحديث الخريطة
+            updateMapView(userLat, userLng);
+
         } catch (error) {
-            console.error('خطأ أثناء جلب اتجاه القبلة:', error);
-            showError('حدث خطأ أثناء حساب اتجاه القبلة. يرجى المحاولة لاحقًا.');
-            return null; // إرجاع null في حالة الخطأ
+            console.error('خطأ في معالجة الموقع:', error);
+            showError('حدث خطأ أثناء معالجة البيانات. يرجى المحاولة مرة أخرى.');
         }
     }
-    
-    // دالة لتحديث واجهة المستخدم بزاوية القبلة
-    function updateQiblaUI(angle) {
-        // تقريب الزاوية إلى رقمين عشريين
-        const roundedAngle = Math.round(angle * 100) / 100;
-        
-        // تحديث النص
-        qiblaDegreeElement.textContent = `${roundedAngle} درجة`;
-        
-        // تدوير سهم البوصلة
-        compassArrow.style.transform = `rotate(${angle}deg)`;
-        
-        // إضافة تأثير حركي للتدوير
-        compassArrow.style.transition = 'transform 1s ease-in-out';
-    }
-    
-    // دالة للتعامل مع أخطاء تحديد الموقع
+
+    // في حالة فشل تحديد الموقع
     function handleLocationError(error) {
-        let errorMessage = '';
-        
+        let errorMessage = 'حدث خطأ غير معروف.';
         switch(error.code) {
             case error.PERMISSION_DENIED:
-                errorMessage = 'تم رفض الوصول إلى الموقع. يرجى السماح للموقع بالوصول إلى موقعك.';
+                errorMessage = 'تم رفض الوصول للموقع. يرجى السماح للموقع بالوصول لموقعك.';
                 break;
             case error.POSITION_UNAVAILABLE:
                 errorMessage = 'معلومات الموقع غير متاحة.';
@@ -114,176 +102,140 @@ document.addEventListener("DOMContentLoaded", function () {
             case error.TIMEOUT:
                 errorMessage = 'انتهت مهلة طلب الموقع.';
                 break;
-            case error.UNKNOWN_ERROR:
-                errorMessage = 'حدث خطأ غير معروف أثناء تحديد الموقع.';
-                break;
         }
-        
-        alert(errorMessage);
+        showError(errorMessage);
     }
     
-    // دالة مساعدة لتحويل الدرجات إلى راديان
-    function toRadians(degrees) {
-        return degrees * (Math.PI / 180);
+    // جلب اتجاه القبلة من API
+    async function fetchQiblaDirection(lat, lng) {
+        const apiUrl = `https://api.aladhan.com/v1/qibla/${lat}/${lng}`;
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error('فشل الاتصال بخدمة القبلة');
+        const data = await response.json();
+        if (data.code === 200 && data.data) {
+            return data.data;
+        }
+        return null;
     }
-    
-    // دالة مساعدة لتحويل الراديان إلى درجات
-    function toDegrees(radians) {
-        return radians * (180 / Math.PI);
-    }
-    
-    // تفعيل البوصلة المباشرة
-    function enableLiveCompass() {
-        // التحقق من دعم المتصفح لأحداث توجيه الجهاز
-        if (window.DeviceOrientationEvent) {
-            // طلب الإذن في أجهزة iOS
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            // إضافة مستمع لأحداث توجيه الجهاز
-                            window.addEventListener('deviceorientation', handleDeviceOrientation, true);
-                            showSuccess('تم تفعيل البوصلة المباشرة');
-                        } else {
-                            showError('تم رفض الإذن لاستخدام البوصلة');
-                        }
-                    })
-                    .catch(console.error);
-            } else {
-                // للأجهزة الأخرى التي لا تتطلب إذنًا
-                window.addEventListener('deviceorientation', handleDeviceOrientation, true);
-            }
-        } else {
-            showError('عذراً، جهازك لا يدعم البوصلة المباشرة');
+
+    // جلب اسم الموقع (مدينة، دولة)
+    async function fetchLocationName(lat, lng) {
+        try {
+            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`;
+            const response = await fetch(apiUrl);
+            if (!response.ok) return "غير معروف";
+            const data = await response.json();
+            const address = data.address;
+            return `${address.city || address.town || address.village || ''}, ${address.country || ''}`;
+        } catch (error) {
+            console.error("Reverse geocoding error:", error);
+            return "غير قادر على تحديد الموقع";
         }
     }
-    
-    // معالجة أحداث توجيه الجهاز بدقة عالية
-    function handleDeviceOrientation(event) {
-        let compassHeading;
-        let alpha = event.alpha; // الدوران حول المحور Z (من 0 إلى 360)
-        let beta = event.beta;   // الدوران حول المحور X (من -180 إلى 180)
-        let gamma = event.gamma; // الدوران حول المحور Y (من -90 إلى 90)
-        
-        // الحصول على اتجاه البوصلة
-        if (event.webkitCompassHeading) {
-            // للأجهزة التي تدعم iOS
-            compassHeading = event.webkitCompassHeading;
-        } else if (typeof alpha === 'number') {
-            // للأجهزة التي تدعم Android
-            
-            // تحويل alpha إلى اتجاه البوصلة (الشمال = 0)
-            compassHeading = 360 - alpha;
-            
-            // تصحيح الاتجاه بناءً على وضعية الجهاز
-            if (typeof beta === 'number' && typeof gamma === 'number') {
-                // تصحيح الاتجاه عندما يكون الجهاز في وضع أفقي
-                if (Math.abs(gamma) > 45) {
-                    // تعديل الاتجاه عندما يكون الجهاز على جانبه
-                    compassHeading = adjustHeadingForDeviceOrientation(compassHeading, beta, gamma);
-                }
-            }
-        } else {
-            // الجهاز لا يدعم قراءة البوصلة
-            showError('جهازك لا يدعم البوصلة بشكل كامل');
-            return;
-        }
-        
-        // الحصول على زاوية القبلة المحفوظة
-        const qiblaAngleText = qiblaDegreeElement.textContent;
-        const qiblaAngle = parseFloat(qiblaAngleText);
-        
-        if (!isNaN(qiblaAngle)) {
-            // تعديل سهم البوصلة ليشير إلى القبلة بناءً على اتجاه الجهاز
-            const rotation = qiblaAngle - compassHeading;
-            
-            // تنعيم حركة السهم باستخدام متوسط متحرك
-            smoothRotation(rotation);
-            
-            // إضافة مؤشر الشمال
-            updateNorthIndicator(compassHeading);
-        }
+
+    // حساب المسافة بين نقطتين
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // نصف قطر الأرض بالكيلومتر
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return (R * c).toFixed(2); // تقريب لرقمين عشريين
     }
-    
-    // متغير لتخزين قيم الدوران السابقة للتنعيم
-    const rotationHistory = [];
-    const MAX_HISTORY = 5; // عدد القيم المستخدمة للتنعيم
-    
-    // دالة لتنعيم حركة السهم
-    function smoothRotation(newRotation) {
-        // إضافة القيمة الجديدة إلى التاريخ
-        rotationHistory.push(newRotation);
-        
-        // الاحتفاظ فقط بآخر MAX_HISTORY قيم
-        if (rotationHistory.length > MAX_HISTORY) {
-            rotationHistory.shift();
-        }
-        
-        // حساب متوسط القيم
-        const sum = rotationHistory.reduce((a, b) => a + b, 0);
-        const avgRotation = sum / rotationHistory.length;
-        
-        // تطبيق الدوران المتوسط
-        compassArrow.style.transform = `rotate(${avgRotation}deg)`;
+
+    // تحديث لوحة المعلومات
+    function updateInfoPanel(data) {
+        qiblaResultsContainer.innerHTML = `
+            <div class="qibla-info-item animate-fade-in">
+                <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="details">
+                    <div class="label">موقعك الحالي</div>
+                    <div class="value">${data.locationName}</div>
+                </div>
+            </div>
+            <div class="qibla-info-item animate-fade-in" style="animation-delay: 0.1s;">
+                <div class="icon"><i class="fas fa-compass"></i></div>
+                <div class="details">
+                    <div class="label">اتجاه القبلة</div>
+                    <div class="value">${data.direction.toFixed(2)} درجة</div>
+                </div>
+            </div>
+            <div class="qibla-info-item animate-fade-in" style="animation-delay: 0.2s;">
+                <div class="icon"><i class="fas fa-route"></i></div>
+                <div class="details">
+                    <div class="label">المسافة إلى الكعبة</div>
+                    <div class="value">${data.distance} كم</div>
+                </div>
+            </div>
+            <div class="qibla-info-item animate-fade-in" style="animation-delay: 0.3s;">
+                <div class="icon"><i class="fas fa-globe"></i></div>
+                <div class="details">
+                    <div class="label">الإحداثيات</div>
+                    <div class="value">${data.latitude.toFixed(4)}, ${data.longitude.toFixed(4)}</div>
+                </div>
+            </div>
+        `;
+        resetButtonState();
     }
-    
-    // دالة لتصحيح اتجاه البوصلة بناءً على وضعية الجهاز
-    function adjustHeadingForDeviceOrientation(heading, beta, gamma) {
-        // تصحيح الاتجاه عندما يكون الجهاز على جانبه
-        let adjustedHeading = heading;
+
+    // تحديث عرض الخريطة
+    function updateMapView(userLat, userLng) {
+        initMap();
         
-        // تعديل بناءً على زاوية gamma (الدوران حول المحور Y)
-        if (gamma > 45) {
-            // الجهاز مائل إلى اليمين
-            adjustedHeading = (heading + 90) % 360;
-        } else if (gamma < -45) {
-            // الجهاز مائل إلى اليسار
-            adjustedHeading = (heading + 270) % 360;
-        }
-        
-        // تعديل إضافي بناءً على زاوية beta (الدوران حول المحور X)
-        if (Math.abs(beta) > 90) {
-            // الجهاز مقلوب
-            adjustedHeading = (adjustedHeading + 180) % 360;
-        }
-        
-        return adjustedHeading;
+        const userLatLng = [userLat, userLng];
+        const kaabaLatLng = [KAABA_LAT, KAABA_LNG];
+
+        // إزالة العلامات والخطوط القديمة
+        if (userMarker) map.removeLayer(userMarker);
+        if (kaabaMarker) map.removeLayer(kaabaMarker);
+        if (qiblaLine) map.removeLayer(qiblaLine);
+
+        // إضافة علامات جديدة
+        userMarker = L.marker(userLatLng, { icon: icons.user }).addTo(map)
+            .bindPopup("<b>موقعك الحالي</b>").openPopup();
+        kaabaMarker = L.marker(kaabaLatLng, { icon: icons.kaaba }).addTo(map)
+            .bindPopup("<b>الكعبة المشرفة</b>");
+
+        // رسم خط القبلة
+        qiblaLine = L.polyline([userLatLng, kaabaLatLng], {
+            color: 'var(--accent-color)',
+            weight: 3,
+            dashArray: '5, 10'
+        }).addTo(map);
+
+        // ضبط عرض الخريطة ليناسب العلامتين
+        map.fitBounds([userLatLng, kaabaLatLng], { padding: [50, 50] });
     }
-    
-    // تحديث مؤشر الشمال
-    function updateNorthIndicator(compassHeading) {
-        // يمكن إضافة مؤشر للشمال هنا إذا لزم الأمر
+
+    // إظهار حالة التحميل
+    function showLoadingState() {
+        getLocationButton.disabled = true;
+        getLocationButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحديد...';
+        qiblaResultsContainer.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>جاري تحديد موقعك وحساب اتجاه القبلة...</span>
+            </div>
+        `;
     }
-    
-    // إظهار رسالة نجاح
-    function showSuccess(message) {
-        const successElement = document.createElement('div');
-        successElement.className = 'success-message';
-        successElement.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-        
-        // إضافة العنصر إلى الصفحة
-        const qiblaFinder = document.querySelector('.qibla-finder');
-        qiblaFinder.appendChild(successElement);
-        
-        // إزالة العنصر بعد 3 ثوانٍ
-        setTimeout(() => {
-            successElement.remove();
-        }, 3000);
+
+    // إعادة حالة الزر
+    function resetButtonState() {
+        getLocationButton.disabled = false;
+        getLocationButton.innerHTML = '<i class="fas fa-location-arrow"></i> تحديد موقعي مرة أخرى';
     }
-    
+
     // إظهار رسالة خطأ
     function showError(message) {
-        const errorElement = document.createElement('div');
-        errorElement.className = 'error-message';
-        errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
-        
-        // إضافة العنصر إلى الصفحة
-        const qiblaFinder = document.querySelector('.qibla-finder');
-        qiblaFinder.appendChild(errorElement);
-        
-        // إزالة العنصر بعد 3 ثوانٍ
-        setTimeout(() => {
-            errorElement.remove();
-        }, 3000);
+        qiblaResultsContainer.innerHTML = `
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        resetButtonState();
     }
 });
