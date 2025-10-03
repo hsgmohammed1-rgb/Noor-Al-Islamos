@@ -305,25 +305,39 @@
                 <div class="video-player-container">
                     <iframe 
                         id="live-stream-iframe"
-                        src="https://www.youtube.com/embed/GyHkiQ8aSYQ?autoplay=1&mute=1" 
+                        src="https://www.youtube.com/embed/zIl0NYIsBCE?autoplay=1&mute=1" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowfullscreen>
                     </iframe>
                 </div>
                 <div class="broadcast-info-panel">
-                    <h3 id="info-panel-title">الكعبة المشرفة</h3>
-                    <p id="info-panel-text">قلب العالم الإسلامي وقبلة المسلمين في صلاتهم، وأول بيت وضع للناس على وجه الأرض لعبادة الله.</p>
+                    <h3 id="info-panel-title">مكة مباشر</h3>
+                    <p id="info-panel-text">بث مباشر على مدار الساعة من مكة المكرمة.</p>
                 </div>
             </div>
             <div class="broadcast-sidebar">
                 <div class="stream-selector">
                     <h4><i class="fas fa-tv"></i> اختر البث</h4>
-                    <div class="stream-option active" data-stream="makkah">
-                        <i class="fas fa-kaaba stream-icon"></i>
+                    <div class="stream-option active" data-stream="makkah_live">
+                        <i class="fas fa-satellite-dish stream-icon"></i>
+                        <div class="option-text">
+                            <h5>مكة مباشر</h5>
+                            <span>بث مباشر على مدار الساعة</span>
+                        </div>
+                    </div>
+                    <div class="stream-option" data-stream="al_haram">
+                        <i class="fas fa-mosque stream-icon"></i>
                         <div class="option-text">
                             <h5>المسجد الحرام</h5>
-                            <span>مكة المكرمة</span>
+                            <span>بث من الحرم المكي</span>
+                        </div>
+                    </div>
+                    <div class="stream-option" data-stream="kaaba_live">
+                        <i class="fas fa-kaaba stream-icon"></i>
+                        <div class="option-text">
+                            <h5>الكعبة مباشر</h5>
+                            <span>بث مباشر للكعبة المشرفة</span>
                         </div>
                     </div>
                     <div class="stream-option" data-stream="madinah">
@@ -518,10 +532,20 @@
             const prayerTimesContainer = document.querySelector('.prayer-times-content');
             
             const streamData = {
-                makkah: {
-                    url: "https://www.youtube.com/embed/GyHkiQ8aSYQ?autoplay=1&mute=1",
-                    title: "الكعبة المشرفة",
-                    text: "قلب العالم الإسلامي وقبلة المسلمين في صلاتهم، وأول بيت وضع للناس على وجه الأرض لعبادة الله."
+                makkah_live: {
+                    url: "https://www.youtube.com/embed/zIl0NYIsBCE?autoplay=1&mute=1",
+                    title: "مكة مباشر",
+                    text: "بث مباشر على مدار الساعة من مكة المكرمة."
+                },
+                al_haram: {
+                    url: "https://www.youtube.com/embed/yBuMRKLHDK0?autoplay=1&mute=1",
+                    title: "المسجد الحرام",
+                    text: "بث مباشر من المسجد الحرام."
+                },
+                kaaba_live: {
+                    url: "https://www.youtube.com/embed/-PR51PBK_yY?autoplay=1&mute=1",
+                    title: "الكعبة مباشر",
+                    text: "بث مباشر للكعبة المشرفة."
                 },
                 madinah: {
                     url: "https://www.youtube.com/embed/V1gQgXjGzKw?autoplay=1&mute=1",
