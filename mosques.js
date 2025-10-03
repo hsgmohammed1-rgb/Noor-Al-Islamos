@@ -23,10 +23,10 @@ const elements = {
 // أيقونات الخريطة
 const icons = {
     user: L.icon({
-        iconUrl: 'https://i.postimg.cc/G2fSBjPj/1000091987.png',
-        iconSize: [38, 38],
-        iconAnchor: [19, 38],
-        popupAnchor: [0, -38]
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/447/447031.png',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40]
     }),
     mosque: L.icon({
         iconUrl: 'https://i.postimg.cc/T1ZSschF/1000091982.png',
