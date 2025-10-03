@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let kaabaMarker = null;
     let qiblaLine = null;
 
-    // أيقونات الخريطة
+    // أيقونات مخصصة للخريطة
     const icons = {
         user: L.icon({
             iconUrl: 'https://i.postimg.cc/G2fSBjPj/1000091987.png',
@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
             </div>
         `;
-        resetButtonState();
+        resetButtonState(true);
     }
 
     // تحديث عرض الخريطة
@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
         qiblaLine = L.polyline([userLatLng, kaabaLatLng], {
             color: 'var(--accent-color)',
             weight: 3,
-            dashArray: '5, 10'
+            opacity: 0.9,
         }).addTo(map);
 
         // ضبط عرض الخريطة ليناسب العلامتين
@@ -223,9 +223,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // إعادة حالة الزر
-    function resetButtonState() {
+    function resetButtonState(isSuccess) {
         getLocationButton.disabled = false;
-        getLocationButton.innerHTML = '<i class="fas fa-location-arrow"></i> تحديد موقعي مرة أخرى';
+        getLocationButton.innerHTML = isSuccess 
+            ? '<i class="fas fa-location-arrow"></i> تحديد موقعي مرة أخرى'
+            : '<i class="fas fa-location-arrow"></i> تحديد موقعي';
     }
 
     // إظهار رسالة خطأ
@@ -236,6 +238,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 <span>${message}</span>
             </div>
         `;
-        resetButtonState();
+        resetButtonState(false);
     }
 });

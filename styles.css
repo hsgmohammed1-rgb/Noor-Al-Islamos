@@ -936,9 +936,15 @@ a:hover {
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.2rem;
-    padding: 0.8rem;
-    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.07);
     border-radius: var(--border-radius-sm);
+    border-left: 4px solid var(--accent-color);
+    transition: background-color 0.3s;
+}
+
+.qibla-info-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .qibla-info-item .icon {
@@ -969,27 +975,32 @@ a:hover {
 }
 
 .qibla-btn {
-    padding: 12px 25px;
-    background: var(--accent-color);
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(45deg, var(--accent-color), var(--warning-color));
     color: white;
     border: none;
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     transition: all var(--transition-speed);
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-.qibla-controls .qibla-btn {
-    width: 100%;
-    padding: 15px;
-    font-size: 1.2rem;
+.qibla-btn:hover:not(:disabled) {
+    background: linear-gradient(45deg, var(--warning-color), var(--accent-color));
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
 }
 
-.qibla-btn:hover {
-    background: var(--warning-color);
+.qibla-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 
