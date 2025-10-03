@@ -28,6 +28,9 @@ document.addEventListener("DOMContentLoaded", function () {
             goalBtnsContainer: document.querySelector('.goal-controls'),
             progressRing: document.getElementById('tasbih-progress-ring'),
             clickSound: document.getElementById('tasbih-click-sound'),
+            autoToggleBtn: document.getElementById('tasbih-auto-toggle'),
+            autoControlsContainer: document.getElementById('tasbih-auto-controls'),
+            speedBtnsContainer: document.querySelector('#tasbih-auto-controls .speed-controls'),
         };
 
         // --- State ---
@@ -37,6 +40,9 @@ document.addEventListener("DOMContentLoaded", function () {
             isSoundOn: true,
             currentPreset: 'سبحان الله',
             ringCircumference: 0,
+            isAutoOn: false,
+            autoSpeed: 1000,
+            autoInterval: null,
         };
 
         // --- Persistence ---
@@ -47,6 +53,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     goal: state.goal,
                     isSoundOn: state.isSoundOn,
                     currentPreset: state.currentPreset,
+                    isAutoOn: state.isAutoOn,
+                    autoSpeed: state.autoSpeed,
                 }));
             } catch (e) {
                 console.error("Could not save Tasbih state:", e);
@@ -62,6 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     state.goal = parsedState.goal || 33;
                     state.isSoundOn = typeof parsedState.isSoundOn === 'boolean' ? parsedState.isSoundOn : true;
                     state.currentPreset = parsedState.currentPreset || 'سبحان الله';
+                    state.isAutoOn = parsedState.isAutoOn || false;
+                    state.autoSpeed = parsedState.autoSpeed || 1000;
                 }
             } catch (e) {
                 console.error("Could not load Tasbih state:", e);
@@ -105,6 +115,17 @@ document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll('.goal-btn').forEach(btn => {
                 btn.classList.toggle('active', parseInt(btn.dataset.goal, 10) === state.goal);
             });
+            
+            // Update auto-tasbih UI
+            elements.autoToggleBtn.classList.toggle('active', state.isAutoOn);
+            elements.autoControlsContainer.classList.toggle('hidden', !state.isAutoOn);
+            elements.mainButton.disabled = state.isAutoOn;
+            elements.mainButton.style.cursor = state.isAutoOn ? 'not-allowed' : 'pointer';
+            elements.mainButton.style.opacity = state.isAutoOn ? 0.7 : 1;
+            
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.speed, 10) === state.autoSpeed);
+            });
         };
         
         // --- Core Logic ---
@@ -114,8 +135,10 @@ document.addEventListener("DOMContentLoaded", function () {
             setTimeout(() => {
                 elements.mainButton.classList.remove('goal-reached');
                 state.count = 0;
-                updateUI();
-                saveState();
+                if (!state.isAutoOn) {
+                   updateUI();
+                   saveState();
+                }
             }, 1200);
         };
 
@@ -127,17 +150,34 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             
             playSound();
-            vibrate(50);
+            if (!state.isAutoOn) vibrate(50);
             
             if (state.goal > 0 && state.count === state.goal) {
                 handleGoalCompletion();
             }
             updateUI();
-            saveState();
+            if (!state.isAutoOn) saveState();
+        };
+        
+        const stopAutoTasbih = () => {
+            clearInterval(state.autoInterval);
+            state.autoInterval = null;
+        };
+        
+        const startAutoTasbih = () => {
+            stopAutoTasbih();
+            state.autoInterval = setInterval(() => {
+                incrementCount();
+                saveState(); // Save state on each auto-increment
+            }, state.autoSpeed);
         };
 
         const resetCount = () => {
             state.count = 0;
+            if (state.isAutoOn) {
+                state.isAutoOn = false;
+                stopAutoTasbih();
+            }
             updateUI();
             saveState();
         };
@@ -173,6 +213,29 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         };
         
+        const onAutoToggleClick = () => {
+            state.isAutoOn = !state.isAutoOn;
+            if (state.isAutoOn) {
+                startAutoTasbih();
+            } else {
+                stopAutoTasbih();
+            }
+            updateUI();
+            saveState();
+        };
+        
+        const onSpeedClick = (e) => {
+            const target = e.target.closest('.speed-btn');
+            if(target) {
+                state.autoSpeed = parseInt(target.dataset.speed, 10);
+                if (state.isAutoOn) {
+                    startAutoTasbih();
+                }
+                updateUI();
+                saveState();
+            }
+        };
+        
         // --- Initialization ---
         const init = () => {
             const radius = elements.progressRing.r.baseVal.value;
@@ -187,15 +250,21 @@ document.addEventListener("DOMContentLoaded", function () {
             elements.soundToggleBtn.addEventListener('click', onSoundToggleClick);
             elements.presetsContainer.addEventListener('click', onPresetClick);
             elements.goalBtnsContainer.addEventListener('click', onGoalClick);
+            elements.autoToggleBtn.addEventListener('click', onAutoToggleClick);
+            elements.speedBtnsContainer.addEventListener('click', onSpeedClick);
             
             document.addEventListener('keydown', (e) => {
-                if (tasbihSection.classList.contains('active') && (e.key === ' ' || e.key === 'Enter')) {
+                if (tasbihSection.classList.contains('active') && (e.key === ' ' || e.key === 'Enter') && !state.isAutoOn) {
                     e.preventDefault();
                     elements.mainButton.style.transform = 'scale(0.95)';
                     setTimeout(() => elements.mainButton.style.transform = 'scale(1)', 100);
                     incrementCount();
                 }
             });
+
+            if(state.isAutoOn) {
+                startAutoTasbih();
+            }
         };
 
         init();

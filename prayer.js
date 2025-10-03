@@ -91,7 +91,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await response.json();
             if (data.code === 200 && data.data) {
                 prayerTimesData = data.data;
-                // Determine location name from API response if available
                 const locationName = await getLocationName(lat, lon, city, country);
                 updateUI(prayerTimesData, locationName);
                 saveToLocalStorage(locationName, prayerTimesData);
@@ -132,9 +131,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-
     // --- UI Update Functions ---
     function updateUI(data, locationName) {
+        if (!data || !data.timings || !data.date || !data.date.hijri) {
+            showError("بيانات أوقات الصلاة غير مكتملة");
+            return;
+        }
         updateLocationAndDate(locationName, data.date.hijri);
         updatePrayerList(data.timings);
         updateTimeline(data.timings);
@@ -159,19 +161,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
         elements.prayerTimesList.innerHTML = '';
         prayerOrder.forEach(prayer => {
-            const li = document.createElement('li');
-            li.id = `prayer-${prayer.key}`;
-            li.innerHTML = `
-                <i class="fas ${prayer.icon}"></i>
-                <span>${prayer.name}</span>
-                <span class="time">${formatTime(timings[prayer.key])}</span>
-            `;
-            elements.prayerTimesList.appendChild(li);
+            if (timings[prayer.key]) {
+                const li = document.createElement('li');
+                li.id = `prayer-${prayer.key}`;
+                li.innerHTML = `
+                    <i class="fas ${prayer.icon}"></i>
+                    <span>${prayer.name}</span>
+                    <span class="time">${formatTime(timings[prayer.key])}</span>
+                `;
+                elements.prayerTimesList.appendChild(li);
+            }
         });
     }
 
     function updateTimeline(timings) {
         const prayerSchedule = getPrayerSchedule(timings);
+        if (prayerSchedule.length === 0) return;
+
         const dayInMinutes = 24 * 60;
         elements.prayerTimeline.innerHTML = ''; // Clear previous timeline
 
@@ -185,7 +191,6 @@ document.addEventListener("DOMContentLoaded", function () {
             elements.prayerTimeline.appendChild(prayerNode);
         });
         
-        // Add current time indicator
         const now = new Date();
         const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
         const indicatorPosition = (currentTimeInMinutes / dayInMinutes) * 100;
@@ -201,26 +206,30 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateDynamicBackground(timings) {
         const now = new Date();
         const currentTime = now.getTime();
-        const fajrTime = parseTime(timings.Fajr).getTime();
-        const sunriseTime = parseTime(timings.Sunrise).getTime();
-        const dhuhrTime = parseTime(timings.Dhuhr).getTime();
-        const asrTime = parseTime(timings.Asr).getTime();
-        const maghribTime = parseTime(timings.Maghrib).getTime();
-        const ishaTime = parseTime(timings.Isha).getTime();
+        
+        const getTimeOrZero = (timeStr) => {
+            const date = parseTime(timeStr);
+            return date ? date.getTime() : 0;
+        };
 
-        let newClass = '';
-        if (currentTime >= fajrTime && currentTime < sunriseTime) {
+        const fajrTime = getTimeOrZero(timings.Fajr);
+        const sunriseTime = getTimeOrZero(timings.Sunrise);
+        const dhuhrTime = getTimeOrZero(timings.Dhuhr);
+        const asrTime = getTimeOrZero(timings.Asr);
+        const maghribTime = getTimeOrZero(timings.Maghrib);
+        const ishaTime = getTimeOrZero(timings.Isha);
+
+        let newClass = 'theme-isha'; // Default
+        if (fajrTime && sunriseTime && currentTime >= fajrTime && currentTime < sunriseTime) {
             newClass = 'theme-fajr';
-        } else if (currentTime >= sunriseTime && currentTime < dhuhrTime) {
+        } else if (sunriseTime && dhuhrTime && currentTime >= sunriseTime && currentTime < dhuhrTime) {
             newClass = 'theme-sunrise';
-        } else if (currentTime >= dhuhrTime && currentTime < asrTime) {
+        } else if (dhuhrTime && asrTime && currentTime >= dhuhrTime && currentTime < asrTime) {
             newClass = 'theme-dhuhr';
-        } else if (currentTime >= asrTime && currentTime < maghribTime) {
+        } else if (asrTime && maghribTime && currentTime >= asrTime && currentTime < maghribTime) {
             newClass = 'theme-asr';
-        } else if (currentTime >= maghribTime && currentTime < ishaTime) {
+        } else if (maghribTime && ishaTime && currentTime >= maghribTime && currentTime < ishaTime) {
             newClass = 'theme-maghrib';
-        } else {
-            newClass = 'theme-isha';
         }
         
         elements.prayerSection.className = `content-section active ${newClass}`;
@@ -231,17 +240,23 @@ document.addEventListener("DOMContentLoaded", function () {
         if (countdownInterval) clearInterval(countdownInterval);
         
         countdownInterval = setInterval(() => {
-            const prayerSchedule = getPrayerSchedule(timings, true); // Get schedule for today and tomorrow
-            const now = new Date();
+            const prayerSchedule = getPrayerSchedule(timings, true);
+            if (prayerSchedule.length === 0) {
+                elements.nextPrayerName.textContent = "لا توجد بيانات";
+                return;
+            }
             
+            const now = new Date();
             let nextPrayer = prayerSchedule.find(p => p.dateObj > now);
 
-            if (!nextPrayer) { // Should not happen with tomorrow's schedule
+            if (!nextPrayer) {
                 elements.nextPrayerName.textContent = "انتهى اليوم";
                 return;
             }
 
             const remainingMillis = nextPrayer.dateObj - now;
+            if (remainingMillis < 0) return;
+
             const totalSeconds = Math.floor(remainingMillis / 1000);
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -252,14 +267,11 @@ document.addEventListener("DOMContentLoaded", function () {
             elements.countdownM.textContent = String(minutes).padStart(2, '0');
             elements.countdownS.textContent = String(seconds).padStart(2, '0');
 
-            // Update active prayer in the list
             document.querySelectorAll('#prayer-times-list li').forEach(li => li.classList.remove('active'));
             const activePrayerEl = document.getElementById(`prayer-${nextPrayer.nameEn}`);
             if (activePrayerEl) activePrayerEl.classList.add('active');
 
-            // Update timeline indicator
             updateTimeline(timings);
-
         }, 1000);
     }
 
@@ -290,39 +302,56 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     function parseTime(timeStr) {
+        if (typeof timeStr !== 'string' || !timeStr.includes(':')) return null;
         const [hours, minutes] = timeStr.split(':').map(Number);
+        if (isNaN(hours) || isNaN(minutes)) return null;
         const date = new Date();
         date.setHours(hours, minutes, 0, 0);
         return date;
     }
 
     function getPrayerSchedule(timings, includeTomorrow = false) {
-        const schedule = [
-            { name: 'الفجر', nameEn: 'Fajr', time: convertToMinutes(timings.Fajr), dateObj: parseTime(timings.Fajr) },
-            { name: 'الظهر', nameEn: 'Dhuhr', time: convertToMinutes(timings.Dhuhr), dateObj: parseTime(timings.Dhuhr) },
-            { name: 'العصر', nameEn: 'Asr', time: convertToMinutes(timings.Asr), dateObj: parseTime(timings.Asr) },
-            { name: 'المغرب', nameEn: 'Maghrib', time: convertToMinutes(timings.Maghrib), dateObj: parseTime(timings.Maghrib) },
-            { name: 'العشاء', nameEn: 'Isha', time: convertToMinutes(timings.Isha), dateObj: parseTime(timings.Isha) }
+        const schedule = [];
+        const prayerMapping = [
+            { key: 'Fajr', name: 'الفجر' },
+            { key: 'Dhuhr', name: 'الظهر' },
+            { key: 'Asr', name: 'العصر' },
+            { key: 'Maghrib', name: 'المغرب' },
+            { key: 'Isha', name: 'العشاء' }
         ];
 
-        if (includeTomorrow) {
+        prayerMapping.forEach(p => {
+            if (timings[p.key]) {
+                const dateObj = parseTime(timings[p.key]);
+                if (dateObj) {
+                    schedule.push({ name: p.name, nameEn: p.key, time: convertToMinutes(timings[p.key]), dateObj });
+                }
+            }
+        });
+
+        if (includeTomorrow && timings.Fajr) {
             const tomorrowFajr = parseTime(timings.Fajr);
-            tomorrowFajr.setDate(tomorrowFajr.getDate() + 1);
-            schedule.push({ name: 'الفجر', nameEn: 'Fajr', time: convertToMinutes(timings.Fajr), dateObj: tomorrowFajr });
+            if (tomorrowFajr) {
+                tomorrowFajr.setDate(tomorrowFajr.getDate() + 1);
+                schedule.push({ name: 'الفجر', nameEn: 'Fajr', time: convertToMinutes(timings.Fajr), dateObj: tomorrowFajr });
+            }
         }
         
         return schedule.sort((a, b) => a.dateObj - b.dateObj);
     }
 
     function convertToMinutes(timeString) {
+        if (typeof timeString !== 'string' || !timeString.includes(':')) return 0;
         const [hours, minutes] = timeString.split(':').map(Number);
-        return hours * 60 + minutes;
+        return isNaN(hours) || isNaN(minutes) ? 0 : hours * 60 + minutes;
     }
 
     function formatTime(timeStr) {
         if (!timeStr) return '--:--';
-        const [hours, minutes] = timeStr.split(':');
-        let h = parseInt(hours, 10);
+        const date = parseTime(timeStr);
+        if (!date) return '--:--';
+        let h = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
         const ampm = h >= 12 ? 'م' : 'ص';
         h = h % 12;
         h = h ? h : 12; // the hour '0' should be '12'
@@ -330,7 +359,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function showLoading(isLoading) {
-        // You can implement skeleton loaders here if you want
+        // Implement skeleton loaders if needed
     }
     
     function showError(message) {
@@ -353,19 +382,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     function saveToLocalStorage(locationName, data) {
-        const key = `prayerTimes_${locationName}`;
-        const storageData = { ...data, timestamp: new Date().getTime() };
-        localStorage.setItem(key, JSON.stringify(storageData));
+        try {
+            const key = `prayerTimes_${locationName}`;
+            const storageData = { ...data, timestamp: new Date().getTime() };
+            localStorage.setItem(key, JSON.stringify(storageData));
+        } catch (e) {
+            console.error("Failed to save to localStorage:", e);
+        }
     }
 
     function getFromLocalStorage(locationName) {
-        const key = `prayerTimes_${locationName}`;
-        const data = localStorage.getItem(key);
-        if (data) {
-            const parsedData = JSON.parse(data);
-            const today = new Date().toDateString();
-            const savedDate = new Date(parsedData.timestamp).toDateString();
-            if (today === savedDate) return parsedData;
+        try {
+            const key = `prayerTimes_${locationName}`;
+            const data = localStorage.getItem(key);
+            if (data) {
+                const parsedData = JSON.parse(data);
+                const today = new Date().toDateString();
+                const savedDate = new Date(parsedData.timestamp).toDateString();
+                if (today === savedDate) return parsedData;
+            }
+        } catch (e) {
+            console.error("Failed to read from localStorage:", e);
         }
         return null;
     }

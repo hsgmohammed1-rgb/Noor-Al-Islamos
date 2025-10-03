@@ -164,7 +164,15 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // إظهار رسالة خطأ
     function showError(message) {
-        hadithContent.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-circle"></i> ${message}</div>`;
+         hadithContent.innerHTML = `
+            <div class="error-message animate-fade-in">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>${message}</span>
+                <button onclick="location.reload()" class="retry-btn">
+                    <i class="fas fa-redo"></i> إعادة المحاولة
+                </button>
+            </div>
+        `;
     }
     
     // إظهار مؤشر التحميل

@@ -932,7 +932,7 @@ a:hover {
     align-items: center;
     justify-content: center;
     user-select: none;
-    transition: transform 0.1s ease-out, box-shadow 0.3s ease-in-out;
+    transition: transform 0.1s ease-out, box-shadow 0.3s ease-in-out, opacity 0.3s;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 
                 inset 0 -8px 15px rgba(0,0,0,0.25),
                 inset 0 8px 15px rgba(255,255,255,0.2);
@@ -1026,7 +1026,7 @@ a:hover {
     font-weight: 500;
     opacity: 0.8;
 }
-.control-btn, .goal-btn {
+.control-btn, .goal-btn, .speed-btn {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid var(--card-border);
     color: var(--text-color);
@@ -1039,26 +1039,26 @@ a:hover {
     height: 55px;
     font-size: 1.3rem;
 }
-.goal-btn {
+.goal-btn, .speed-btn {
     padding: 0.6rem 1.2rem;
     font-size: 1rem;
 }
-.control-btn:active, .goal-btn:active {
+.control-btn:active, .goal-btn:active, .speed-btn:active {
     transform: scale(0.95);
 }
-.control-btn.active, .goal-btn.active {
+.control-btn.active, .goal-btn.active, .speed-btn.active {
     background: var(--accent-color);
     color: white;
     border-color: transparent;
 }
-.control-btn:hover:not(.active), .goal-btn:hover:not(.active) {
+.control-btn:hover:not(.active), .goal-btn:hover:not(.active), .speed-btn:hover:not(.active) {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Hide auto-tasbih controls */
-#tasbih-auto-toggle, #tasbih-auto-controls {
-    display: none;
+.hidden {
+    display: none !important;
 }
+
 
 /* قائمة التسبيحات */
 .tasbih-presets-container {
@@ -1850,8 +1850,29 @@ a:hover {
     text-align: center;
     font-size: 1.1rem;
 }
-.error-message { color: var(--error-color); }
+.error-message { 
+    color: var(--error-color); 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
 .loading-spinner i { margin-left: 10px; }
+.retry-btn {
+    padding: 8px 16px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.retry-btn:hover {
+    background: var(--warning-color);
+}
 
 
 /* تحسين التصميم على الجوال */
