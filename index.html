@@ -186,7 +186,7 @@
                 </div>
                 <div class="prayer-card">
                     <div class="prayer-name">الظهر</div>
-                    <div class="prayer-time" id="dhuhr-time">12:12</div>
+                    <div class="prayer-time" id="dhr-time">12:12</div>
                 </div>
                 <div class="prayer-card">
                     <div class="prayer-name">العصر</div>
@@ -394,7 +394,14 @@
                 <div class="radio-list-panel">
                     <div class="radio-search">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="radio-search-input" placeholder="ابحث عن إذاعة بالاسم أو الوصف...">
+                        <input type="text" id="radio-search-input" placeholder="ابحث عن إذاعة...">
+                    </div>
+                    <div class="featured-stations-wrapper">
+                        <h3><i class="fas fa-star"></i> إذاعات مميزة</h3>
+                        <div class="featured-stations" id="featured-stations-container">
+                        </div>
+                    </div>
+                    <div class="radio-categories" id="radio-categories-container">
                     </div>
                     <div class="radio-stations" id="radio-stations-container">
                         <div class="loading-spinner">
@@ -403,8 +410,8 @@
                     </div>
                 </div>
                 <div class="radio-player-panel">
-                     <div class="radio-player">
-                        <div class="station-artwork">
+                    <div class="radio-player">
+                        <div class="station-artwork-new" id="station-artwork-new">
                             <i class="fas fa-broadcast-tower"></i>
                         </div>
                         <div class="station-info">

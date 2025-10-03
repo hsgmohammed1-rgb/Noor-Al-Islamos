@@ -2,6 +2,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // عناصر واجهة المستخدم
     const radioSearchInput = document.getElementById('radio-search-input');
     const radioStationsContainer = document.getElementById('radio-stations-container');
+    const featuredStationsContainer = document.getElementById('featured-stations-container');
+    const categoriesContainer = document.getElementById('radio-categories-container');
+    
+    // عناصر المشغل
+    const radioPlayer = document.querySelector('.radio-player');
     const currentStationName = document.getElementById('current-station-name');
     const currentStationDesc = document.getElementById('current-station-desc');
     const radioPlayBtn = document.getElementById('radio-play-btn');
@@ -10,13 +15,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const volumeIcon = document.getElementById('volume-icon');
     const radioAudio = document.getElementById('radio-audio');
     const visualizerCanvas = document.getElementById('visualizer');
-    
+    const stationArtwork = document.getElementById('station-artwork-new');
+
     // متغيرات عامة
     let allStations = [];
     let currentStation = null;
     let isPlaying = false;
     let searchQuery = '';
-    
+    let currentCategory = 'all';
+
     // متغيرات المؤثرات البصرية
     let canvasCtx, analyser, audioCtx, source, dataArray, bufferLength;
     let animationFrameId;
@@ -27,31 +34,31 @@ document.addEventListener("DOMContentLoaded", function () {
         setupEventListeners();
         initVisualizer();
     }
-    
-    // إعداد أحداث النقر
+
+    // إعداد مستمعي الأحداث
     function setupEventListeners() {
         radioSearchInput.addEventListener('input', function() {
             searchQuery = this.value.trim().toLowerCase();
-            filterStations();
+            filterAndDisplayStations();
         });
-        
+
         radioPlayBtn.addEventListener('click', function() {
             if (!currentStation) return;
             if (isPlaying) {
                 radioAudio.pause();
             } else {
-                playStation();
+                playStation(currentStation);
             }
         });
-        
+
         radioStopBtn.addEventListener('click', stopStation);
-        
+
         volumeSlider.addEventListener('input', function() {
             const volume = this.value / 100;
             radioAudio.volume = volume;
             updateVolumeIcon(volume);
         });
-        
+
         radioAudio.addEventListener('play', () => {
             isPlaying = true;
             updatePlayerUI();
@@ -60,13 +67,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 drawVisualizer();
             }
         });
-        
+
         radioAudio.addEventListener('pause', () => {
             isPlaying = false;
             updatePlayerUI();
             cancelAnimationFrame(animationFrameId);
         });
-        
+
         radioAudio.addEventListener('error', function(e) {
             const src = radioAudio.getAttribute('src');
             if (!src || src === '') return;
@@ -76,8 +83,8 @@ document.addEventListener("DOMContentLoaded", function () {
             cancelAnimationFrame(animationFrameId);
         });
     }
-    
-    // جلب الإذاعات من مصادر متعددة
+
+    // جلب الإذاعات وتصنيفها
     async function fetchRadioStations() {
         showLoading(true);
         try {
@@ -100,9 +107,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     id: index + 1,
                     name: radio.name.trim(),
                     description: radio.description || 'إذاعة إسلامية',
-                    radio_url: radio.radio_url
+                    radio_url: radio.radio_url,
+                    category: categorizeStation(radio.name)
                 }));
-                displayStations(allStations);
+                
+                populateCategories();
+                displayFeaturedStations();
+                filterAndDisplayStations();
+
             } else {
                 useFallbackRadioStations();
             }
@@ -113,71 +125,129 @@ document.addEventListener("DOMContentLoaded", function () {
             showLoading(false);
         }
     }
-    
+
     function useFallbackRadioStations() {
-        const fallbackStations = [{ id: 1, name: 'إذاعة القرآن الكريم من مكة', description: 'بث مباشر من المسجد الحرام', radio_url: 'https://stream.radiojar.com/0tpy1h0kxtzuv' }];
-        allStations = fallbackStations;
-        displayStations(allStations);
+        allStations = [{ id: 1, name: 'إذاعة القرآن الكريم من مكة', description: 'بث مباشر من المسجد الحرام', radio_url: 'https://stream.radiojar.com/0tpy1h0kxtzuv', category: 'قرآن كريم' }];
+        populateCategories();
+        displayFeaturedStations();
+        filterAndDisplayStations();
         showError('تم استخدام قائمة احتياطية بسبب تعذر الاتصال بالخادم');
     }
-    
-    // عرض الإذاعات
-    function displayStations(stations) {
-        if (stations.length === 0) {
-            radioStationsContainer.innerHTML = '<div class="no-results">لم يتم العثور على إذاعات مطابقة للبحث</div>';
-            return;
+
+    // تصنيف الإذاعة بناءً على الاسم
+    function categorizeStation(name) {
+        const lowerName = name.toLowerCase();
+        if (lowerName.includes('قرآن')) return 'قرآن كريم';
+        if (lowerName.includes('سنة') || lowerName.includes('حديث')) return 'سنة نبوية';
+        if (lowerName.includes('فتاوى') || lowerName.includes('فتوى')) return 'فتاوى';
+        if (lowerName.includes('تفسير')) return 'تفسير';
+        return 'منوعات';
+    }
+
+    // عرض فئات الإذاعات
+    function populateCategories() {
+        const categories = ['all', ...new Set(allStations.map(s => s.category))];
+        categoriesContainer.innerHTML = '';
+        categories.forEach(category => {
+            const btn = document.createElement('button');
+            btn.className = 'category-btn';
+            btn.dataset.category = category;
+            btn.textContent = category === 'all' ? 'الكل' : category;
+            if (category === currentCategory) {
+                btn.classList.add('active');
+            }
+            btn.addEventListener('click', () => {
+                currentCategory = category;
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                filterAndDisplayStations();
+            });
+            categoriesContainer.appendChild(btn);
+        });
+    }
+
+    // عرض الإذاعات المميزة
+    function displayFeaturedStations() {
+        const featuredKeywords = ['مكة', 'قناة القرآن', 'سعود', 'سديس', 'عفاسي'];
+        let featured = allStations.filter(s => featuredKeywords.some(kw => s.name.includes(kw)));
+        if (featured.length < 5) {
+            const randomStations = allStations.filter(s => !featured.includes(s)).sort(() => 0.5 - Math.random());
+            featured.push(...randomStations.slice(0, 5 - featured.length));
         }
         
-        let html = '';
-        stations.forEach(station => {
-            let stationName = station.name;
-            let stationDesc = station.description;
+        featuredStationsContainer.innerHTML = '';
+        featured.slice(0, 5).forEach(station => {
+            const card = document.createElement('div');
+            card.className = 'featured-station-card';
+            card.innerHTML = `
+                <div class="icon"><i class="fas fa-satellite-dish"></i></div>
+                <div class="name">${station.name}</div>
+            `;
+            card.addEventListener('click', () => {
+                playStation(station);
+            });
+            featuredStationsContainer.appendChild(card);
+        });
+    }
+    
+    // تصفية وعرض الإذاعات
+    function filterAndDisplayStations() {
+        let filtered = allStations;
 
+        if (currentCategory !== 'all') {
+            filtered = filtered.filter(s => s.category === currentCategory);
+        }
+
+        if (searchQuery) {
+            filtered = filtered.filter(s => 
+                s.name.toLowerCase().includes(searchQuery) || 
+                s.description.toLowerCase().includes(searchQuery)
+            );
+        }
+        
+        displayStations(filtered);
+    }
+
+    // عرض قائمة الإذاعات
+    function displayStations(stations) {
+        radioStationsContainer.innerHTML = '';
+        if (stations.length === 0) {
+            radioStationsContainer.innerHTML = '<div class="no-results">لم يتم العثور على إذاعات مطابقة</div>';
+            return;
+        }
+
+        stations.forEach(station => {
+            const stationEl = document.createElement('div');
+            stationEl.className = 'radio-station';
+            stationEl.dataset.id = station.id;
+
+            let stationName = station.name;
             if (searchQuery) {
                 const regex = new RegExp(searchQuery, 'gi');
                 stationName = stationName.replace(regex, `<span class="highlight">$&</span>`);
-                stationDesc = stationDesc.replace(regex, `<span class="highlight">$&</span>`);
             }
-            html += `
-                <div class="radio-station" data-id="${station.id}">
-                    <div class="station-icon"><i class="fas fa-satellite-dish"></i></div>
-                    <div class="station-details">
-                        <div class="station-name">${stationName}</div>
-                        <div class="station-desc">${stationDesc}</div>
-                    </div>
-                    <div class="playing-indicator">
-                        <span></span><span></span><span></span>
-                    </div>
+
+            stationEl.innerHTML = `
+                <div class="station-icon"><i class="fas fa-satellite-dish"></i></div>
+                <div class="station-details">
+                    <div class="station-name">${stationName}</div>
+                    <div class="station-desc">${station.description}</div>
+                </div>
+                <div class="playing-indicator">
+                    <span></span><span></span><span></span>
                 </div>
             `;
+            stationEl.addEventListener('click', () => playStation(station));
+            radioStationsContainer.appendChild(stationEl);
         });
-        
-        radioStationsContainer.innerHTML = html;
-        
-        const stationElements = document.querySelectorAll('.radio-station');
-        stationElements.forEach(element => {
-            element.addEventListener('click', function() {
-                const stationId = this.dataset.id;
-                currentStation = allStations.find(s => s.id.toString() === stationId);
-                updateStationInfo();
-                radioPlayBtn.disabled = false;
-                radioStopBtn.disabled = false;
-                playStation();
-            });
-        });
+        updatePlayerUI();
     }
-    
-    function filterStations() {
-        const filtered = allStations.filter(s => 
-            s.name.toLowerCase().includes(searchQuery) || 
-            s.description.toLowerCase().includes(searchQuery)
-        );
-        displayStations(filtered);
-    }
-    
-    function playStation() {
-        if (!currentStation) return;
-        
+
+    // تشغيل إذاعة
+    function playStation(station) {
+        if (!station) return;
+        currentStation = station;
+
         if (!audioCtx) setupAudioNodes();
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         
@@ -192,54 +262,68 @@ document.addEventListener("DOMContentLoaded", function () {
                 showError('تعذر تشغيل الإذاعة تلقائيًا.');
             });
         }
+        updateStationInfo();
     }
-    
+
+    // إيقاف الإذاعة
     function stopStation() {
         radioAudio.pause();
         radioAudio.removeAttribute('src');
         radioAudio.load();
         isPlaying = false;
+        currentStation = null;
+        updateStationInfo();
         updatePlayerUI();
     }
-    
+
+    // تحديث معلومات المشغل
     function updateStationInfo() {
         if (currentStation) {
             currentStationName.textContent = currentStation.name;
             currentStationDesc.textContent = currentStation.description;
+            radioPlayBtn.disabled = false;
+            radioStopBtn.disabled = false;
         } else {
             currentStationName.textContent = 'اختر إذاعة للبدء';
             currentStationDesc.textContent = 'استمع للقرآن الكريم مباشرة';
+            radioPlayBtn.disabled = true;
+            radioStopBtn.disabled = true;
         }
     }
-    
+
+    // تحديث واجهة المشغل
     function updatePlayerUI() {
         radioPlayBtn.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+        radioPlayer.classList.toggle('playing', isPlaying);
+
         document.querySelectorAll('.radio-station').forEach(el => el.classList.remove('playing'));
         if (isPlaying && currentStation) {
             const currentStationEl = document.querySelector(`.radio-station[data-id="${currentStation.id}"]`);
             if (currentStationEl) currentStationEl.classList.add('playing');
         }
     }
-    
+
+    // تحديث أيقونة الصوت
     function updateVolumeIcon(volume) {
         if (volume > 0.5) volumeIcon.className = 'fas fa-volume-up';
         else if (volume > 0) volumeIcon.className = 'fas fa-volume-down';
         else volumeIcon.className = 'fas fa-volume-mute';
     }
 
+    // إظهار رسالة خطأ
     function showError(message) {
-        // Simple notification logic
         const notification = document.createElement('div');
         notification.className = 'radio-notification';
         notification.textContent = message;
         document.body.appendChild(notification);
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+        setTimeout(() => notification.remove(), 3000);
     }
     
+    // إظهار مؤشر التحميل
     function showLoading(show) {
-        radioStationsContainer.innerHTML = show ? '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> جاري تحميل الإذاعات...</div>' : '';
+        if(show) {
+            radioStationsContainer.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> جاري تحميل الإذاعات...</div>';
+        }
     }
 
     // --- Audio Visualizer Logic ---
