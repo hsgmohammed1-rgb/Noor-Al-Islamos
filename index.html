@@ -146,12 +146,39 @@
 
     <!-- قسم أوقات الصلاة -->
     <section id="prayer-times" class="content-section">
-        <h2 class="section-title">أوقات الصلاة</h2>
-        <div class="prayer-container">
-            <div class="prayer-location">
-                <h3>أوقات الصلاة في مدينتك</h3>
-                <div class="location-selector">
-                    <select id="country-select" class="location-input">
+        <div class="prayer-container-modern">
+            <div class="prayer-main-display">
+                <div class="location-and-date">
+                    <h3 id="prayer-location-display"><i class="fas fa-map-marker-alt"></i> جاري تحديد الموقع...</h3>
+                    <p id="hijri-date-display">التاريخ الهجري</p>
+                </div>
+                <div class="next-prayer-info-modern">
+                    <p>الصلاة القادمة</p>
+                    <h2 id="next-prayer-name">--</h2>
+                    <div id="countdown-timer" class="countdown-timer">
+                        <div class="time-part">
+                            <span id="countdown-h">00</span>
+                            <small>ساعة</small>
+                        </div>
+                        <div class="time-part">
+                            <span id="countdown-m">00</span>
+                            <small>دقيقة</small>
+                        </div>
+                        <div class="time-part">
+                            <span id="countdown-s">00</span>
+                            <small>ثانية</small>
+                        </div>
+                    </div>
+                </div>
+                 <div class="prayer-timeline">
+                    <!-- سيتم تعبئتها بواسطة JS -->
+                </div>
+            </div>
+
+            <div class="prayer-sidebar">
+                <div class="location-controls-modern">
+                    <h4>تغيير الموقع</h4>
+                    <select id="country-select" class="location-input-modern">
                         <option value="SA">المملكة العربية السعودية</option>
                         <option value="EG">مصر</option>
                         <option value="AE">الإمارات العربية المتحدة</option>
@@ -165,47 +192,15 @@
                         <option value="SY">سوريا</option>
                         <option value="IQ">العراق</option>
                     </select>
-                    <select id="city-select" class="location-input">
-                        <option value="Riyadh">الرياض</option>
-                        <option value="Jeddah">جدة</option>
-                        <option value="Mecca">مكة المكرمة</option>
-                        <option value="Medina">المدينة المنورة</option>
-                        <option value="Dammam">الدمام</option>
+                    <select id="city-select" class="location-input-modern">
+                        <!-- سيتم تعبئتها بواسطة JS -->
                     </select>
-                    <button id="update-prayer-times" class="update-btn">تحديث</button>
                 </div>
-            </div>
-            <div class="prayer-times-display">
-                <div class="prayer-card">
-                    <div class="prayer-name">الفجر</div>
-                    <div class="prayer-time" id="fajr-time">04:35</div>
-                </div>
-                <div class="prayer-card">
-                    <div class="prayer-name">الشروق</div>
-                    <div class="prayer-time" id="sunrise-time">06:04</div>
-                </div>
-                <div class="prayer-card">
-                    <div class="prayer-name">الظهر</div>
-                    <div class="prayer-time" id="dhuhr-time">12:12</div>
-                </div>
-                <div class="prayer-card">
-                    <div class="prayer-name">العصر</div>
-                    <div class="prayer-time" id="asr-time">15:37</div>
-                </div>
-                <div class="prayer-card">
-                    <div class="prayer-name">المغرب</div>
-                    <div class="prayer-time" id="maghrib-time">18:20</div>
-                </div>
-                <div class="prayer-card">
-                    <div class="prayer-name">العشاء</div>
-                    <div class="prayer-time" id="isha-time">19:50</div>
-                </div>
-            </div>
-            <div class="next-prayer">
-                <h3>الصلاة القادمة</h3>
-                <div class="next-prayer-info">
-                    <span id="next-prayer-name">العصر</span>
-                    <span>بعد <span id="remaining-time">02:15</span></span>
+                <div class="all-prayer-times">
+                    <h4>أوقات اليوم</h4>
+                    <ul id="prayer-times-list">
+                        <!-- سيتم تعبئتها بواسطة JS -->
+                    </ul>
                 </div>
             </div>
         </div>

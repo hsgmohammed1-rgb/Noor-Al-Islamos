@@ -1,403 +1,375 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // عناصر واجهة المستخدم
-    const countrySelect = document.getElementById('country-select');
-    const citySelect = document.getElementById('city-select');
-    const updateButton = document.getElementById('update-prayer-times');
-    
-    // عناصر عرض أوقات الصلاة
-    const prayerTimeElements = {
-        Fajr: document.getElementById('fajr-time'),
-        Sunrise: document.getElementById('sunrise-time'),
-        Dhuhr: document.getElementById('dhuhr-time'),
-        Asr: document.getElementById('asr-time'),
-        Maghrib: document.getElementById('maghrib-time'),
-        Isha: document.getElementById('isha-time')
+    // --- DOM Elements ---
+    const elements = {
+        countrySelect: document.getElementById('country-select'),
+        citySelect: document.getElementById('city-select'),
+        locationDisplay: document.getElementById('prayer-location-display'),
+        hijriDateDisplay: document.getElementById('hijri-date-display'),
+        nextPrayerName: document.getElementById('next-prayer-name'),
+        countdownH: document.getElementById('countdown-h'),
+        countdownM: document.getElementById('countdown-m'),
+        countdownS: document.getElementById('countdown-s'),
+        prayerTimesList: document.getElementById('prayer-times-list'),
+        prayerSection: document.getElementById('prayer-times'),
+        prayerTimeline: document.querySelector('.prayer-timeline'),
     };
-    
-    // عناصر عرض الصلاة القادمة
-    const nextPrayerNameElement = document.getElementById('next-prayer-name');
-    const remainingTimeElement = document.getElementById('remaining-time');
-    
-    // قائمة المدن حسب البلد
+
+    // --- State ---
+    let prayerTimesData = null;
+    let countdownInterval = null;
+    let currentCity = 'Riyadh';
+    let currentCountry = 'SA';
+
+    // List of cities by country
     const citiesByCountry = {
-        'SA': [
-            { value: 'Riyadh', text: 'الرياض' },
-            { value: 'Jeddah', text: 'جدة' },
-            { value: 'Mecca', text: 'مكة المكرمة' },
-            { value: 'Medina', text: 'المدينة المنورة' },
-            { value: 'Dammam', text: 'الدمام' },
-            { value: 'Taif', text: 'الطائف' },
-            { value: 'Tabuk', text: 'تبوك' },
-            { value: 'Abha', text: 'أبها' }
-        ],
-        'EG': [
-            { value: 'Cairo', text: 'القاهرة' },
-            { value: 'Alexandria', text: 'الإسكندرية' },
-            { value: 'Giza', text: 'الجيزة' },
-            { value: 'Luxor', text: 'الأقصر' },
-            { value: 'Aswan', text: 'أسوان' },
-            { value: 'Sharm El-Sheikh', text: 'شرم الشيخ' },
-            { value: 'Hurghada', text: 'الغردقة' }
-        ],
-        'AE': [
-            { value: 'Dubai', text: 'دبي' },
-            { value: 'Abu Dhabi', text: 'أبو ظبي' },
-            { value: 'Sharjah', text: 'الشارقة' },
-            { value: 'Ajman', text: 'عجمان' },
-            { value: 'Fujairah', text: 'الفجيرة' },
-            { value: 'Ras Al Khaimah', text: 'رأس الخيمة' }
-        ],
-        'KW': [
-            { value: 'Kuwait City', text: 'مدينة الكويت' },
-            { value: 'Al Ahmadi', text: 'الأحمدي' },
-            { value: 'Hawalli', text: 'حولي' },
-            { value: 'Salmiya', text: 'السالمية' }
-        ],
-        'QA': [
-            { value: 'Doha', text: 'الدوحة' },
-            { value: 'Al Rayyan', text: 'الريان' },
-            { value: 'Al Wakrah', text: 'الوكرة' },
-            { value: 'Al Khor', text: 'الخور' }
-        ],
-        'BH': [
-            { value: 'Manama', text: 'المنامة' },
-            { value: 'Riffa', text: 'الرفاع' },
-            { value: 'Muharraq', text: 'المحرق' }
-        ],
-        'OM': [
-            { value: 'Muscat', text: 'مسقط' },
-            { value: 'Salalah', text: 'صلالة' },
-            { value: 'Sohar', text: 'صحار' },
-            { value: 'Nizwa', text: 'نزوى' }
-        ],
-        'JO': [
-            { value: 'Amman', text: 'عمان' },
-            { value: 'Zarqa', text: 'الزرقاء' },
-            { value: 'Irbid', text: 'إربد' },
-            { value: 'Aqaba', text: 'العقبة' }
-        ],
-        'PS': [
-            { value: 'Jerusalem', text: 'القدس' },
-            { value: 'Gaza', text: 'غزة' },
-            { value: 'Ramallah', text: 'رام الله' },
-            { value: 'Hebron', text: 'الخليل' },
-            { value: 'Nablus', text: 'نابلس' }
-        ],
-        'LB': [
-            { value: 'Beirut', text: 'بيروت' },
-            { value: 'Tripoli', text: 'طرابلس' },
-            { value: 'Sidon', text: 'صيدا' },
-            { value: 'Tyre', text: 'صور' }
-        ],
-        'SY': [
-            { value: 'Damascus', text: 'دمشق' },
-            { value: 'Aleppo', text: 'حلب' },
-            { value: 'Homs', text: 'حمص' },
-            { value: 'Latakia', text: 'اللاذقية' }
-        ],
-        'IQ': [
-            { value: 'Baghdad', text: 'بغداد' },
-            { value: 'Basra', text: 'البصرة' },
-            { value: 'Mosul', text: 'الموصل' },
-            { value: 'Erbil', text: 'أربيل' },
-            { value: 'Najaf', text: 'النجف' }
-        ]
+        'SA': [{ value: 'Riyadh', text: 'الرياض' }, { value: 'Jeddah', text: 'جدة' }, { value: 'Mecca', text: 'مكة المكرمة' }, { value: 'Medina', text: 'المدينة المنورة' }, { value: 'Dammam', text: 'الدمام' }],
+        'EG': [{ value: 'Cairo', text: 'القاهرة' }, { value: 'Alexandria', text: 'الإسكندرية' }, { value: 'Giza', text: 'الجيزة' }],
+        'AE': [{ value: 'Dubai', text: 'دبي' }, { value: 'Abu Dhabi', text: 'أبو ظبي' }, { value: 'Sharjah', text: 'الشارقة' }],
+        'KW': [{ value: 'Kuwait City', text: 'مدينة الكويت' }],
+        'QA': [{ value: 'Doha', text: 'الدوحة' }],
+        'BH': [{ value: 'Manama', text: 'المنامة' }],
+        'OM': [{ value: 'Muscat', text: 'مسقط' }],
+        'JO': [{ value: 'Amman', text: 'عمان' }],
+        'PS': [{ value: 'Jerusalem', text: 'القدس' }, { value: 'Gaza', text: 'غزة' }, { value: 'Ramallah', text: 'رام الله' }],
+        'LB': [{ value: 'Beirut', text: 'بيروت' }],
+        'SY': [{ value: 'Damascus', text: 'دمشق' }],
+        'IQ': [{ value: 'Baghdad', text: 'بغداد' }]
     };
+    
+    // --- Initialization ---
+    function init() {
+        setupEventListeners();
+        loadInitialData();
+    }
 
-    // تحديث قائمة المدن عند تغيير البلد
-    countrySelect.addEventListener('change', function() {
-        const country = this.value;
-        const cities = citiesByCountry[country] || [];
-        
-        // إفراغ قائمة المدن
-        citySelect.innerHTML = '';
-        
-        // إضافة المدن الجديدة
-        cities.forEach(city => {
-            const option = document.createElement('option');
-            option.value = city.value;
-            option.textContent = city.text;
-            citySelect.appendChild(option);
-        });
-        
-        // تحديث أوقات الصلاة تلقائيًا عند تغيير البلد
-        if (cities.length > 0) {
-            fetchPrayerTimes(country, cities[0].value);
-        }
-    });
+    function setupEventListeners() {
+        elements.countrySelect.addEventListener('change', handleCountryChange);
+        elements.citySelect.addEventListener('change', handleCityChange);
+    }
 
-    // تحديث أوقات الصلاة عند تغيير المدينة
-    citySelect.addEventListener('change', function() {
-        const country = countrySelect.value;
-        const city = this.value;
-        fetchPrayerTimes(country, city);
-    });
-
-    // تحديث أوقات الصلاة عند النقر على زر التحديث
-    updateButton.addEventListener('click', function() {
-        fetchPrayerTimes(countrySelect.value, citySelect.value);
-    });
-
-    // دالة لإظهار أو إخفاء مؤشر التحميل
-    function showLoading(show) {
-        updateButton.disabled = show;
-        updateButton.innerHTML = show ? '<i class="fas fa-spinner fa-spin"></i>' : 'تحديث';
-        
-        if (show) {
-            Object.values(prayerTimeElements).forEach(element => {
-                element.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            });
+    // --- Data Fetching and Management ---
+    async function loadInitialData() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    await fetchPrayerTimes(latitude, longitude);
+                },
+                (error) => {
+                    console.warn("Geolocation failed, falling back to default.", error);
+                    populateCountryCities(currentCountry); // Populate cities for default country
+                    elements.citySelect.value = currentCity;
+                    fetchPrayerTimes(null, null, currentCountry, currentCity);
+                }
+            );
+        } else {
+            populateCountryCities(currentCountry); // Populate cities for default country
+            elements.citySelect.value = currentCity;
+            fetchPrayerTimes(null, null, currentCountry, currentCity);
         }
     }
 
-    // دالة لجلب أوقات الصلاة من API
-    async function fetchPrayerTimes(country, city) {
+    async function fetchPrayerTimes(lat, lon, country = null, city = null) {
+        showLoading(true);
+        const date = new Date();
+        const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+        let apiUrl;
+
+        if (lat && lon) {
+            apiUrl = `https://api.aladhan.com/v1/timings/${formattedDate}?latitude=${lat}&longitude=${lon}&method=4`;
+        } else if (city && country) {
+            apiUrl = `https://api.aladhan.com/v1/timingsByCity/${formattedDate}?city=${city}&country=${country}&method=4`;
+        } else {
+            showError("بيانات الموقع غير كافية");
+            return;
+        }
+
         try {
-            showLoading(true);
-            const apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=4`;
             const response = await fetch(apiUrl);
-
-            if (!response.ok) {
-                throw new Error('فشل في الاتصال بخدمة أوقات الصلاة');
-            }
-
+            if (!response.ok) throw new Error('فشل الاتصال بالشبكة');
+            
             const data = await response.json();
-
-            if (data.code === 200 && data.status === 'OK') {
-                const times = data.data.timings;
-                
-                // تحديث أوقات الصلاة في الصفحة
-                updatePrayerTimesUI(times);
-
-                // تحديث الصلاة القادمة
-                updateNextPrayer(times);
-
-                // حفظ البيانات في التخزين المحلي
-                saveToLocalStorage(country, city, times);
-
+            if (data.code === 200 && data.data) {
+                prayerTimesData = data.data;
+                // Determine location name from API response if available
+                const locationName = await getLocationName(lat, lon, city, country);
+                updateUI(prayerTimesData, locationName);
+                saveToLocalStorage(locationName, prayerTimesData);
             } else {
-                throw new Error('البيانات غير صحيحة');
+                throw new Error('تنسيق البيانات غير صالح');
             }
         } catch (error) {
             console.error('خطأ في جلب أوقات الصلاة:', error);
-            const savedData = getFromLocalStorage(country, city);
+            const locationName = city && country ? `${city}, ${country}` : 'الموقع الافتراضي';
+            const savedData = getFromLocalStorage(locationName);
             if (savedData) {
-                updatePrayerTimesUI(savedData);
-                updateNextPrayer(savedData);
-                showNotification('تم استخدام البيانات المخزنة محليًا', 'warning');
+                prayerTimesData = savedData;
+                updateUI(savedData, locationName);
+                showNotification('تم عرض البيانات المحفوظة محلياً', 'warning');
             } else {
-                useFallbackData(city);
-                showNotification('تعذر الاتصال بخدمة أوقات الصلاة', 'error');
+                showError('تعذر تحميل أوقات الصلاة');
             }
         } finally {
             showLoading(false);
         }
     }
     
-    // دالة لتنسيق الوقت
-    function formatTime(timeStr) {
-        if (!timeStr) return '--:--';
-        const [hours, minutes] = timeStr.split(':');
-        return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
-    }
-    
-    // دالة لإظهار إشعار
-    function showNotification(message, type = 'info') {
-        const existingNotification = document.querySelector('.notification');
-        if (existingNotification) {
-            existingNotification.remove();
+    async function getLocationName(lat, lon, city, country) {
+        if (city && country) {
+            const countryName = elements.countrySelect.options[elements.countrySelect.selectedIndex].text;
+            const cityName = Array.from(elements.citySelect.options).find(o => o.value === city)?.text || city;
+            return `${cityName}, ${countryName}`;
         }
-
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i> <span>${message}</span>`;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.classList.add('hide');
-            setTimeout(() => {
-                notification.remove();
-            }, 500);
-        }, 5000);
-    }
-    
-    // دالة لحفظ البيانات في التخزين المحلي
-    function saveToLocalStorage(country, city, data) {
-        const key = `prayerTimes_${country}_${city}`;
-        const storageData = {
-            ...data,
-            dateString: new Date().toDateString()
-        };
-        localStorage.setItem(key, JSON.stringify(storageData));
-    }
-    
-    // دالة لاسترجاع البيانات من التخزين المحلي
-    function getFromLocalStorage(country, city) {
-        const key = `prayerTimes_${country}_${city}`;
-        const data = localStorage.getItem(key);
-        
-        if (data) {
-            const parsedData = JSON.parse(data);
-            if (parsedData.dateString === new Date().toDateString()) {
-                return parsedData;
-            }
-        }
-        return null;
-    }
-    
-    // دالة لاستخدام البيانات الاحتياطية
-    function useFallbackData(city) {
-        const fallbackTimes = {
-            'Riyadh': { Fajr: '04:35', Sunrise: '06:04', Dhuhr: '12:12', Asr: '15:37', Maghrib: '18:20', Isha: '19:50' },
-            'Jeddah': { Fajr: '04:52', Sunrise: '06:18', Dhuhr: '12:25', Asr: '15:45', Maghrib: '18:32', Isha: '20:02' },
-            'Cairo': { Fajr: '04:15', Sunrise: '05:45', Dhuhr: '12:05', Asr: '15:25', Maghrib: '18:15', Isha: '19:45' }
-        };
-        const times = fallbackTimes[city] || fallbackTimes['Riyadh'];
-        updatePrayerTimesUI(times);
-        updateNextPrayer(times);
-    }
-    
-    // دالة لتحديث واجهة المستخدم بأوقات الصلاة
-    function updatePrayerTimesUI(times) {
-        for (const prayer in prayerTimeElements) {
-            if (prayerTimeElements.hasOwnProperty(prayer) && times.hasOwnProperty(prayer)) {
-                prayerTimeElements[prayer].textContent = formatTime(times[prayer]);
-                prayerTimeElements[prayer].classList.add('updated');
-                setTimeout(() => prayerTimeElements[prayer].classList.remove('updated'), 1000);
-            }
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=ar`);
+            const data = await response.json();
+            const address = data.address;
+            const locationCity = address.city || address.town || address.village || 'مكان غير معروف';
+            const locationCountry = address.country || '';
+            return `${locationCity}, ${locationCountry}`;
+        } catch (e) {
+            return 'موقعك الحالي';
         }
     }
 
-    // دالة لتحديث الصلاة القادمة
-    function updateNextPrayer(times) {
-        const now = new Date();
-        const currentTime = now.getHours() * 60 + now.getMinutes();
 
-        const prayerSchedule = [
-            { name: 'الفجر', nameEn: 'Fajr', time: convertToMinutes(times.Fajr) },
-            { name: 'الشروق', nameEn: 'Sunrise', time: convertToMinutes(times.Sunrise) },
-            { name: 'الظهر', nameEn: 'Dhuhr', time: convertToMinutes(times.Dhuhr) },
-            { name: 'العصر', nameEn: 'Asr', time: convertToMinutes(times.Asr) },
-            { name: 'المغرب', nameEn: 'Maghrib', time: convertToMinutes(times.Maghrib) },
-            { name: 'العشاء', nameEn: 'Isha', time: convertToMinutes(times.Isha) }
+    // --- UI Update Functions ---
+    function updateUI(data, locationName) {
+        updateLocationAndDate(locationName, data.date.hijri);
+        updatePrayerList(data.timings);
+        updateTimeline(data.timings);
+        startCountdown(data.timings);
+        updateDynamicBackground(data.timings);
+    }
+    
+    function updateLocationAndDate(locationName, hijriDate) {
+        elements.locationDisplay.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${locationName}`;
+        elements.hijriDateDisplay.textContent = `${hijriDate.weekday.ar}، ${hijriDate.day} ${hijriDate.month.ar} ${hijriDate.year}`;
+    }
+
+    function updatePrayerList(timings) {
+        const prayerOrder = [
+            { key: 'Fajr', name: 'الفجر', icon: 'fa-moon' },
+            { key: 'Sunrise', name: 'الشروق', icon: 'fa-sun' },
+            { key: 'Dhuhr', name: 'الظهر', icon: 'fa-sun' },
+            { key: 'Asr', name: 'العصر', icon: 'fa-cloud-sun' },
+            { key: 'Maghrib', name: 'المغرب', icon: 'fa-cloud-moon' },
+            { key: 'Isha', name: 'العشاء', icon: 'fa-moon' },
         ];
 
-        let nextPrayer = null;
-        for (const prayer of prayerSchedule) {
-            if (prayer.time > currentTime) {
-                nextPrayer = prayer;
-                break;
-            }
-        }
-        
-        let remainingMinutes;
-        if (nextPrayer) {
-            remainingMinutes = nextPrayer.time - currentTime;
-        } else {
-            // الصلاة القادمة هي الفجر في اليوم التالي
-            nextPrayer = prayerSchedule[0];
-            remainingMinutes = (24 * 60 - currentTime) + nextPrayer.time;
-        }
-        
-        const hours = Math.floor(remainingMinutes / 60);
-        const minutes = remainingMinutes % 60;
+        elements.prayerTimesList.innerHTML = '';
+        prayerOrder.forEach(prayer => {
+            const li = document.createElement('li');
+            li.id = `prayer-${prayer.key}`;
+            li.innerHTML = `
+                <i class="fas ${prayer.icon}"></i>
+                <span>${prayer.name}</span>
+                <span class="time">${formatTime(timings[prayer.key])}</span>
+            `;
+            elements.prayerTimesList.appendChild(li);
+        });
+    }
 
-        nextPrayerNameElement.textContent = nextPrayer.name;
-        remainingTimeElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    function updateTimeline(timings) {
+        const prayerSchedule = getPrayerSchedule(timings);
+        const dayInMinutes = 24 * 60;
+        elements.prayerTimeline.innerHTML = ''; // Clear previous timeline
+
+        prayerSchedule.forEach(prayer => {
+            if (prayer.nameEn === 'Sunrise') return; // Don't show sunrise on timeline
+            const position = (prayer.time / dayInMinutes) * 100;
+            const prayerNode = document.createElement('div');
+            prayerNode.className = 'prayer-time-node';
+            prayerNode.style.right = `${position}%`; // Use right for RTL
+            prayerNode.dataset.prayer = prayer.name;
+            elements.prayerTimeline.appendChild(prayerNode);
+        });
         
-        // تمييز بطاقة الصلاة القادمة
-        document.querySelectorAll('.prayer-card').forEach(card => card.classList.remove('active'));
-        const nextPrayerCard = prayerTimeElements[nextPrayer.nameEn]?.parentElement;
-        if(nextPrayerCard) nextPrayerCard.classList.add('active');
+        // Add current time indicator
+        const now = new Date();
+        const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+        const indicatorPosition = (currentTimeInMinutes / dayInMinutes) * 100;
+        let indicator = elements.prayerTimeline.querySelector('.current-time-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.className = 'current-time-indicator';
+            elements.prayerTimeline.appendChild(indicator);
+        }
+        indicator.style.right = `${indicatorPosition}%`;
+    }
+
+    function updateDynamicBackground(timings) {
+        const now = new Date();
+        const currentTime = now.getTime();
+        const fajrTime = parseTime(timings.Fajr).getTime();
+        const sunriseTime = parseTime(timings.Sunrise).getTime();
+        const dhuhrTime = parseTime(timings.Dhuhr).getTime();
+        const asrTime = parseTime(timings.Asr).getTime();
+        const maghribTime = parseTime(timings.Maghrib).getTime();
+        const ishaTime = parseTime(timings.Isha).getTime();
+
+        let newClass = '';
+        if (currentTime >= fajrTime && currentTime < sunriseTime) {
+            newClass = 'theme-fajr';
+        } else if (currentTime >= sunriseTime && currentTime < dhuhrTime) {
+            newClass = 'theme-sunrise';
+        } else if (currentTime >= dhuhrTime && currentTime < asrTime) {
+            newClass = 'theme-dhuhr';
+        } else if (currentTime >= asrTime && currentTime < maghribTime) {
+            newClass = 'theme-asr';
+        } else if (currentTime >= maghribTime && currentTime < ishaTime) {
+            newClass = 'theme-maghrib';
+        } else {
+            newClass = 'theme-isha';
+        }
+        
+        elements.prayerSection.className = `content-section active ${newClass}`;
+    }
+
+    // --- Countdown Logic ---
+    function startCountdown(timings) {
+        if (countdownInterval) clearInterval(countdownInterval);
+        
+        countdownInterval = setInterval(() => {
+            const prayerSchedule = getPrayerSchedule(timings, true); // Get schedule for today and tomorrow
+            const now = new Date();
+            
+            let nextPrayer = prayerSchedule.find(p => p.dateObj > now);
+
+            if (!nextPrayer) { // Should not happen with tomorrow's schedule
+                elements.nextPrayerName.textContent = "انتهى اليوم";
+                return;
+            }
+
+            const remainingMillis = nextPrayer.dateObj - now;
+            const totalSeconds = Math.floor(remainingMillis / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            elements.nextPrayerName.textContent = nextPrayer.name;
+            elements.countdownH.textContent = String(hours).padStart(2, '0');
+            elements.countdownM.textContent = String(minutes).padStart(2, '0');
+            elements.countdownS.textContent = String(seconds).padStart(2, '0');
+
+            // Update active prayer in the list
+            document.querySelectorAll('#prayer-times-list li').forEach(li => li.classList.remove('active'));
+            const activePrayerEl = document.getElementById(`prayer-${nextPrayer.nameEn}`);
+            if (activePrayerEl) activePrayerEl.classList.add('active');
+
+            // Update timeline indicator
+            updateTimeline(timings);
+
+        }, 1000);
+    }
+
+    // --- Event Handlers ---
+    function handleCountryChange() {
+        currentCountry = elements.countrySelect.value;
+        populateCountryCities(currentCountry);
+        currentCity = elements.citySelect.value;
+        fetchPrayerTimes(null, null, currentCountry, currentCity);
+    }
+    
+    function handleCityChange() {
+        currentCity = elements.citySelect.value;
+        currentCountry = elements.countrySelect.value;
+        fetchPrayerTimes(null, null, currentCountry, currentCity);
+    }
+
+    // --- Helper Functions ---
+    function populateCountryCities(country) {
+        const cities = citiesByCountry[country] || [];
+        elements.citySelect.innerHTML = '';
+        cities.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city.value;
+            option.textContent = city.text;
+            elements.citySelect.appendChild(option);
+        });
+    }
+    
+    function parseTime(timeStr) {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const date = new Date();
+        date.setHours(hours, minutes, 0, 0);
+        return date;
+    }
+
+    function getPrayerSchedule(timings, includeTomorrow = false) {
+        const schedule = [
+            { name: 'الفجر', nameEn: 'Fajr', time: convertToMinutes(timings.Fajr), dateObj: parseTime(timings.Fajr) },
+            { name: 'الظهر', nameEn: 'Dhuhr', time: convertToMinutes(timings.Dhuhr), dateObj: parseTime(timings.Dhuhr) },
+            { name: 'العصر', nameEn: 'Asr', time: convertToMinutes(timings.Asr), dateObj: parseTime(timings.Asr) },
+            { name: 'المغرب', nameEn: 'Maghrib', time: convertToMinutes(timings.Maghrib), dateObj: parseTime(timings.Maghrib) },
+            { name: 'العشاء', nameEn: 'Isha', time: convertToMinutes(timings.Isha), dateObj: parseTime(timings.Isha) }
+        ];
+
+        if (includeTomorrow) {
+            const tomorrowFajr = parseTime(timings.Fajr);
+            tomorrowFajr.setDate(tomorrowFajr.getDate() + 1);
+            schedule.push({ name: 'الفجر', nameEn: 'Fajr', time: convertToMinutes(timings.Fajr), dateObj: tomorrowFajr });
+        }
+        
+        return schedule.sort((a, b) => a.dateObj - b.dateObj);
     }
 
     function convertToMinutes(timeString) {
-        if (!timeString) return 0;
         const [hours, minutes] = timeString.split(':').map(Number);
         return hours * 60 + minutes;
     }
 
-    // تهيئة عند تحميل الصفحة
-    function initialize() {
-        const defaultCountry = 'SA';
-        const defaultCity = 'Riyadh';
-        countrySelect.value = defaultCountry;
-        countrySelect.dispatchEvent(new Event('change')); // لتعبئة المدن
-        citySelect.value = defaultCity;
-        
-        const savedData = getFromLocalStorage(defaultCountry, defaultCity);
-        if(savedData) {
-            updatePrayerTimesUI(savedData);
-            updateNextPrayer(savedData);
-        } else {
-            fetchPrayerTimes(defaultCountry, defaultCity);
-        }
+    function formatTime(timeStr) {
+        if (!timeStr) return '--:--';
+        const [hours, minutes] = timeStr.split(':');
+        let h = parseInt(hours, 10);
+        const ampm = h >= 12 ? 'م' : 'ص';
+        h = h % 12;
+        h = h ? h : 12; // the hour '0' should be '12'
+        return `${String(h).padStart(2, '0')}:${minutes} ${ampm}`;
     }
 
-    initialize();
-
-    // تحديث الوقت المتبقي كل دقيقة
-    setInterval(() => {
-        const savedData = getFromLocalStorage(countrySelect.value, citySelect.value);
-        if (savedData) {
-            updateNextPrayer(savedData);
-        }
-    }, 60000);
+    function showLoading(isLoading) {
+        // You can implement skeleton loaders here if you want
+    }
     
-    // إضافة CSS للتأثيرات الحركية
-    const style = document.createElement('style');
-    style.textContent = `
-        .prayer-card.active {
-            transform: translateY(-5px);
-            box-shadow: 0 0 20px var(--accent-color);
-            border-color: var(--accent-color);
+    function showError(message) {
+        elements.locationDisplay.textContent = message;
+        elements.prayerTimesList.innerHTML = `<li class="error-message">${message}</li>`;
+    }
+
+    function showNotification(message, type = 'info') {
+        const existing = document.querySelector('.notification');
+        if (existing) existing.remove();
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `<i class="fas fa-info-circle"></i> <span>${message}</span>`;
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            notification.classList.add('hide');
+            setTimeout(() => notification.remove(), 500);
+        }, 5000);
+    }
+    
+    function saveToLocalStorage(locationName, data) {
+        const key = `prayerTimes_${locationName}`;
+        const storageData = { ...data, timestamp: new Date().getTime() };
+        localStorage.setItem(key, JSON.stringify(storageData));
+    }
+
+    function getFromLocalStorage(locationName) {
+        const key = `prayerTimes_${locationName}`;
+        const data = localStorage.getItem(key);
+        if (data) {
+            const parsedData = JSON.parse(data);
+            const today = new Date().toDateString();
+            const savedDate = new Date(parsedData.timestamp).toDateString();
+            if (today === savedDate) return parsedData;
         }
-        .prayer-time.updated {
-            animation: highlight 1s ease-in-out;
-        }
-        #next-prayer-name {
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-        @keyframes highlight {
-            0% { color: var(--text-color); }
-            50% { color: var(--accent-color); transform: scale(1.1); }
-            100% { color: var(--text-color); transform: scale(1); }
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 25px;
-            border-radius: var(--border-radius-md);
-            background: rgba(44, 62, 80, 0.9);
-            color: white;
-            z-index: 1001;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            backdrop-filter: blur(5px);
-            transition: opacity 0.5s, transform 0.5s;
-            animation: slideUp 0.5s ease-out forwards;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .notification.hide {
-            opacity: 0;
-            transform: translate(-50%, 20px);
-        }
-        .notification.error { background: rgba(231, 76, 60, 0.9); }
-        .notification.warning { background: rgba(243, 156, 18, 0.9); }
-        @keyframes slideUp {
-            from { transform: translate(-50%, 50px); opacity: 0; }
-            to { transform: translate(-50%, 0); opacity: 1; }
-        }
-    `;
-    document.head.appendChild(style);
+        return null;
+    }
+
+    // --- Start the App ---
+    init();
 });

@@ -88,6 +88,7 @@ a:hover {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: var(--card-shadow);
+    transition: background 0.8s ease-in-out;
 }
 
 .content-section.active {
@@ -507,106 +508,238 @@ a:hover {
     font-style: italic;
 }
 
-/* قسم أوقات الصلاة */
-.prayer-container {
-    max-width: 900px;
-    margin: 0 auto;
+
+/* --- قسم أوقات الصلاة المطور --- */
+
+#prayer-times {
+    background-size: cover;
+    background-position: center center;
+    position: relative;
+    overflow: hidden;
 }
 
-.prayer-location {
-    text-align: center;
-    margin-bottom: 2rem;
+#prayer-times::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 20, 40, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 0;
 }
 
-.location-selector {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 1rem;
-    flex-wrap: wrap;
-}
+/* Dynamic Backgrounds */
+#prayer-times.theme-fajr { background-image: url('https://i.postimg.cc/k4T8KHYc/pexels-pixabay-206434.jpg'); }
+#prayer-times.theme-sunrise { background-image: url('https://i.postimg.cc/MHhC4dG2/pexels-h-ng-giang-2088164.jpg'); }
+#prayer-times.theme-dhuhr { background-image: url('https://i.postimg.cc/hGvQhCjX/pexels-asad-photo-maldives-1580267.jpg'); }
+#prayer-times.theme-asr { background-image: url('https://i.postimg.cc/D03m8g0P/pexels-james-wheeler-417074.jpg'); }
+#prayer-times.theme-maghrib { background-image: url('https://i.postimg.cc/85z1X2X7/pexels-stephan-seeber-1054218.jpg'); }
+#prayer-times.theme-isha { background-image: url('https://i.postimg.cc/L5n8x6TS/pexels-adrien-olichon-2387873.jpg'); }
 
-.location-input {
-    padding: 10px 15px;
-    border: 1px solid var(--card-border);
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-color);
-    border-radius: var(--border-radius-sm);
-    font-size: 1rem;
-}
 
-.update-btn {
-    padding: 10px 20px;
-    background: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    transition: all var(--transition-speed);
-}
-
-.update-btn:hover {
-    background: var(--warning-color);
-}
-
-.prayer-times-display {
+.prayer-container-modern {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
+    grid-template-columns: 2.5fr 1fr;
+    gap: 2.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.prayer-main-display {
+    text-align: center;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.location-and-date {
     margin-bottom: 2rem;
 }
 
-.prayer-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius-md);
-    padding: 1rem;
-    text-align: center;
-    transition: all var(--transition-speed);
+#prayer-location-display {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+#hijri-date-display {
+    font-size: 1rem;
+    opacity: 0.8;
 }
 
-.prayer-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.prayer-name {
+.next-prayer-info-modern p {
     font-size: 1.2rem;
     margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+.next-prayer-info-modern h2 {
+    font-size: 4rem;
+    font-weight: 700;
     color: var(--accent-color);
+    text-shadow: 0 0 20px rgba(230, 126, 34, 0.5);
+    margin-bottom: 1.5rem;
+    font-family: 'Amiri', serif;
 }
 
-.prayer-time {
-    font-size: 1.5rem;
-    font-weight: bold;
+.countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+}
+.time-part {
+    background: rgba(0,0,0,0.3);
+    padding: 1rem;
+    border-radius: var(--border-radius-md);
+    min-width: 90px;
+    border: 1px solid var(--card-border);
+}
+.time-part span {
+    font-size: 2.5rem;
+    font-weight: 700;
+    display: block;
+    line-height: 1;
+}
+.time-part small {
+    font-size: 0.9rem;
+    opacity: 0.8;
 }
 
-.next-prayer {
+.prayer-timeline {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    margin-top: 4rem;
+    position: relative;
+}
+.prayer-time-node {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    border: 3px solid var(--accent-color);
+    cursor: pointer;
+}
+.prayer-time-node::after {
+    content: attr(data-prayer);
+    position: absolute;
+    bottom: 25px;
+    right: 50%;
+    transform: translateX(50%);
+    background: rgba(0,0,0,0.7);
+    padding: 4px 8px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+.current-time-indicator {
+    position: absolute;
+    top: -5px;
+    width: 4px;
+    height: 16px;
+    background: var(--accent-color);
+    border-radius: 2px;
+    transform: translateX(50%);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+
+.prayer-sidebar {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius-md);
     padding: 1.5rem;
-    text-align: center;
 }
 
-.next-prayer h3 {
-    margin-bottom: 1rem;
-    color: var(--accent-color);
+.location-controls-modern, .all-prayer-times {
+    margin-bottom: 2rem;
+}
+.location-controls-modern h4, .all-prayer-times h4 {
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--card-border);
+}
+.location-input-modern {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--card-border);
+    color: white;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+.location-input-modern option {
+    background-color: var(--primary-color);
 }
 
-.next-prayer-info {
-    font-size: 1.3rem;
+#prayer-times-list {
+    list-style: none;
+    padding: 0;
 }
-
-#next-prayer-name {
+#prayer-times-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s;
+    font-size: 1.1rem;
+}
+#prayer-times-list li:not(:last-child) {
+    border-bottom: 1px solid var(--card-border);
+}
+#prayer-times-list li.active {
+    background: var(--accent-color);
+    color: white;
     font-weight: bold;
-    margin-left: 1rem;
+    transform: scale(1.05);
+}
+#prayer-times-list li .time {
+    font-weight: 500;
+    font-size: 1rem;
+}
+#prayer-times-list li i {
+    opacity: 0.7;
+    margin-left: 10px;
+}
+#prayer-times-list li.active i {
+    opacity: 1;
 }
 
-#remaining-time {
-    color: var(--warning-color);
-    font-weight: bold;
+/* Notification styling from old JS */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 25px;
+    border-radius: var(--border-radius-md);
+    background: rgba(44, 62, 80, 0.9);
+    color: white;
+    z-index: 1001;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    backdrop-filter: blur(5px);
+    transition: opacity 0.5s, transform 0.5s;
+    animation: slideUp 0.5s ease-out forwards;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
+.notification.hide {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+}
+.notification.error { background: rgba(231, 76, 60, 0.9); }
+.notification.warning { background: rgba(243, 156, 18, 0.9); }
+@keyframes slideUp {
+    from { transform: translate(-50%, 50px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
+/* --- End Prayer Times --- */
+
 
 /* قسم القرآن الكريم */
 .quran-container {
@@ -1723,7 +1856,7 @@ a:hover {
 
 /* تحسين التصميم على الجوال */
 @media (max-width: 992px) {
-    .qibla-container-new {
+    .qibla-container-new, .live-broadcast-wrapper, .radio-main-content, .prayer-container-modern {
         grid-template-columns: 1fr;
     }
 
@@ -1732,13 +1865,6 @@ a:hover {
         min-height: 400px;
     }
 
-    .live-broadcast-wrapper {
-        grid-template-columns: 1fr;
-    }
-
-    .radio-main-content {
-        grid-template-columns: 1fr;
-    }
     .radio-player-panel {
         position: static;
     }
@@ -1756,9 +1882,30 @@ a:hover {
     .hero-content h1 { font-size: 2rem; }
     .hero-content h2 { font-size: 1.5rem; }
     .section-title { font-size: 1.8rem; }
-    .prayer-times-display { grid-template-columns: repeat(2, 1fr); }
-    .location-selector { flex-direction: column; }
-    .location-input, .update-btn { width: 100%; }
+    
+    .prayer-container-modern {
+        gap: 1.5rem;
+    }
+    .prayer-main-display {
+        padding: 1rem;
+    }
+    .next-prayer-info-modern h2 {
+        font-size: 3rem;
+    }
+    .countdown-timer {
+        gap: 0.5rem;
+    }
+    .time-part {
+        min-width: 70px;
+        padding: 0.5rem;
+    }
+    .time-part span {
+        font-size: 2rem;
+    }
+    .prayer-sidebar {
+        padding: 1rem;
+    }
+
     .quran-search { flex-direction: column; }
     .footer-content { grid-template-columns: 1fr; text-align: center; }
     .footer-links h3::after, .footer-contact h3::after { left: 50%; transform: translateX(-50%); }
@@ -1774,8 +1921,6 @@ a:hover {
     .hero-content h1 { font-size: 1.8rem; }
     .hero-content h2 { font-size: 1.3rem; }
     .section-title { font-size: 1.6rem; }
-    .prayer-times-display { grid-template-columns: 1fr; }
-    .prayer-card { flex-direction: row; justify-content: space-between; align-items: center; }
     .azkar-buttons { flex-direction: column; }
     .azkar-btn { width: 100%; }
     .tasbih-counter-area { width: 240px; height: 240px; }
