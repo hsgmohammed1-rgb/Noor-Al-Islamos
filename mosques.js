@@ -26,7 +26,7 @@ const icons = {
     user: L.icon({
         iconUrl: 'https://i.postimg.cc/G2fSBjPj/1000091987.png',
         iconSize: [70, 70],
-        iconAnchor: [20, 40],
+        iconAnchor: [35, 70],
         popupAnchor: [0, -40]
     }),
     mosque: L.icon({
