@@ -10,6 +10,9 @@
     <!-- Meta tags for SEO -->
     <meta name="description" content="موقع نور الإسلام - موقع إسلامي شامل يحتوي على الأذكار، أوقات الصلاة، حاسبة الزكاة، المسبحة الإلكترونية، والمزيد من المحتوى الإسلامي">
     <meta name="keywords" content="إسلام، أذكار، قرآن، صلاة، زكاة، مسبحة، أدعية، إسلامي">
+    <!-- LeafletJS for Mosques Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="mosques.css">
 </head>
 <body>
     <!-- الهيدر والقائمة -->
@@ -46,6 +49,9 @@
                 <button class="nav-btn" data-section="qibla-section" title="اتجاه القبلة">
                     <i class="fas fa-compass"></i>
                 </button>
+                <button class="nav-btn" data-section="mosques-section" title="دليل المساجد">
+                    <i class="fas fa-map-marked-alt"></i>
+                </button>
             </nav>
         </div>
     </header>
@@ -74,9 +80,9 @@
                         <p>قراءة وتلاوة القرآن الكريم</p>
                     </div>
                     <div class="feature-card">
-                        <i class="fas fa-pray"></i>
-                        <h3>المسبحة الإلكترونية</h3>
-                        <p>سبّح بسهولة باستخدام المسبحة الإلكترونية</p>
+                        <i class="fas fa-map-marked-alt"></i>
+                        <h3>دليل المساجد</h3>
+                        <p>اعثر على أقرب المساجد إليك بسهولة</p>
                     </div>
                 </div>
                 <div class="daily-verse">
@@ -401,6 +407,58 @@
         </div>
     </section>
 
+    <!-- قسم دليل المساجد -->
+    <section id="mosques-section" class="content-section">
+        <h2 class="section-title">دليل المساجد القريبة</h2>
+        <div class="mosques-content-wrapper">
+            <div class="app-controls">
+                <div class="location-controls">
+                    <button id="locate-btn" class="btn locate-btn">
+                        <i class="fas fa-location-crosshairs"></i> تحديد موقعي
+                    </button>
+                    <div class="range-control">
+                        <label for="radius">نطاق البحث:</label>
+                        <input type="range" id="radius" min="0.5" max="10" step="0.5" value="2">
+                        <span id="radius-value">2 كم</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading-overlay" id="loading">
+                <div class="spinner"></div>
+                <p>جاري تحديد موقعك والبحث عن المساجد...</p>
+            </div>
+
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="map-actions">
+                    <button id="zoom-in" class="map-btn"><i class="fas fa-plus"></i></button>
+                    <button id="zoom-out" class="map-btn"><i class="fas fa-minus"></i></button>
+                    <button id="current-loc" class="map-btn"><i class="fas fa-location-arrow"></i></button>
+                </div>
+            </div>
+
+            <div class="results-container">
+                <div class="results-header">
+                    <h2><i class="fas fa-list"></i> قائمة المساجد</h2>
+                    <span id="results-count">0 مسجد</span>
+                </div>
+                <div class="mosques-list" id="mosques-list">
+                    <p class="no-results">الرجاء تحديد موقعك لعرض المساجد القريبة</p>
+                </div>
+            </div>
+
+            <div class="prayer-times-mosques" id="prayer-times-mosques">
+                <h3><i class="fas fa-clock"></i> أوقات الصلاة لموقعك الحالي</h3>
+                <div class="times-grid">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> يرجى تحديد موقعك لعرض الأوقات
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- الفوتر -->
     <footer class="main-footer">
         <div class="footer-content">
@@ -446,6 +504,8 @@
     <script src="hadith.js"></script>
     <script src="azkar.js"></script>
     <script src="radio.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="mosques.js"></script>
     <script>
         // كود البث المباشر من الكعبة
         document.addEventListener("DOMContentLoaded", function() {

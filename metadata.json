@@ -1,5 +1,7 @@
 {
-  "name": "Empty",
-  "description": "An empty app",
-  "requestFramePermissions": []
+  "name": "نور الإسلام",
+  "description": "موقع إسلامي شامل يحتوي على الأذكار، أوقات الصلاة، دليل المساجد، والمزيد",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
 }
