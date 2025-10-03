@@ -25,13 +25,13 @@ const elements = {
 const icons = {
     user: L.icon({
         iconUrl: 'https://i.postimg.cc/G2fSBjPj/1000091987.png',
-        iconSize: [40, 40],
+        iconSize: [70, 70],
         iconAnchor: [20, 40],
         popupAnchor: [0, -40]
     }),
     mosque: L.icon({
         iconUrl: 'https://i.postimg.cc/T1ZSschF/1000091982.png',
-        iconSize: [40, 40],
+        iconSize: [70, 70],
         iconAnchor: [20, 40],
         popupAnchor: [0, -40]
     })
