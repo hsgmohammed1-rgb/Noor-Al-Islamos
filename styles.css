@@ -1243,39 +1243,32 @@ a:hover {
     cursor: pointer;
 }
 
-/* قسم البث المباشر */
-.kaaba-live-container {
-    max-width: 900px;
-    margin: 0 auto;
+/* قسم البث المباشر (جديد) */
+.live-broadcast-wrapper {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    align-items: flex-start;
 }
 
-.kaaba-info {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius-md);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    text-align: center;
+.main-broadcast-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.live-stream-container {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius-md);
-    padding: 1rem;
-    margin-bottom: 2rem;
-}
-
-.video-container {
+.video-player-container {
     position: relative;
     padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
     height: 0;
     overflow: hidden;
-    margin-bottom: 1rem;
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--border-radius-md);
+    background-color: #000;
+    box-shadow: var(--card-shadow);
+    border: 2px solid var(--card-border);
 }
 
-.video-container iframe {
+.video-player-container iframe {
     position: absolute;
     top: 0;
     left: 0;
@@ -1283,64 +1276,129 @@ a:hover {
     height: 100%;
 }
 
-.stream-options {
+.broadcast-info-panel {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-md);
+    padding: 1.25rem;
+    border: 1px solid var(--card-border);
+}
+
+.broadcast-info-panel h3 {
+    color: var(--accent-color);
+    margin: 0 0 0.5rem 0;
+}
+
+.broadcast-info-panel p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    opacity: 0.9;
+}
+
+.broadcast-sidebar {
     display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 1rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.stream-selector, .makkah-prayer-times-widget {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-md);
+    padding: 1.25rem;
+    border: 1px solid var(--card-border);
+}
+
+.stream-selector h4, .makkah-prayer-times-widget h3 {
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .stream-option {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: var(--border-radius-sm);
-    padding: 0.8rem 1.5rem;
-    cursor: pointer;
-    transition: all var(--transition-speed);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color 0.2s, border-left-color 0.2s;
+    border-left: 4px solid transparent;
 }
 
 .stream-option:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .stream-option.active {
-    background: var(--accent-color);
-    color: white;
+    background-color: rgba(230, 126, 34, 0.15);
+    border-left-color: var(--accent-color);
 }
 
-.prayer-times-reminder {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius-md);
-    padding: 1.5rem;
+.stream-icon {
+    font-size: 1.8rem;
+    color: var(--accent-color);
+    width: 40px;
     text-align: center;
 }
 
-.makkah-date {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    color: var(--accent-color);
+.option-text h5 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
 }
 
-.makkah-prayers {
+.option-text span {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.makkah-date {
+    text-align: center;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.makkah-prayers-grid {
     display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 0.5rem;
 }
 
-.makkah-prayer {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: var(--border-radius-sm);
-    padding: 0.5rem 1rem;
+.makkah-prayer-item {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    min-width: 80px;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--border-radius-sm);
+    transition: background-color 0.2s;
 }
+
+.makkah-prayer-item .prayer-name {
+    font-weight: 500;
+}
+
+.makkah-prayer-item .prayer-time {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.makkah-prayer-item.next {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.makkah-prayer-item.next .prayer-name {
+    color: white;
+}
+
+.makkah-prayer-item.next .prayer-time {
+    color: white;
+}
+
 
 .loading-spinner, .error-message, .no-results {
     padding: 1rem;
@@ -1360,6 +1418,10 @@ a:hover {
     .qibla-map-area, .qibla-info-panel {
         height: auto;
         min-height: 400px;
+    }
+
+    .live-broadcast-wrapper {
+        grid-template-columns: 1fr;
     }
 }
 

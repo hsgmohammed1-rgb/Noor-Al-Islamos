@@ -299,42 +299,55 @@
 
     <!-- قسم البث المباشر من الكعبة -->
     <section id="kaaba-live-section" class="content-section">
-        <h2 class="section-title">بث مباشر من الكعبة المشرفة</h2>
-        <div class="kaaba-live-container">
-            <div class="kaaba-info">
-                <h3>البث المباشر من المسجد الحرام</h3>
-                <p>شاهد البث المباشر من الكعبة المشرفة على مدار الساعة. استمتع بمشاهدة المصلين والطائفين حول بيت الله الحرام في أي وقت.</p>
-            </div>
-            <div class="live-stream-container">
-                <div class="video-container">
+        <h2 class="section-title">البث المباشر من الحرمين الشريفين</h2>
+        <div class="live-broadcast-wrapper">
+            <div class="main-broadcast-panel">
+                <div class="video-player-container">
                     <iframe 
+                        id="live-stream-iframe"
                         src="https://www.youtube.com/embed/GyHkiQ8aSYQ?autoplay=1&mute=1" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowfullscreen>
                     </iframe>
                 </div>
-                <div class="stream-options">
-                    <div class="stream-option active" data-stream="makkah">
-                        <i class="fas fa-kaaba"></i>
-                        <span>الكعبة المشرفة</span>
-                    </div>
-                    <div class="stream-option" data-stream="madinah">
-                        <i class="fas fa-mosque"></i>
-                        <span>المسجد النبوي</span>
-                    </div>
-                    <div class="stream-option" data-stream="quran">
-                        <i class="fas fa-quran"></i>
-                        <span>قناة القرآن الكريم</span>
-                    </div>
+                <div class="broadcast-info-panel">
+                    <h3 id="info-panel-title">الكعبة المشرفة</h3>
+                    <p id="info-panel-text">قلب العالم الإسلامي وقبلة المسلمين في صلاتهم، وأول بيت وضع للناس على وجه الأرض لعبادة الله.</p>
                 </div>
             </div>
-            <div class="prayer-times-reminder">
-                <h3>أوقات الصلاة في مكة المكرمة</h3>
-                <div class="makkah-prayer-times">
-                    <div class="loading-spinner">
-                        <i class="fas fa-spinner fa-spin"></i> جاري تحميل أوقات الصلاة...
+            <div class="broadcast-sidebar">
+                <div class="stream-selector">
+                    <h4><i class="fas fa-tv"></i> اختر البث</h4>
+                    <div class="stream-option active" data-stream="makkah">
+                        <i class="fas fa-kaaba stream-icon"></i>
+                        <div class="option-text">
+                            <h5>المسجد الحرام</h5>
+                            <span>مكة المكرمة</span>
+                        </div>
                     </div>
+                    <div class="stream-option" data-stream="madinah">
+                        <i class="fas fa-mosque stream-icon"></i>
+                        <div class="option-text">
+                            <h5>المسجد النبوي</h5>
+                            <span>المدينة المنورة</span>
+                        </div>
+                    </div>
+                    <div class="stream-option" data-stream="quran">
+                        <i class="fas fa-quran stream-icon"></i>
+                         <div class="option-text">
+                            <h5>قناة القرآن الكريم</h5>
+                            <span>بث تلاوات عطرة</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="makkah-prayer-times-widget">
+                     <h3><i class="fas fa-clock"></i> الصلاة في مكة</h3>
+                     <div class="prayer-times-content">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                     </div>
                 </div>
             </div>
         </div>
@@ -495,83 +508,110 @@
     <script>
         // كود البث المباشر من الكعبة
         document.addEventListener("DOMContentLoaded", function() {
-            const streamOptions = document.querySelectorAll('.stream-option');
-            const videoContainer = document.querySelector('.video-container iframe');
+            // Check if we are on the Kaaba section before running the code
+            if (!document.getElementById('kaaba-live-section')) return;
+
+            const streamOptions = document.querySelectorAll('#kaaba-live-section .stream-option');
+            const iframe = document.getElementById('live-stream-iframe');
+            const infoTitle = document.getElementById('info-panel-title');
+            const infoText = document.getElementById('info-panel-text');
+            const prayerTimesContainer = document.querySelector('.prayer-times-content');
             
-            // روابط البث المباشر
-            const streamUrls = {
-                makkah: "https://www.youtube.com/embed/GyHkiQ8aSYQ?autoplay=1&mute=1",
-                madinah: "https://www.youtube.com/embed/V1gQgXjGzKw?autoplay=1&mute=1",
-                quran: "https://www.youtube.com/embed/3OMrH7LFjLk?autoplay=1&mute=1"
+            const streamData = {
+                makkah: {
+                    url: "https://www.youtube.com/embed/GyHkiQ8aSYQ?autoplay=1&mute=1",
+                    title: "الكعبة المشرفة",
+                    text: "قلب العالم الإسلامي وقبلة المسلمين في صلاتهم، وأول بيت وضع للناس على وجه الأرض لعبادة الله."
+                },
+                madinah: {
+                    url: "https://www.youtube.com/embed/V1gQgXjGzKw?autoplay=1&mute=1",
+                    title: "المسجد النبوي",
+                    text: "ثاني أقدس المساجد وبه قبر النبي محمد ﷺ. أحد أكبر المساجد في العالم ومقصد للمسلمين من كل مكان."
+                },
+                quran: {
+                    url: "https://www.youtube.com/embed/3OMrH7Lk?autoplay=1&mute=1",
+                    title: "قناة القرآن الكريم",
+                    text: "بث مباشر على مدار الساعة لتلاوات عطرة من القرآن الكريم بأصوات نخبة من أشهر القراء."
+                }
             };
             
-            // تغيير البث عند النقر على الخيارات
             streamOptions.forEach(option => {
                 option.addEventListener('click', function() {
-                    const stream = this.dataset.stream;
+                    const streamKey = this.dataset.stream;
+                    const data = streamData[streamKey];
                     
-                    // تحديث الفيديو
-                    videoContainer.src = streamUrls[stream];
-                    
-                    // تحديث الفئة النشطة
-                    streamOptions.forEach(opt => opt.classList.remove('active'));
-                    this.classList.add('active');
+                    if (data) {
+                        iframe.src = data.url;
+                        infoTitle.textContent = data.title;
+                        infoText.textContent = data.text;
+                        
+                        streamOptions.forEach(opt => opt.classList.remove('active'));
+                        this.classList.add('active');
+                    }
                 });
             });
             
-            // جلب أوقات الصلاة في مكة المكرمة
+            function convertToMinutes(timeString) {
+                if (!timeString) return 0;
+                const [hours, minutes] = timeString.split(':').map(Number);
+                return hours * 60 + minutes;
+            }
+
             async function fetchMakkahPrayerTimes() {
                 try {
                     const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=Mecca&country=SA&method=4`);
-                    
-                    if (!response.ok) {
-                        throw new Error('فشل في الاتصال بخدمة أوقات الصلاة');
-                    }
+                    if (!response.ok) throw new Error('Network response was not ok');
                     
                     const data = await response.json();
-                    
                     if (data.code === 200 && data.status === 'OK') {
                         const timings = data.data.timings;
                         const date = data.data.date;
                         
-                        // عرض أوقات الصلاة
-                        const makkahPrayerTimesElement = document.querySelector('.makkah-prayer-times');
-                        makkahPrayerTimesElement.innerHTML = `
-                            <div class="makkah-date">${date.hijri.day} ${date.hijri.month.ar} ${date.hijri.year}</div>
-                            <div class="makkah-prayers">
-                                <div class="makkah-prayer">
-                                    <span class="prayer-name">الفجر</span>
-                                    <span class="prayer-time">${timings.Fajr}</span>
-                                </div>
-                                <div class="makkah-prayer">
-                                    <span class="prayer-name">الظهر</span>
-                                    <span class="prayer-time">${timings.Dhuhr}</span>
-                                </div>
-                                <div class="makkah-prayer">
-                                    <span class="prayer-name">العصر</span>
-                                    <span class="prayer-time">${timings.Asr}</span>
-                                </div>
-                                <div class="makkah-prayer">
-                                    <span class="prayer-name">المغرب</span>
-                                    <span class="prayer-time">${timings.Maghrib}</span>
-                                </div>
-                                <div class="makkah-prayer">
-                                    <span class="prayer-name">العشاء</span>
-                                    <span class="prayer-time">${timings.Isha}</span>
-                                </div>
+                        const prayerSchedule = [
+                            { name: 'الفجر', nameEn: 'Fajr', time: convertToMinutes(timings.Fajr) },
+                            { name: 'الشروق', nameEn: 'Sunrise', time: convertToMinutes(timings.Sunrise) },
+                            { name: 'الظهر', nameEn: 'Dhuhr', time: convertToMinutes(timings.Dhuhr) },
+                            { name: 'العصر', nameEn: 'Asr', time: convertToMinutes(timings.Asr) },
+                            { name: 'المغرب', nameEn: 'Maghrib', time: convertToMinutes(timings.Maghrib) },
+                            { name: 'العشاء', nameEn: 'Isha', time: convertToMinutes(timings.Isha) }
+                        ];
+
+                        const now = new Date();
+                        const currentTime = now.getHours() * 60 + now.getMinutes();
+                        let nextPrayer = null;
+
+                        for (const prayer of prayerSchedule) {
+                            if (prayer.time > currentTime) {
+                                nextPrayer = prayer;
+                                break;
+                            }
+                        }
+                        if (!nextPrayer) {
+                            nextPrayer = prayerSchedule[0]; // Next prayer is Fajr tomorrow
+                        }
+                        
+                        prayerTimesContainer.innerHTML = `
+                            <div class="makkah-date">${date.hijri.day} ${date.hijri.month.ar} ${date.hijri.year} هـ</div>
+                            <div class="makkah-prayers-grid">
+                                ${prayerSchedule.map(p => `
+                                    <div class="makkah-prayer-item ${p.nameEn === nextPrayer.nameEn ? 'next' : ''}">
+                                        <span class="prayer-name">${p.name}</span>
+                                        <span class="prayer-time">${timings[p.nameEn]}</span>
+                                    </div>
+                                `).join('')}
                             </div>
                         `;
                     } else {
-                        throw new Error('لم يتم العثور على بيانات أوقات الصلاة');
+                        throw new Error('Invalid data from API');
                     }
                 } catch (error) {
-                    console.error('خطأ في جلب أوقات الصلاة:', error);
-                    document.querySelector('.makkah-prayer-times').innerHTML = '<div class="error-message">تعذر تحميل أوقات الصلاة</div>';
+                    console.error('Error fetching Makkah prayer times:', error);
+                    prayerTimesContainer.innerHTML = '<div class="error-message">تعذر تحميل أوقات الصلاة</div>';
                 }
             }
             
-            // تحميل أوقات الصلاة عند فتح الصفحة
             fetchMakkahPrayerTimes();
+            setInterval(fetchMakkahPrayerTimes, 60000); // Refresh every minute
         });
     </script>
 </body>
