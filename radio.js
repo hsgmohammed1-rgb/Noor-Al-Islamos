@@ -168,15 +168,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // عرض الإذاعات المميزة
     function displayFeaturedStations() {
-        const featuredKeywords = ['مكة', 'قناة القرآن', 'سعود', 'سديس', 'عفاسي'];
+        const featuredKeywords = [
+            'الدوسري', 
+            'الشريم', 
+            'السديس', 
+            'اذكار الصباح', 
+            'اذكار المساء', 
+            'البقرة', 
+            'حياة الصحابة'
+        ];
         let featured = allStations.filter(s => featuredKeywords.some(kw => s.name.includes(kw)));
-        if (featured.length < 5) {
-            const randomStations = allStations.filter(s => !featured.includes(s)).sort(() => 0.5 - Math.random());
-            featured.push(...randomStations.slice(0, 5 - featured.length));
+        
+        // Ensure we have a good mix, even if not all keywords are found
+        if (featured.length < 7) {
+            const randomStations = allStations
+                .filter(s => !featured.includes(s)) // Exclude already featured
+                .sort(() => 0.5 - Math.random()); // Shuffle
+            featured.push(...randomStations.slice(0, 7 - featured.length));
         }
         
         featuredStationsContainer.innerHTML = '';
-        featured.slice(0, 5).forEach(station => {
+        featured.slice(0, 7).forEach(station => { // Increased to 7
             const card = document.createElement('div');
             card.className = 'featured-station-card';
             card.innerHTML = `
