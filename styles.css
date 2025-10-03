@@ -538,7 +538,7 @@ a:hover {
 
 .prayer-container-modern {
     display: grid;
-    grid-template-columns: 2.5fr 1fr;
+    grid-template-columns: 1fr 2.5fr; /* Changed for RTL */
     gap: 2.5rem;
     position: relative;
     z-index: 1;
@@ -549,7 +549,8 @@ a:hover {
     padding: 2rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center; /* Changed for better vertical alignment */
+    gap: 2rem; /* Added for spacing */
 }
 
 .location-and-date {
@@ -608,7 +609,7 @@ a:hover {
     height: 6px;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 3px;
-    margin-top: 4rem;
+    margin-top: 2rem; /* Adjusted margin */
     position: relative;
 }
 .prayer-time-node {
@@ -701,13 +702,21 @@ a:hover {
     font-weight: 500;
     font-size: 1rem;
 }
-#prayer-times-list li i {
-    opacity: 0.7;
-    margin-left: 10px;
+
+#prayer-times-list .prayer-name-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
-#prayer-times-list li.active i {
+#prayer-times-list .prayer-name-container i {
+    opacity: 0.7;
+    width: 20px;
+    text-align: center;
+}
+#prayer-times-list li.active .prayer-name-container i {
     opacity: 1;
 }
+
 
 /* Notification styling from old JS */
 .notification {

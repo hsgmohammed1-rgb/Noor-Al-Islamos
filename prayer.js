@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     function updateLocationAndDate(locationName, hijriDate) {
-        elements.locationDisplay.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${locationName}`;
+        elements.locationDisplay.innerHTML = `${locationName} <i class="fas fa-map-marker-alt"></i>`;
         elements.hijriDateDisplay.textContent = `${hijriDate.weekday.ar}، ${hijriDate.day} ${hijriDate.month.ar} ${hijriDate.year}`;
     }
 
@@ -165,8 +165,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 const li = document.createElement('li');
                 li.id = `prayer-${prayer.key}`;
                 li.innerHTML = `
-                    <i class="fas ${prayer.icon}"></i>
-                    <span>${prayer.name}</span>
+                    <div class="prayer-name-container">
+                        <i class="fas ${prayer.icon}"></i>
+                        <span>${prayer.name}</span>
+                    </div>
                     <span class="time">${formatTime(timings[prayer.key])}</span>
                 `;
                 elements.prayerTimesList.appendChild(li);
