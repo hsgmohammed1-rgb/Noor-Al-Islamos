@@ -340,13 +340,6 @@
                             <span>بث مباشر للكعبة المشرفة</span>
                         </div>
                     </div>
-                    <div class="stream-option" data-stream="madinah">
-                        <i class="fas fa-mosque stream-icon"></i>
-                        <div class="option-text">
-                            <h5>المسجد النبوي</h5>
-                            <span>المدينة المنورة</span>
-                        </div>
-                    </div>
                     <div class="stream-option" data-stream="quran">
                         <i class="fas fa-quran stream-icon"></i>
                          <div class="option-text">
@@ -547,13 +540,8 @@
                     title: "الكعبة مباشر",
                     text: "بث مباشر للكعبة المشرفة."
                 },
-                madinah: {
-                    url: "https://www.youtube.com/embed/V1gQgXjGzKw?autoplay=1&mute=1",
-                    title: "المسجد النبوي",
-                    text: "ثاني أقدس المساجد وبه قبر النبي محمد ﷺ. أحد أكبر المساجد في العالم ومقصد للمسلمين من كل مكان."
-                },
                 quran: {
-                    url: "https://www.youtube.com/embed/3OMrH7Lk?autoplay=1&mute=1",
+                    url: "https://www.youtube.com/watch?v=3OMrH7Lk",
                     title: "قناة القرآن الكريم",
                     text: "بث مباشر على مدار الساعة لتلاوات عطرة من القرآن الكريم بأصوات نخبة من أشهر القراء."
                 }
@@ -565,12 +553,16 @@
                     const data = streamData[streamKey];
                     
                     if (data) {
-                        iframe.src = data.url;
-                        infoTitle.textContent = data.title;
-                        infoText.textContent = data.text;
-                        
-                        streamOptions.forEach(opt => opt.classList.remove('active'));
-                        this.classList.add('active');
+                        if (streamKey === 'quran') {
+                            window.open(data.url, '_blank');
+                        } else {
+                            iframe.src = data.url;
+                            infoTitle.textContent = data.title;
+                            infoText.textContent = data.text;
+                            
+                            streamOptions.forEach(opt => opt.classList.remove('active'));
+                            this.classList.add('active');
+                        }
                     }
                 });
             });
