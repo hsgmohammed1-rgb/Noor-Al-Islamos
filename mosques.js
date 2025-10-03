@@ -30,7 +30,7 @@ const icons = {
         popupAnchor: [0, -40]
     }),
     mosque: L.icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063188.png',
+        iconUrl: 'https://i.postimg.cc/T1ZSschF/1000091982.png',
         iconSize: [40, 40],
         iconAnchor: [20, 40],
         popupAnchor: [0, -40]
