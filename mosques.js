@@ -12,7 +12,6 @@ const elements = {
     locateBtn: document.getElementById('locate-btn'),
     radiusSlider: document.getElementById('radius'),
     radiusValue: document.getElementById('radius-value'),
-    loading: document.getElementById('loading'),
     mosquesList: document.getElementById('mosques-list'),
     resultsCount: document.getElementById('results-count'),
     zoomIn: document.getElementById('zoom-in'),
@@ -25,15 +24,15 @@ const elements = {
 const icons = {
     user: L.icon({
         iconUrl: 'https://i.postimg.cc/G2fSBjPj/1000091987.png',
-        iconSize: [70, 70],
-        iconAnchor: [35, 70],
-        popupAnchor: [0, -40]
+        iconSize: [38, 38],
+        iconAnchor: [19, 38],
+        popupAnchor: [0, -38]
     }),
     mosque: L.icon({
         iconUrl: 'https://i.postimg.cc/T1ZSschF/1000091982.png',
-        iconSize: [70, 70],
-        iconAnchor: [20, 40],
-        popupAnchor: [0, -40]
+        iconSize: [38, 38],
+        iconAnchor: [19, 38],
+        popupAnchor: [0, -38]
     })
 };
 
@@ -84,6 +83,8 @@ function setupEventListeners() {
     // شريط نطاق البحث
     elements.radiusSlider.addEventListener('input', function() {
         elements.radiusValue.textContent = `${this.value} كم`;
+    });
+    elements.radiusSlider.addEventListener('change', function() {
         if (currentLocation) {
             findNearbyMosques(currentLocation);
         }
@@ -99,9 +100,28 @@ function setupEventListeners() {
     });
 }
 
+// عرض مؤشرات التحميل
+function showLoadingIndicators() {
+    elements.locateBtn.disabled = true;
+    elements.locateBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> جاري التحديد...`;
+    elements.mosquesList.innerHTML = '<div class="loading-spinner-container"><div class="spinner"></div><p>جاري البحث عن المساجد...</p></div>';
+    elements.prayerTimes.querySelector('.times-grid').innerHTML = '<div class="loading-spinner-container"><div class="spinner"></div></div>';
+}
+
+// إخفاء مؤشرات التحميل واستعادة الحالة
+function hideLoadingIndicators(errorMessage = '') {
+    elements.locateBtn.disabled = false;
+    elements.locateBtn.innerHTML = `<i class="fas fa-location-crosshairs"></i> تحديد موقعي`;
+
+    if(errorMessage) {
+        elements.mosquesList.innerHTML = `<p class="no-results">${errorMessage}</p>`;
+        elements.prayerTimes.querySelector('.times-grid').innerHTML = '<p class="no-results" style="grid-column: 1 / -1;">تعذر تحميل الأوقات</p>';
+    }
+}
+
 // تحديد موقع المستخدم
 function locateUser() {
-    showLoading();
+    showLoadingIndicators();
     
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -114,16 +134,20 @@ function locateUser() {
                 showUserLocation(userLoc);
                 findNearbyMosques(userLoc);
                 loadPrayerTimes();
-                hideLoading();
+                // لا نخفي التحميل هنا، findNearbyMosques ستفعل ذلك
             },
             error => {
-                hideLoading();
-                alert(`تعذر الحصول على الموقع: ${error.message}`);
+                let message = 'حدث خطأ غير معروف';
+                if(error.code === 1) message = 'يرجى السماح بالوصول لموقعك.';
+                if(error.code === 2) message = 'تعذر تحديد موقعك الحالي.';
+                if(error.code === 3) message = 'انتهت مهلة تحديد الموقع.';
+                hideLoadingIndicators(message);
+                alert(`تعذر الحصول على الموقع: ${message}`);
             },
             { enableHighAccuracy: true, timeout: 10000 }
         );
     } else {
-        hideLoading();
+        hideLoadingIndicators("المتصفح لا يدعم خدمة تحديد الموقع");
         alert("المتصفح لا يدعم خدمة تحديد الموقع");
     }
 }
@@ -131,21 +155,14 @@ function locateUser() {
 // عرض موقع المستخدم على الخريطة
 function showUserLocation(location) {
     if (!map) return;
-    // إزالة العلامة القديمة إن وجدت
     if (userMarker) {
         map.removeLayer(userMarker);
     }
-    
-    // إضافة علامة جديدة
     userMarker = L.marker([location.lat, location.lng], {
         icon: icons.user,
         title: "موقعك الحالي"
     }).addTo(map);
-    
-    // توجيه الخريطة للموقع الحالي
     map.setView([location.lat, location.lng], 15);
-    
-    // تحديث دائرة نصف القطر
     updateRadiusCircle(location);
 }
 
@@ -165,16 +182,16 @@ function updateRadiusCircle(location) {
 
 // البحث عن المساجد القريبة
 async function findNearbyMosques(location) {
-    showLoading();
+    // عرض التحميل في قائمة المساجد فقط عند تغيير النطاق
+    if(elements.locateBtn.disabled === false) {
+       elements.mosquesList.innerHTML = '<div class="loading-spinner-container"><div class="spinner"></div><p>جاري البحث عن المساجد...</p></div>';
+    }
     updateRadiusCircle(location);
     
     const radius = parseFloat(elements.radiusSlider.value) * 1000; // تحويل إلى متر
     
     try {
-        // مسح العلامات القديمة
         clearMosqueMarkers();
-        
-        // جلب بيانات المساجد من Overpass API
         const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];
             (
                 node[amenity=place_of_worship][religion=muslim](around:${radius},${location.lat},${location.lng});
@@ -184,19 +201,22 @@ async function findNearbyMosques(location) {
             out center;`;
         
         const response = await fetch(overpassUrl);
+        if (!response.ok) {
+            throw new Error(`فشل الطلب: ${response.statusText}`);
+        }
         const data = await response.json();
         
         mosquesData = data.elements || [];
-        
-        // عرض النتائج
         displayMosquesOnMap(location);
         displayMosquesList();
         
-        hideLoading();
     } catch (error) {
-        hideLoading();
         console.error("Error fetching mosques:", error);
-        alert("حدث خطأ أثناء جلب بيانات المساجد");
+        mosquesData = [];
+        displayMosquesList(); // لعرض رسالة "لا توجد مساجد"
+        elements.mosquesList.innerHTML += '<p class="no-results error">حدث خطأ أثناء جلب بيانات المساجد</p>';
+    } finally {
+        hideLoadingIndicators();
     }
 }
 
@@ -205,40 +225,32 @@ function displayMosquesOnMap(userLocation) {
     if (!map) return;
     mosquesData.forEach(mosque => {
         let mosqueLocation;
-        let name = "مسجد";
+        let name = mosque.tags?.name || "مسجد";
         
         if (mosque.type === "node") {
             mosqueLocation = [mosque.lat, mosque.lon];
         } else if (mosque.center) {
             mosqueLocation = [mosque.center.lat, mosque.center.lon];
         } else {
-            return; // تخطي العناصر بدون موقع
+            return;
         }
         
-        if (mosque.tags?.name) {
-            name = mosque.tags.name;
-        }
-        
-        // حساب المسافة
         const distance = calculateDistance(
             userLocation.lat, userLocation.lng,
             mosqueLocation[0], mosqueLocation[1]
         ).toFixed(1);
         
-        // إنشاء علامة للمسجد
         const marker = L.marker(mosqueLocation, {
             icon: icons.mosque,
             title: name
         }).addTo(map);
         
-        // إضافة نافذة معلومات
         const popupContent = `
             <div class="map-popup">
                 <h3>${name}</h3>
                 <p><strong>المسافة:</strong> ${distance} كم</p>
-                ${mosque.tags?.addr_street ? `<p><strong>العنوان:</strong> ${mosque.tags.addr_street}</p>` : ''}
-                <button onclick="focusOnMosque(${mosqueLocation[0]}, ${mosqueLocation[1]})" 
-                    class="popup-btn">
+                ${mosque.tags?.['addr:street'] ? `<p><strong>العنوان:</strong> ${mosque.tags['addr:street']}</p>` : ''}
+                <button onclick="focusOnMosque(${mosqueLocation[0]}, ${mosqueLocation[1]})" class="popup-btn">
                     <i class="fas fa-map-marker-alt"></i> عرض على الخريطة
                 </button>
             </div>
@@ -259,25 +271,14 @@ function displayMosquesList() {
         return;
     }
     
-    // ترتيب المساجد حسب المسافة
     mosquesData.sort((a, b) => {
         const locA = a.center ? [a.center.lat, a.center.lon] : [a.lat, a.lon];
         const locB = b.center ? [b.center.lat, b.center.lon] : [b.lat, b.lon];
-        
-        const distA = calculateDistance(
-            currentLocation.lat, currentLocation.lng,
-            locA[0], locA[1]
-        );
-        
-        const distB = calculateDistance(
-            currentLocation.lat, currentLocation.lng,
-            locB[0], locB[1]
-        );
-        
+        const distA = calculateDistance(currentLocation.lat, currentLocation.lng, locA[0], locA[1]);
+        const distB = calculateDistance(currentLocation.lat, currentLocation.lng, locB[0], locB[1]);
         return distA - distB;
     });
     
-    // عرض المساجد في القائمة
     mosquesData.forEach(mosque => {
         const mosqueLocation = mosque.center ? [mosque.center.lat, mosque.center.lon] : [mosque.lat, mosque.lon];
         const distance = calculateDistance(
@@ -289,7 +290,7 @@ function displayMosquesList() {
         mosqueCard.className = 'mosque-card';
         mosqueCard.innerHTML = `
             <h3><i class="fas fa-mosque"></i> ${mosque.tags?.name || "مسجد"}</h3>
-            <p class="distance"><i class="fas fa-location-arrow"></i> المسافة: ${distance} كم</p>
+            <p class="distance"><i class="fas fa-route"></i> المسافة: ${distance} كم</p>
             ${mosque.tags?.['addr:street'] || mosque.tags?.['addr:city'] ? `<p class="address"><i class="fas fa-map-marker-alt"></i> ${mosque.tags?.['addr:street'] || ''} ${mosque.tags?.['addr:city'] || ''}</p>` : ''}
             <div class="actions">
                 <button onclick="focusOnMosque(${mosqueLocation[0]}, ${mosqueLocation[1]})">
@@ -353,13 +354,19 @@ async function loadPrayerTimes() {
         const apiUrl = `https://api.aladhan.com/v1/timings/${formattedDate}?latitude=${currentLocation.lat}&longitude=${currentLocation.lng}&method=4`;
         
         const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error(`فشل الطلب: ${response.statusText}`);
+        }
         const data = await response.json();
         
         if (data.data && data.data.timings) {
             displayPrayerTimes(data.data.timings);
+        } else {
+            throw new Error("تنسيق البيانات غير صالح");
         }
     } catch (error) {
         console.error("Error fetching prayer times:", error);
+        elements.prayerTimes.querySelector('.times-grid').innerHTML = '<p class="no-results error" style="grid-column: 1 / -1;">حدث خطأ أثناء تحميل أوقات الصلاة</p>';
     }
 }
 
@@ -385,16 +392,6 @@ function displayPrayerTimes(timings) {
         `;
         timesGrid.appendChild(timeElement);
     }
-}
-
-// عرض شاشة التحميل
-function showLoading() {
-    elements.loading.style.display = 'flex';
-}
-
-// إخفاء شاشة التحميل
-function hideLoading() {
-    elements.loading.style.display = 'none';
 }
 
 // جعل الدوال متاحة عالمياً للاستدعاء من HTML
