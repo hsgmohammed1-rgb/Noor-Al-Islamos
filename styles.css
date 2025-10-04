@@ -2,14 +2,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Amiri:wght@400;700&display=swap');
 
 :root {
-    --primary-color: #4a2c0f;
-    --secondary-color: #e67e22;
-    --accent-color: #FAD02E; /* New Gold Color */
-    --accent-color-darker: #f0b90b;
+    --primary-color: #1e3a5f;
+    --secondary-color: #3498db;
+    --accent-color: #e67e22;
+    --accent-color-darker: #c86e1d;
     --text-color: #fff;
     --light-text: #f8f9fa;
     --dark-text: #2c3e50;
-    --bg-gradient: linear-gradient(135deg, #4a2c0f, #8c4d16);
+    --bg-gradient: linear-gradient(135deg, #001f3f, #0a4d8c);
     --card-bg: rgba(255, 255, 255, 0.08);
     --card-border: rgba(255, 255, 255, 0.1);
     --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -22,8 +22,8 @@
     --transition-speed: 0.3s;
     --hadith-bg: rgba(46, 204, 113, 0.1);
     --hadith-border: rgba(46, 204, 113, 0.2);
-    --radio-bg: rgba(230, 126, 34, 0.1);
-    --radio-border: rgba(230, 126, 34, 0.2);
+    --radio-bg: rgba(52, 152, 219, 0.1);
+    --radio-border: rgba(52, 152, 219, 0.2);
 }
 
 * {
@@ -181,10 +181,10 @@ a:hover {
 
 .nav-btn.active,
 .nav-btn:hover {
-    background: var(--secondary-color); /* Orange color */
+    background: var(--secondary-color); /* Blue color */
     color: var(--text-color); /* White icon */
     transform: translateY(-3px);
-    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.5); /* Matching orange shadow */
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.5); /* Matching blue shadow */
 }
 
 /* القسم الرئيسي */
@@ -371,7 +371,7 @@ a:hover {
 }
 
 .azkar-count {
-    background: rgba(250, 208, 46, 0.2);
+    background: rgba(230, 126, 34, 0.2);
     padding: 2px 8px;
     border-radius: var(--border-radius-sm);
 }
@@ -382,7 +382,7 @@ a:hover {
 /* --- قسم أوقات الصلاة المطور --- */
 
 #prayer-times {
-    background: #5f2700;
+    background: #001f3f;
     position: relative;
     overflow: hidden;
     padding: 0;
@@ -392,7 +392,7 @@ a:hover {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle, transparent, #5f2700 70%);
+    background: radial-gradient(circle, transparent, #001f3f 70%);
     z-index: 1;
 }
 
@@ -477,7 +477,7 @@ a:hover {
     font-size: 4.5rem;
     font-weight: 700;
     color: var(--accent-color);
-    text-shadow: 0 0 25px rgba(250, 208, 46, 0.6);
+    text-shadow: 0 0 25px rgba(230, 126, 34, 0.6);
     margin-top: 0;
     margin-bottom: 2rem;
     font-family: 'Amiri', serif;
@@ -551,7 +551,7 @@ a:hover {
     transform: translateY(-50%);
     width: 14px;
     height: 14px;
-    background: #5f2700;
+    background: #001f3f;
     border-radius: 50%;
     border: 3px solid var(--accent-color);
     cursor: pointer;
@@ -618,7 +618,7 @@ a:hover {
 }
 .location-input-modern:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 10px rgba(250, 208, 46, 0.5);
+    box-shadow: 0 0 10px rgba(230, 126, 34, 0.5);
     outline: none;
 }
 .location-input-modern option {
@@ -646,7 +646,7 @@ a:hover {
 }
 #prayer-times-list li.active {
     background: var(--accent-color);
-    color: #5f2700;
+    color: #001f3f;
     font-weight: bold;
     transform: scale(1.03);
 }
@@ -736,7 +736,7 @@ a:hover {
 
 #surah-search:focus, #surah-select:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 10px rgba(250, 208, 46, 0.5);
+    box-shadow: 0 0 10px rgba(230, 126, 34, 0.5);
     outline: none;
 }
 
@@ -1359,7 +1359,7 @@ a:hover {
 #radio-search-input:focus {
     background: rgba(255, 255, 255, 0.15);
     border-color: var(--accent-color);
-    box-shadow: 0 0 10px rgba(250, 208, 46, 0.5);
+    box-shadow: 0 0 10px rgba(230, 126, 34, 0.5);
     outline: none;
 }
 
@@ -1525,9 +1525,9 @@ a:hover {
     animation: pulse-artwork 2s infinite;
 }
 @keyframes pulse-artwork {
-    0% { box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.1), 0 0 0 0 rgba(250, 208, 46, 0.7); }
-    70% { box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.1), 0 0 0 10px rgba(250, 208, 46, 0); }
-    100% { box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.1), 0 0 0 0 rgba(250, 208, 46, 0); }
+    0% { box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.1), 0 0 0 0 rgba(230, 126, 34, 0.7); }
+    70% { box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.1), 0 0 0 10px rgba(230, 126, 34, 0); }
+    100% { box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.1), 0 0 0 0 rgba(230, 126, 34, 0); }
 }
 .radio-player .station-info h3 {
     font-size: 1.4rem;
@@ -1744,7 +1744,7 @@ a:hover {
 }
 
 .stream-option.active {
-    background-color: rgba(250, 208, 46, 0.15);
+    background-color: rgba(230, 126, 34, 0.15);
     border-left-color: var(--accent-color);
 }
 
@@ -1970,7 +1970,7 @@ a:hover {
 }
 .hisn-zikr-card.playing {
     border-left-color: var(--accent-color);
-    box-shadow: 0 0 20px rgba(250, 208, 46, 0.3);
+    box-shadow: 0 0 20px rgba(230, 126, 34, 0.3);
 }
 
 .zikr-text {
