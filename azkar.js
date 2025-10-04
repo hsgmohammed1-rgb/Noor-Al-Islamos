@@ -422,7 +422,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 ${zikr.FADL ? `<div class="azkar-card-fadl"><i class="fas fa-lightbulb"></i><p>${zikr.FADL}</p></div>` : ''}
                 <div class="azkar-card-footer">
                     <div class="azkar-card-actions">
-                        ${zikr.AUDIO ? `<button class="action-btn play-btn" data-audio-src="${zikr.AUDIO}" title="تشغيل الصوت"><i class="fas fa-play"></i></button>` : ''}
                         <button class="action-btn copy-btn" title="نسخ النص"><i class="fas fa-copy"></i></button>
                         <button class="action-btn share-btn" title="مشاركة"><i class="fas fa-share-alt"></i></button>
                     </div>
@@ -448,20 +447,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 counterBtn.addEventListener('click', () => handleCounterClick(card, counterBtn));
             }
 
-            const playBtn = card.querySelector('.play-btn');
-            if(playBtn) {
-                playBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const audioSrc = playBtn.dataset.audioSrc;
-                    
-                    if (activeAudioBtn === playBtn && !audioPlayer.paused) {
-                        audioPlayer.pause();
-                    } else {
-                        playAudio(audioSrc, playBtn);
-                    }
-                });
-            }
-            
             const copyBtn = card.querySelector('.copy-btn');
             copyBtn.addEventListener('click', (e) => {
                  e.stopPropagation();
