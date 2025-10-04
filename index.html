@@ -28,8 +28,8 @@
                 <button class="nav-btn" data-section="azkar-section" title="الأذكار">
                     <i class="fas fa-book-open"></i>
                 </button>
-                <button class="nav-btn" data-section="hadith-section" title="الأحاديث">
-                    <i class="fas fa-book"></i>
+                <button class="nav-btn" data-section="hadith-section" title="حصن المسلم">
+                    <i class="fas fa-shield-alt"></i>
                 </button>
                 <button class="nav-btn" data-section="prayer-times" title="أوقات الصلاة">
                     <i class="fas fa-clock"></i>
@@ -118,28 +118,51 @@
         </div>
     </section>
 
-    <!-- قسم الأحاديث -->
+    <!-- قسم حصن المسلم (الأحاديث سابقا) -->
     <section id="hadith-section" class="content-section">
-        <h2 class="section-title">الأحاديث النبوية</h2>
-        <div class="hadith-container">
-            <div class="hadith-search">
-                <input type="text" id="hadith-search-input" placeholder="ابحث في الأحاديث...">
-                <button id="hadith-search-btn" class="search-btn"><i class="fas fa-search"></i></button>
-            </div>
-            <div class="hadith-filters">
-                <select id="hadith-collection" class="hadith-select">
-                    <option value="abu-dawud">سنن أبي داود</option>
-                </select>
-                <div class="hadith-pagination">
-                    <button id="prev-hadith-page" class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
-                    <span id="hadith-page-info">الصفحة 1</span>
-                    <button id="next-hadith-page" class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
+        <h2 class="section-title">حصن المسلم</h2>
+        <div class="hisn-muslim-container">
+            <aside class="hisn-sidebar">
+                <div class="hisn-search-container">
+                    <input type="text" id="hisn-search-input" placeholder="ابحث عن ذكر أو دعاء...">
+                    <i class="fas fa-search"></i>
                 </div>
-            </div>
-            <div id="hadith-content" class="hadith-content">
-                <div class="loading-spinner">
-                    <i class="fas fa-spinner fa-spin"></i> جاري تحميل الأحاديث...
+                <div id="hisn-categories-list" class="hisn-categories-list">
+                    <!-- Skeleton Loader -->
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
                 </div>
+            </aside>
+            <main class="hisn-main-content">
+                <div id="hisn-category-header" class="hisn-category-header">
+                     <!-- Populated by JS -->
+                </div>
+                <div id="hisn-azkar-list" class="hisn-azkar-list">
+                    <div class="initial-prompt">
+                        <i class="fas fa-hand-pointer"></i>
+                        <p>اختر فئة من القائمة لبدء التصفح</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <div id="hisn-audio-player" class="hisn-audio-player hidden">
+            <audio id="hisn-audio-element" preload="metadata"></audio>
+            <div class="player-info">
+                <i class="fas fa-music"></i>
+                <div id="hisn-player-title">...</div>
+            </div>
+            <div class="player-controls">
+                <button id="hisn-player-prev" title="السابق"><i class="fas fa-backward-step"></i></button>
+                <button id="hisn-player-play" title="تشغيل/إيقاف"><i class="fas fa-play"></i></button>
+                <button id="hisn-player-next" title="التالي"><i class="fas fa-forward-step"></i></button>
+            </div>
+            <div class="progress-container">
+                <span id="hisn-current-time">0:00</span>
+                <input type="range" id="hisn-progress-bar" value="0" step="1" min="0" max="100">
+                <span id="hisn-duration">0:00</span>
             </div>
         </div>
     </section>
@@ -554,7 +577,7 @@
                 <ul>
                     <li><a href="#home-section">الرئيسية</a></li>
                     <li><a href="#azkar-section">الأذكار</a></li>
-                    <li><a href="#hadith-section">الأحاديث</a></li>
+                    <li><a href="#hadith-section">حصن المسلم</a></li>
                     <li><a href="#prayer-times">أوقات الصلاة</a></li>
                     <li><a href="#quran-section">القرآن الكريم</a></li>
                     <li><a href="#tasbih-section">المسبحة</a></li>
