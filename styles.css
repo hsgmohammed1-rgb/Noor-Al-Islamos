@@ -279,11 +279,15 @@ a:hover {
     margin: 0 auto;
 }
 
-.azkar-search {
+.azkar-controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
     margin-bottom: 1.5rem;
 }
 
-#azkar-search-input {
+#azkar-search-input,
+#azkar-category-select {
     width: 100%;
     padding: 12px 15px;
     border: 1px solid var(--card-border);
@@ -293,90 +297,110 @@ a:hover {
     font-size: 1rem;
 }
 
-.azkar-categories {
-    margin-bottom: 1.5rem;
+#azkar-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .azkar-select {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1px solid var(--card-border);
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-color);
-    border-radius: var(--border-radius-sm);
-    font-size: 1rem;
     cursor: pointer;
 }
-
-.azkar-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
+.azkar-select option {
+    background-color: var(--primary-color);
 }
 
-.azkar-btn {
-    padding: 10px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    background: var(--secondary-color);
-    color: white;
-    cursor: pointer;
-    transition: all var(--transition-speed);
-}
-
-.azkar-btn.active, .azkar-btn:hover {
-    background: var(--accent-color);
-    color: var(--primary-color);
-    transform: translateY(-2px);
-}
 
 #azkar-content {
-    padding: 1.5rem;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius-md);
-    text-align: right;
-    font-size: 1.2rem;
-    line-height: 2;
     max-height: 500px;
     overflow-y: auto;
+    padding: 1rem;
 }
 
 .azkar-item {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(0,0,0,0.15);
+    border-radius: var(--border-radius-sm);
+    border-right: 4px solid var(--accent-color);
+    margin-bottom: 1rem;
     position: relative;
 }
 
 .azkar-item:last-child {
-    border-bottom: none;
     margin-bottom: 0;
-    padding-bottom: 0;
 }
 
 .azkar-text {
-    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+    line-height: 2.2;
+    font-family: 'Amiri', serif;
+    margin-bottom: 0; /* Override default p margin */
+    padding-right: 50px; /* Space for play button */
 }
 
 .azkar-info {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
     font-size: 0.9rem;
-    color: var(--accent-color);
+    color: var(--light-text);
     opacity: 0.8;
+    padding-right: 50px; /* Space for play button */
+}
+
+.azkar-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .azkar-count {
     background: rgba(230, 126, 34, 0.2);
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: var(--border-radius-sm);
+    color: var(--accent-color);
+    font-weight: bold;
 }
 
-/* قسم الأحاديث (تم استبداله بحصن المسلم) - سيتم إضافة التنسيقات الجديدة أدناه */
+.azkar-source {
+    flex-basis: 100%;
+}
+
+.play-azkar-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: var(--accent-color);
+    color: var(--primary-color);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.play-azkar-btn:hover {
+    background: var(--accent-color-darker);
+    transform: scale(1.1);
+}
+
+#azkar-audio-player {
+    width: 100%;
+    margin-top: 1.5rem;
+    background: var(--card-bg);
+    border-radius: 50px;
+    padding: 5px;
+    border: 1px solid var(--card-border);
+}
 
 
 /* --- قسم أوقات الصلاة المطور --- */
@@ -1905,6 +1929,10 @@ a:hover {
     .footer-content { grid-template-columns: 1fr; text-align: center; }
     .footer-links h3::after, .footer-contact h3::after { left: 50%; transform: translateX(-50%); }
     .audio-controls { flex-direction: column; }
+
+    .azkar-controls-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* تحسينات إضافية للهواتف الصغيرة */
@@ -1913,8 +1941,6 @@ a:hover {
     .hero-content h1 { font-size: 1.8rem; }
     .hero-content h2 { font-size: 1.3rem; }
     .section-title { font-size: 1.6rem; }
-    .azkar-buttons { flex-direction: column; }
-    .azkar-btn { width: 100%; }
     .tasbih-counter-area { width: 240px; height: 240px; }
     #tasbih-main-button { width: 180px; height: 180px; }
     #tasbih-main-text { font-size: 1.5rem; }

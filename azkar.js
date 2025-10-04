@@ -2,89 +2,195 @@ document.addEventListener("DOMContentLoaded", function () {
     // عناصر واجهة المستخدم
     const azkarSearchInput = document.getElementById('azkar-search-input');
     const azkarCategorySelect = document.getElementById('azkar-category-select');
-    const azkarButtons = document.querySelectorAll('.azkar-btn');
     const azkarContent = document.getElementById('azkar-content');
+    const azkarAudioPlayer = document.getElementById('azkar-audio-player');
     
     // متغيرات عامة
-    let allAzkar = {};
-    let currentCategory = 'morning';
+    let allCategories = [];
+    let currentCategoryData = [];
     let searchQuery = '';
     
     // تهيئة القسم
-    function init() {
-        // تحميل الأذكار من API
-        fetchAzkarCategories();
-        
-        // إضافة أحداث النقر
+    async function init() {
+        await fetchAzkarCategories();
         setupEventListeners();
-        
-        // عرض أذكار الصباح افتراضيًا
-        loadDefaultAzkar();
     }
     
-    // إعداد أحداث النقر
+    // إعداد مستمعي الأحداث
     function setupEventListeners() {
-        // حدث البحث
-        azkarSearchInput.addEventListener('input', function() {
-            searchQuery = this.value.trim();
-            filterAzkar();
-        });
+        azkarSearchInput.addEventListener('input', filterAzkar);
         
-        // حدث تغيير التصنيف
         azkarCategorySelect.addEventListener('change', function() {
             if (this.value) {
-                // تم التعديل ليعمل مع البيانات المحلية بدلاً من API خارجي
-                currentCategory = this.value;
-                displayDefaultAzkar(currentCategory);
-                
-                // إزالة التحديد من الأزرار
-                azkarButtons.forEach(btn => btn.classList.remove('active'));
+                fetchAzkarByCategory(this.value);
             }
         });
         
-        // أزرار الأذكار
-        azkarButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // تحديث الفئة النشطة
-                azkarButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-                
-                // تحديث التصنيف الحالي
-                currentCategory = this.dataset.type;
-                
-                // إعادة تعيين التصنيف المنسدل
-                azkarCategorySelect.value = '';
-                
-                // عرض الأذكار
-                displayDefaultAzkar(currentCategory);
-            });
+        azkarAudioPlayer.addEventListener('ended', () => {
+             document.querySelectorAll('.play-azkar-btn').forEach(btn => {
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+                btn.classList.remove('playing');
+             });
         });
     }
     
-    // تعديل دالة جلب تصنيفات الأذكار
+    // جلب تصنيفات الأذكار
     async function fetchAzkarCategories() {
+        showLoading(true);
         try {
-            // استخدام البيانات المحلية بدلاً من API
-            const categories = [
-                { ID: 'morning', TITLE: 'أذكار الصباح' },
-                { ID: 'evening', TITLE: 'أذكار المساء' },
-                { ID: 'sleep', TITLE: 'أذكار النوم' },
-                { ID: 'duas', TITLE: 'أدعية مختارة' }
+            // البيانات المقدمة من المستخدم
+            allCategories = [
+                { "ID": 27, "TITLE": "أذكار الصباح والمساء", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_028.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/27.json" },
+                { "ID": 28, "TITLE": "أذكار النوم", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_029.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/28.json" },
+                { "ID": 1, "TITLE": "أذكار الاستيقاظ من النوم", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_002.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/1.json" },
+                { "ID": 6, "TITLE": "دعاء دخول الخلاء", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_007.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/6.json" },
+                { "ID": 7, "TITLE": "دعاء الخروج من الخلاء", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_008.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/7.json" },
+                { "ID": 8, "TITLE": "الذكر قبل الوضوء", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_009.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/8.json" },
+                { "ID": 9, "TITLE": "الذكر بعد الفراغ من الوضوء", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_010.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/9.json" },
+                { "ID": 10, "TITLE": "الذكر عند الخروج من المنزل", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_011.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/10.json" },
+                { "ID": 11, "TITLE": "الذكر عند دخول المنزل", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_012.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/11.json" },
+                { "ID": 12, "TITLE": "دعاء الذهاب إلى المسجد", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_013.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/12.json" },
+                { "ID": 13, "TITLE": "دعاء دخول المسجد", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_014.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/13.json" },
+                { "ID": 14, "TITLE": "دعاء الخروج من المسجد", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_015.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/14.json" },
+                { "ID": 15, "TITLE": "أذكار الآذان", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_016.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/15.json" },
+                { "ID": 2, "TITLE": "دعاء ُلبْس الثوب", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_003.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/2.json" },
+                { "ID": 3, "TITLE": "دعاء ُلبْس الثوب الجديد", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_004.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/3.json" },
+                { "ID": 4, "TITLE": "الدعاء لمن لبس ثوبا جديدا", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_005.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/4.json" },
+                { "ID": 5, "TITLE": "ما يقول إذا وضع ثوبه", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_006.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/5.json" },
+                { "ID": 16, "TITLE": "دعاء الاستفتاح", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_017.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/16.json" },
+                { "ID": 17, "TITLE": "دعاء الركوع", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_018.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/17.json" },
+                { "ID": 18, "TITLE": "دعاء الرفع من الركوع", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_019.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/18.json" },
+                { "ID": 19, "TITLE": "دعاء السجود", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_020.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/19.json" },
+                { "ID": 20, "TITLE": "دعاء الجلسة بين السجدتين", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_021.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/20.json" },
+                { "ID": 21, "TITLE": "دعاء سجود التلاوة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_022.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/21.json" },
+                { "ID": 22, "TITLE": "التشهد", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_023.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/22.json" },
+                { "ID": 23, "TITLE": "الصلاة على النبي بعد التشهد", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_024.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/23.json" },
+                { "ID": 24, "TITLE": "الدعاء بعد التشهد الأخير قبل السلام", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_025.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/24.json" },
+                { "ID": 25, "TITLE": "الأذكار بعد السلام من الصلاة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_026.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/25.json" },
+                { "ID": 26, "TITLE": "دعاء صلاة الاستخارة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_027.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/26.json" },
+                { "ID": 29, "TITLE": "الدعاء إذا تقلب ليلا", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_030.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/29.json" },
+                { "ID": 30, "TITLE": "دعاء الفزع في النوم و من بُلِيَ بالوحشة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_031.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/30.json" },
+                { "ID": 31, "TITLE": "ما يفعل من رأى الرؤيا أو الحلم", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_032.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/31.json" },
+                { "ID": 32, "TITLE": "دعاء قنوت الوتر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_033.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/32.json" },
+                { "ID": 33, "TITLE": "الذكر عقب السلام من الوتر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_034.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/33.json" },
+                { "ID": 34, "TITLE": "دعاء الهم والحزن", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_035.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/34.json" },
+                { "ID": 35, "TITLE": "دعاء الكرب", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_036.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/35.json" },
+                { "ID": 36, "TITLE": "دعاء لقاء العدو و ذي السلطان", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_037.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/36.json" },
+                { "ID": 37, "TITLE": "دعاء من خاف ظلم السلطان", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_038.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/37.json" },
+                { "ID": 38, "TITLE": "الدعاء على العدو", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_039.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/38.json" },
+                { "ID": 39, "TITLE": "ما يقول من خاف قوما", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_040.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/39.json" },
+                { "ID": 40, "TITLE": "دعاء من أصابه وسوسة في الإيمان", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_041.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/40.json" },
+                { "ID": 41, "TITLE": "دعاء قضاء الدين", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_042.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/41.json" },
+                { "ID": 42, "TITLE": "دعاء الوسوسة في الصلاة و القراءة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_043.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/42.json" },
+                { "ID": 43, "TITLE": "دعاء من استصعب عليه أمر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_044.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/43.json" },
+                { "ID": 44, "TITLE": "ما يقول ويفعل من أذنب ذنبا", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_045.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/44.json" },
+                { "ID": 45, "TITLE": "دعاء طرد الشيطان و وساوسه", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_046.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/45.json" },
+                { "ID": 46, "TITLE": "الدعاء حينما يقع ما لا يرضاه أو ُ غلب على أمره", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_047.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/46.json" },
+                { "ID": 47, "TITLE": "ﺗﻬنئة المولود له وجوابه", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_048.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/47.json" },
+                { "ID": 48, "TITLE": "ما يعوذ به الأولاد", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_049.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/48.json" },
+                { "ID": 49, "TITLE": "الدعاء للمريض في عيادته", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_050.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/49.json" },
+                { "ID": 50, "TITLE": "فضل عيادة المريض", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_051.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/50.json" },
+                { "ID": 51, "TITLE": "دعاء المريض الذي يئس من حياته", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_052.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/51.json" },
+                { "ID": 52, "TITLE": "تلقين المحتضر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_053.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/52.json" },
+                { "ID": 53, "TITLE": "دعاء من أصيب بمصيبة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_054.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/53.json" },
+                { "ID": 54, "TITLE": "الدعاء عند إغماض الميت", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_055.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/54.json" },
+                { "ID": 55, "TITLE": "الدعاء للميت في الصلاة عليه", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_056.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/55.json" },
+                { "ID": 56, "TITLE": "الدعاء للفرط في الصلاة عليه", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_057.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/56.json" },
+                { "ID": 57, "TITLE": "دعاء التعزية", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_058.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/57.json" },
+                { "ID": 58, "TITLE": "الدعاء عند إدخال الميت القبر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_059.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/58.json" },
+                { "ID": 59, "TITLE": "الدعاء بعد دفن الميت", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_060.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/59.json" },
+                { "ID": 60, "TITLE": "دعاء زيارة القبور", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_061.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/60.json" },
+                { "ID": 61, "TITLE": "دعاء الريح", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_062.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/61.json" },
+                { "ID": 62, "TITLE": "دعاء الرعد", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_063.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/62.json" },
+                { "ID": 63, "TITLE": "من أدعية الاستسقاء", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_064.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/63.json" },
+                { "ID": 64, "TITLE": "الدعاء إذا نزل المطر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_065.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/64.json" },
+                { "ID": 65, "TITLE": "الذكر بعد نزول المطر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_066.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/65.json" },
+                { "ID": 66, "TITLE": "من أدعية الاستصحاء", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_067.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/66.json" },
+                { "ID": 67, "TITLE": "دعاء رؤية الهلال", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_068.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/67.json" },
+                { "ID": 68, "TITLE": "الدعاء عند إفطار الصائم", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_069.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/68.json" },
+                { "ID": 69, "TITLE": "الدعاء قبل الطعام", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_070.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/69.json" },
+                { "ID": 70, "TITLE": "الدعاء عند الفراغ من الطعام", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_071.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/70.json" },
+                { "ID": 71, "TITLE": "دعاء الضيف لصاحب الطعام", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_072.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/71.json" },
+                { "ID": 72, "TITLE": "التعريض بالدعاء لطلب الطعام أو الشراب", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_073.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/72.json" },
+                { "ID": 73, "TITLE": "الدعاء إذا أفطر عند أهل بيت", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_074.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/73.json" },
+                { "ID": 74, "TITLE": "دعاء الصائم إذا حضر الطعام ولم يفطر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_075.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/74.json" },
+                { "ID": 75, "TITLE": "ما يقول الصائم إذا سابه أحد", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_076.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/75.json" },
+                { "ID": 76, "TITLE": "الدعاء عند رؤية باكورة الثمر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_077.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/76.json" },
+                { "ID": 77, "TITLE": "دعاء العطاس", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_078.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/77.json" },
+                { "ID": 78, "TITLE": "ما يقال للكافر إذا عطس فحمد الله", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_079.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/78.json" },
+                { "ID": 79, "TITLE": "الدعاء للمتزوج", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_080.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/79.json" },
+                { "ID": 80, "TITLE": "دعاء المتزوج و شراء الدابة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_081.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/80.json" },
+                { "ID": 81, "TITLE": "الدعاء قبل إتيان الزوجة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_082.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/81.json" },
+                { "ID": 82, "TITLE": "دعاء الغضب", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_083.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/82.json" },
+                { "ID": 83, "TITLE": "دعاء من رأى مبتلى", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_084.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/83.json" },
+                { "ID": 84, "TITLE": "ما يقال في اﻟﻤﺠلس", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_085.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/84.json" },
+                { "ID": 85, "TITLE": "كفارة اﻟﻤﺠلس", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_086.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/85.json" },
+                { "ID": 86, "TITLE": "الدعاء لمن قال غفر الله لك", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_087.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/87.json" },
+                { "ID": 87, "TITLE": "الدعاء لمن صنع إليك معروفا", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_088.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/87.json" },
+                { "ID": 88, "TITLE": "ما يعصم الله به من الدجال", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_089.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/88.json" },
+                { "ID": 89, "TITLE": "الدعاء لمن قال إني أحبك في الله", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_090.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/89.json" },
+                { "ID": 90, "TITLE": "الدعاء لمن عرض عليك ماله", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_091.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/90.json" },
+                { "ID": 91, "TITLE": "الدعاء لمن أقرض عند القضاء", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_091.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/91.json" },
+                { "ID": 92, "TITLE": "دعاء الخوف من الشرك", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_092.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/92.json" },
+                { "ID": 93, "TITLE": "الدعاء لمن قال بارك الله فيك", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_094.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/93.json" },
+                { "ID": 94, "TITLE": "دعاء كراهية الطيرة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_095.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/94.json" },
+                { "ID": 95, "TITLE": "دعاء الركوب", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_096.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/95.json" },
+                { "ID": 96, "TITLE": "دعاء السفر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_097.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/96.json" },
+                { "ID": 97, "TITLE": "دعاء دخول القرية أو البلدة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_098.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/97.json" },
+                { "ID": 98, "TITLE": "دعاء دخول السوق", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_099.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/98.json" },
+                { "ID": 99, "TITLE": "الدعاء إذا تعس المركوب", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_100.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/99.json" },
+                { "ID": 100, "TITLE": "دعاء المسافر للمقيم", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_101.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/100.json" },
+                { "ID": 101, "TITLE": "دعاء المقيم للمسافر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_102.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/101.json" },
+                { "ID": 102, "TITLE": "التكبير و التسبيح في سير السفر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_103.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/102.json" },
+                { "ID": 103, "TITLE": "دعاء المسافر إذا أسحر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_104.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/103.json" },
+                { "ID": 104, "TITLE": "الدعاء إذا نزل مترلا في سفر أو غيره", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_105.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/104.json" },
+                { "ID": 105, "TITLE": "ذكر الرجوع من السفر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_106.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/105.json" },
+                { "ID": 106, "TITLE": "ما يقول من أتاه أمر يسره أو يكرهه", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_107.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/106.json" },
+                { "ID": 107, "TITLE": "فضل الصلاة على النبي صلى الله عليه و سلم", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_108.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/107.json" },
+                { "ID": 108, "TITLE": "إفشاء السلام", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_109.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/108.json" },
+                { "ID": 109, "TITLE": "كيف يرد السلام على الكافر إذا سلم", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_110.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/109.json" },
+                { "ID": 110, "TITLE": "الدُّعاءُ عِنْدَ سَمَاعِ صِياحِ الدِّيكِ ونَهِيقِ الْحِمَارِ", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_111.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/110.json" },
+                { "ID": 111, "TITLE": "دعاء نباح الكلاب بالليل", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_112.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/111.json" },
+                { "ID": 112, "TITLE": "الدعاء لمن سببته", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_113.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/112.json" },
+                { "ID": 113, "TITLE": "ما يقول المسلم إذا مدح المسلم", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_114.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/113.json" },
+                { "ID": 114, "TITLE": "ما يقول المسلم إذا زكي", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_115.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/114.json" },
+                { "ID": 115, "TITLE": "كيف يلبي المحرم في الحج أو العمرة ؟", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_116.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/115.json" },
+                { "ID": 116, "TITLE": "التكبير إذا أتى الركن الأسود", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_117.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/116.json" },
+                { "ID": 117, "TITLE": "الدعاء بين الركن اليماني والحجر الأسود", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_118.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/117.json" },
+                { "ID": 118, "TITLE": "دعاء الوقوف على الصفا والمروة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_119.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/118.json" },
+                { "ID": 119, "TITLE": "الدعاء يوم عرفة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_120.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/119.json" },
+                { "ID": 120, "TITLE": "الذكر عند المشعر الحرام", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_121.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/120.json" },
+                { "ID": 121, "TITLE": "التكبير عند رمي الجمار مع كل حصاة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_122.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/121.json" },
+                { "ID": 122, "TITLE": "دعاء التعجب والأمر السار", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_123.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/122.json" },
+                { "ID": 123, "TITLE": "ما يفعل من أتاه أمر يسره", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_124.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/123.json" },
+                { "ID": 124, "TITLE": "ما يقول من أحس وجعا في جسده", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_125.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/124.json" },
+                { "ID": 125, "TITLE": "دعاء من خشي أن يصيب شيئا بعينه", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_126.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/125.json" },
+                { "ID": 126, "TITLE": "ما يقال عند الفزع", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_127.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/126.json" },
+                { "ID": 127, "TITLE": "ما يقول عند الذبح أو النحر", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_128.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/127.json" },
+                { "ID": 128, "TITLE": "ما يقول لرد كيد مردة الشياطين", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_129.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/128.json" },
+                { "ID": 129, "TITLE": "الاستغفار و التوبة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_130.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/129.json" },
+                { "ID": 130, "TITLE": "فضل التسبيح و التحميد، و التهليل، و التكبير", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_131.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/130.json" },
+                { "ID": 131, "TITLE": "كيف كان النبي يسبح؟", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_132.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/131.json" },
+                { "ID": 132, "TITLE": "من أنواع الخير والآداب الجامعة", "AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_133.mp3", "TEXT": "http://www.hisnmuslim.com/api/ar/132.json" }
             ];
             
-            populateCategoriesDropdown(categories);
+            populateCategoriesDropdown(allCategories);
+            
+            // تحميل أول تصنيف بشكل افتراضي
+            if (allCategories.length > 0) {
+                await fetchAzkarByCategory(allCategories[0].ID);
+            }
         } catch (error) {
             console.error('خطأ في تحميل التصنيفات:', error);
             showError('تعذر تحميل التصنيفات');
+        } finally {
+            showLoading(false);
         }
     }
     
     // إضافة التصنيفات إلى القائمة المنسدلة
     function populateCategoriesDropdown(categories) {
-        // إفراغ القائمة المنسدلة
         azkarCategorySelect.innerHTML = '<option value="">اختر تصنيف الأذكار...</option>';
-        
-        // إضافة التصنيفات
         categories.forEach(category => {
             const option = document.createElement('option');
             option.value = category.ID;
@@ -93,153 +199,115 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     
-    // جلب الأذكار حسب التصنيف - تم تعديل هذه الدالة
+    // جلب الأذكار حسب التصنيف
     async function fetchAzkarByCategory(categoryId) {
-       // بدلاً من استدعاء API خارجي قد يكون معطلاً، سنستخدم البيانات المحلية
-       // هذا يضمن أن القائمة المنسدلة تعمل تمامًا مثل الأزرار
+        if (!categoryId) return;
+        
         showLoading(true);
+        searchQuery = ''; // إعادة تعيين البحث
+        azkarSearchInput.value = '';
+        azkarAudioPlayer.style.display = 'none';
+        azkarAudioPlayer.pause();
+        
         try {
-            currentCategory = categoryId;
-            displayDefaultAzkar(categoryId);
+            const category = allCategories.find(c => c.ID == categoryId);
+            if (!category) throw new Error('لم يتم العثور على التصنيف');
+            
+            const response = await fetch(category.TEXT);
+            if (!response.ok) throw new Error('فشل الاتصال بالشبكة');
+            
+            const data = await response.json();
+            currentCategoryData = data['العربية'];
+            
+            displayAzkar(currentCategoryData);
         } catch (error) {
-             console.error('خطأ في عرض الأذكار:', error);
+             console.error('خطأ في جلب الأذكار:', error);
              showError('تعذر تحميل الأذكار. يرجى المحاولة مرة أخرى لاحقًا.');
         } finally {
             showLoading(false);
         }
     }
     
-    // تحسين دالة عرض الأذكار
+    // عرض الأذكار
     function displayAzkar(azkar) {
         try {
             if (!Array.isArray(azkar) || azkar.length === 0) {
-                azkarContent.innerHTML = '<div class="no-results">لا توجد أذكار متاحة</div>';
+                azkarContent.innerHTML = '<div class="no-results">لا توجد أذكار متاحة لهذا التصنيف</div>';
                 return;
             }
 
             const html = azkar.map(zikr => `
                 <div class="azkar-item animate-fade-in">
-                    <div class="azkar-text">${zikr.ARABIC_TEXT || zikr}</div>
-                    ${zikr.REPEAT_COUNT ? `
-                        <div class="azkar-info">
-                            <span class="azkar-count">التكرار: ${zikr.REPEAT_COUNT}</span>
-                            ${zikr.REFERENCE ? `<span class="azkar-source">${zikr.REFERENCE}</span>` : ''}
-                        </div>
+                    ${zikr.AUDIO ? `
+                        <button class="play-azkar-btn" data-audio-src="${zikr.AUDIO}" title="تشغيل الصوت">
+                            <i class="fas fa-play"></i>
+                        </button>
                     ` : ''}
+                    <p class="azkar-text">${zikr.ARABIC_TEXT}</p>
+                    <div class="azkar-info">
+                        ${zikr.REPEAT_COUNT > 0 ? `<span class="azkar-count">التكرار: ${zikr.REPEAT_COUNT}</span>` : ''}
+                        ${zikr.REFERENCE ? `<span class="azkar-source">${zikr.REFERENCE}</span>` : ''}
+                    </div>
                 </div>
             `).join('');
-
             azkarContent.innerHTML = html;
+            
+            // إضافة مستمعي الأحداث لأزرار التشغيل الجديدة
+            document.querySelectorAll('.play-azkar-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const audioSrc = this.dataset.audioSrc;
+                    
+                    document.querySelectorAll('.play-azkar-btn').forEach(btn => {
+                        if (btn !== this) {
+                            btn.innerHTML = '<i class="fas fa-play"></i>';
+                            btn.classList.remove('playing');
+                        }
+                    });
+
+                    if (azkarAudioPlayer.src === audioSrc && !azkarAudioPlayer.paused) {
+                        azkarAudioPlayer.pause();
+                        this.innerHTML = '<i class="fas fa-play"></i>';
+                        this.classList.remove('playing');
+                    } else {
+                        azkarAudioPlayer.src = audioSrc;
+                        azkarAudioPlayer.play();
+                        azkarAudioPlayer.style.display = 'block';
+                        this.innerHTML = '<i class="fas fa-pause"></i>';
+                        this.classList.add('playing');
+                    }
+                });
+            });
+
         } catch (error) {
             console.error('خطأ في عرض الأذكار:', error);
             showError('حدث خطأ أثناء عرض الأذكار');
         }
     }
     
-    // تحسين دالة البحث
+    // تصفية الأذكار
     function filterAzkar() {
-        try {
-            // استخدام الدالة displayDefaultAzkar التي تحتوي على منطق البحث
-            displayDefaultAzkar(currentCategory);
-        } catch (error) {
-            console.error('خطأ في البحث:', error);
-            showError('حدث خطأ أثناء البحث');
-        }
-    }
-    
-    // تعديل دالة تحميل الأذكار الافتراضية
-    function loadDefaultAzkar() {
-        try {
-            // تحديد الزر الأول كنشط
-            const firstButton = azkarButtons[0];
-            if (firstButton) {
-                firstButton.classList.add('active');
-                currentCategory = firstButton.dataset.type || 'morning';
-            }
-            
-            // عرض الأذكار
-            displayDefaultAzkar(currentCategory);
-        } catch (error) {
-            console.error('خطأ في تحميل الأذكار:', error);
-            showError('تعذر تحميل الأذكار الافتراضية');
-        }
-    }
-    
-    // عرض الأذكار الافتراضية
-    function displayDefaultAzkar(type) {
-        // الأذكار الافتراضية
-        const defaultAzkar = {
-            morning: [
-                "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد، وهو على كل شيء قدير.",
-                "اللهم إني أسألك خير هذا اليوم فتحه، ونصره، ونوره، وبركته، وهداه، وأعوذ بك من شر ما فيه وشر ما بعده.",
-                "اللهم أنت ربي، لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك عليّ، وأبوء بذنبي فاغفر لي، فإنه لا يغفر الذنوب إلا أنت.",
-                "اللهم إني أسألك علماً نافعاً، ورزقاً طيباً، وعملاً متقبلاً.",
-                "اللهم بك أصبحنا، وبك نحيا، وبك نموت، وإليك النشور.",
-                "اللهم إني أصبحت أشهدك، وأشهد حملة عرشك، وملائكتك، وجميع خلقك أنك أنت الله، لا إله إلا أنت، وحدك لا شريك لك، وأن محمداً عبدك ورسولك (ثلاث مرات).",
-                "اللهم إني أعوذ بك من الكفر والفقر، وأعوذ بك من عذاب القبر، لا إله إلا أنت.",
-                "اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري، لا إله إلا أنت.",
-                "رضيت بالله رباً، وبالإسلام ديناً، وبمحمد صلى الله عليه وسلم نبياً ورسولاً (ثلاث مرات).",
-                "بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم (ثلاث مرات).",
-                "حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم (سبع مرات).",
-                "اللهم إني أسألك العفو والعافية في الدنيا والآخرة.",
-                "اللهم إني أسألك خير هذا اليوم وخير ما فيه، وأعوذ بك من شر هذا اليوم وشر ما فيه."
-            ],
-            evening: [
-                "أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد، وهو على كل شيء قدير.",
-                "اللهم إني أسألك خير هذه الليلة فتحها، ونصرها، ونورها، وبركتها، وهداها، وأعوذ بك من شر ما فيها وشر ما بعدها.",
-                "اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك عليّ، وأبوء بذنبي فاغفر لي، فإنه لا يغفر الذنوب إلا أنت.",
-                "اللهم بك أمسينا، وبك نحيا، وبك نموت، وإليك المصير.",
-                "اللهم إني أمسيت أشهدك، وأشهد حملة عرشك، وملائكتك، وجميع خلقك أنك أنت الله، لا إله إلا أنت، وحدك لا شريك لك، وأن محمداً عبدك ورسولك (ثلاث مرات).",
-                "سبحان الله وبحمده (مائة مرة).",
-                "اللهم اجعل لي في قلبي نوراً، وفي لساني نوراً، وفي سمعي نوراً، وفي بصري نوراً، ومن فوقي نوراً، ومن تحتي نوراً، وعن يميني نوراً، وعن شمالي نوراً، ومن أمامي نوراً، ومن خلفي نوراً، واجعل لي نوراً.",
-                "اللهم فاطر السماوات والأرض، عالم الغيب والشهادة، رب كل شيء ومليكه، أشهد أن لا إله إلا أنت، أعوذ بك من شر نفسي ومن شر الشيطان وشركه.",
-                "حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم (سبع مرات)."
-            ],
-            sleep: [
-                "باسمك ربي وضعت جنبي، وبك أرفعه، فإن أمسكت نفسي فارحمها، وإن أرسلتها فاحفظها بما تحفظ به عبادك الصالحين.",
-                "اللهم قني عذابك يوم تبعث عبادك.",
-                "اللهم باسمك أموت وأحيا.",
-                "اللهم إني أسلمت نفسي إليك، ووجهت وجهي إليك، وفوضت أمري إليك، وألجأت ظهري إليك، رغبةً ورهبةً إليك، لا ملجأ ولا منجى منك إلا إليك.",
-                "اللهم اغفر لي ذنبي، واستر عورتي، وأمن روعتي، واحفظني من بين يدي ومن خلفي، وعن يميني وعن شمالي، وأعوذ بعظمتك أن أغتال من تحتي.",
-                "سبحان الله (33 مرة)، الحمد لله (33 مرة)، الله أكبر (34 مرة)."
-            ],
-            duas: [
-                "اللهم اجعل القرآن ربيع قلبي، ونور صدري، وجلاء حزني، وذهاب همي.",
-                "اللهم إني أسألك من الخير كله عاجله وآجله، ما علمت منه وما لم أعلم.",
-                "اللهم إني أعوذ بك من الهم والحزن، والعجز والكسل، والبخل والجبن، وضلع الدين وغلبة الرجال.",
-                "اللهم إني أعوذ بك من زوال نعمتك، وتحول عافيتك، وفجاءة نقمتك، وجميع سخطك.",
-                "اللهم اغفر لي، واهدني، وارزقني، وعافني.",
-                "اللهم أصلح لي ديني الذي هو عصمة أمري، وأصلح لي دنياي التي فيها معاشي، وأصلح لي آخرتي التي فيها معادي.",
-                "اللهم أعني على ذكرك وشكرك وحسن عبادتك.",
-                "اللهم إني أسألك الجنة وما قرب إليها من قول أو عمل، وأعوذ بك من النار وما قرب إليها من قول أو عمل.",
-                "اللهم ارزقني حبك، وحب من يحبك، وحب عمل يقربني إلى حبك.",
-                "اللهم صل وسلم وبارك على سيدنا محمد وعلى آله وصحبه أجمعين."
-            ]
-        };
+        searchQuery = azkarSearchInput.value.trim().toLowerCase();
         
-        const azkarList = defaultAzkar[type] || [];
-        
-        // إذا كان هناك استعلام بحث
-        if (searchQuery) {
-            // تصفية الأذكار حسب البحث
-            const filteredAzkar = azkarList.filter(zikr => 
-                zikr.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-            
-            if (filteredAzkar.length === 0) {
-                azkarContent.innerHTML = '<div class="no-results">لم يتم العثور على أذكار مطابقة للبحث</div>';
-                return;
-            }
-            
-            // عرض الأذكار المصفاة
-            displayAzkar(filteredAzkar);
-        } else {
-            // عرض جميع الأذكار
-            displayAzkar(azkarList);
+        if (!currentCategoryData) return;
+
+        if (searchQuery === '') {
+            displayAzkar(currentCategoryData);
+            return;
         }
+
+        const filteredAzkar = currentCategoryData.filter(zikr => 
+            zikr.ARABIC_TEXT && zikr.ARABIC_TEXT.toLowerCase().includes(searchQuery)
+        );
+        
+        if (filteredAzkar.length === 0) {
+            azkarContent.innerHTML = '<div class="no-results">لم يتم العثور على أذكار مطابقة للبحث</div>';
+            return;
+        }
+        
+        displayAzkar(filteredAzkar);
     }
     
-    // تحسين دالة إظهار الخطأ
+    // إظهار رسالة الخطأ
     function showError(message) {
         azkarContent.innerHTML = `
             <div class="error-message animate-fade-in">
@@ -252,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
     }
     
-    // تحسين دالة إظهار التحميل
+    // إظهار مؤشر التحميل
     function showLoading(show) {
         if (show) {
             azkarContent.innerHTML = `

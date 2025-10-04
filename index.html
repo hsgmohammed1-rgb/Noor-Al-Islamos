@@ -95,23 +95,20 @@
 
     <!-- قسم الأذكار -->
     <section id="azkar-section" class="content-section">
-        <h2 class="section-title">الأذكار اليومية</h2>
+        <h2 class="section-title">حصن المسلم</h2>
         <div class="azkar-container">
-            <div class="azkar-search">
-                <input type="text" id="azkar-search-input" placeholder="ابحث في الأذكار...">
-            </div>
-            <div class="azkar-categories">
-                <select id="azkar-category-select" class="azkar-select">
-                    <option value="">اختر تصنيف الأذكار...</option>
-                </select>
-            </div>
-            <div class="azkar-buttons">
-                <button class="azkar-btn active" data-type="morning">أذكار الصباح</button>
-                <button class="azkar-btn" data-type="evening">أذكار المساء</button>
-                <button class="azkar-btn" data-type="sleep">أذكار النوم</button>
-                <button class="azkar-btn" data-type="duas">أدعية مختارة</button>
+            <div class="azkar-controls-grid">
+                <div class="azkar-search">
+                    <input type="text" id="azkar-search-input" placeholder="ابحث في الأذكار...">
+                </div>
+                <div class="azkar-categories">
+                    <select id="azkar-category-select" class="azkar-select">
+                        <option value="">اختر تصنيف الأذكار...</option>
+                    </select>
+                </div>
             </div>
             <div id="azkar-content" class="azkar-content"></div>
+            <audio id="azkar-audio-player" controls style="width: 100%; margin-top: 1.5rem; display: none;"></audio>
         </div>
     </section>
 
