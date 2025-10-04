@@ -306,13 +306,24 @@ document.addEventListener("DOMContentLoaded", function () {
                 verse_key: `${tafsirData.number}:${ayah.numberInSurah}`,
                 text: ayah.text,
             }));
+
+            const hasBismillahHeader = quranData.number !== 9;
+            const bismillahRegex = /^بِسْمِ ٱ?للَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/;
+
+            // For surahs other than Al-Fatiha, clean the first verse from any prepended Bismillah
+            if (quranData.number !== 1 && hasBismillahHeader && mappedVerses.length > 0) {
+                let firstVerse = mappedVerses[0];
+                if (bismillahRegex.test(firstVerse.text_uthmani)) {
+                    firstVerse.text_uthmani = firstVerse.text_uthmani.replace(bismillahRegex, '').trim();
+                }
+            }
     
             state.currentSurahData = { 
                 id: quranData.number,
                 name_arabic: quranData.name,
                 revelation_place: quranData.revelationType === 'Meccan' ? 'makkah' : 'madinah',
                 verses_count: quranData.numberOfAyahs,
-                bismillah_pre: quranData.number !== 1 && quranData.number !== 9,
+                hasBismillahHeader: hasBismillahHeader,
                 verses: mappedVerses, 
                 tafsirs: mappedTafsirs,
             };
@@ -335,14 +346,32 @@ document.addEventListener("DOMContentLoaded", function () {
         readerTextContainer.lang = 'ar';
 
         let fullTextHTML = '';
-        if (data.bismillah_pre) {
-            fullTextHTML += `<div class="reader-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
+
+        if (data.hasBismillahHeader) {
+            // Special handling for Al-Fatiha: make the Bismillah header clickable for tafsir
+            if (data.id === 1) {
+                const bismillahAyah = data.verses.find(v => v.verse_number === 1);
+                if (bismillahAyah) {
+                    fullTextHTML += `<div class="reader-bismillah ayah-text-segment" data-verse-key="${bismillahAyah.verse_key}">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
+                }
+            } else {
+                // For all other surahs (except 9), it's a non-interactive header
+                fullTextHTML += `<div class="reader-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
+            }
         }
         
         fullTextHTML += '<p class="ayah-paragraph">';
         data.verses.forEach(ayah => {
-            fullTextHTML += `<span class="ayah-text-segment" data-verse-key="${ayah.verse_key}">${ayah.text_uthmani}</span>`;
-            fullTextHTML += `<span class="ayah-end-symbol">${ayah.verse_number.toLocaleString('ar-EG')}</span>`;
+            // Since we rendered Al-Fatiha's first verse (Bismillah) as a header, skip it here.
+            if (data.id === 1 && ayah.verse_number === 1) {
+                return;
+            }
+
+            // Only render if there is text.
+            if (ayah.text_uthmani && ayah.text_uthmani.trim().length > 0) {
+                fullTextHTML += `<span class="ayah-text-segment" data-verse-key="${ayah.verse_key}">${ayah.text_uthmani}</span>`;
+                fullTextHTML += `<span class="ayah-end-symbol">${ayah.verse_number.toLocaleString('ar-EG')}</span>`;
+            }
         });
         fullTextHTML += '</p>';
 
