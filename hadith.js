@@ -57,8 +57,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok) throw new Error('فشل الاتصال بالشبكة');
             const data = await response.json();
             
-            if (data && data['العربية']) {
-                state.allData = data['العربية'];
+            // FIX: The API response is now a direct array, not an object with a key 'العربية'
+            if (Array.isArray(data)) {
+                state.allData = data;
                 state.categories = state.allData.map(({ ID, TITLE }) => ({ ID, TITLE }));
                 displayCategories();
             } else {
@@ -168,6 +169,8 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (error) {
             console.error("Error displaying azkar:", error);
             showError(elements.azkarList, 'حدث خطأ أثناء عرض الأذكار.');
+        } finally {
+            showAzkarLoading(false);
         }
     }
 
