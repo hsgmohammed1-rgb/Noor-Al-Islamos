@@ -22,8 +22,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- State ---
     let prayerTimesData = null;
     let countdownInterval = null;
-    let currentCity = 'Riyadh';
-    let currentCountry = 'SA';
+    let currentCity = null;
+    let currentCountry = null;
     let countdownRingCircumference;
 
     // List of cities by country
@@ -75,16 +75,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     await fetchPrayerTimes(latitude, longitude);
                 },
                 (error) => {
-                    console.warn("Geolocation failed, falling back to default.", error);
-                    populateCountryCities(currentCountry); // Populate cities for default country
-                    elements.citySelect.value = currentCity;
-                    fetchPrayerTimes(null, null, currentCountry, currentCity);
+                    console.warn("Geolocation failed. Waiting for user input.", error);
                 }
             );
         } else {
-            populateCountryCities(currentCountry); // Populate cities for default country
-            elements.citySelect.value = currentCity;
-            fetchPrayerTimes(null, null, currentCountry, currentCity);
+            console.warn("Geolocation is not supported. Waiting for user input.");
         }
     }
 
@@ -95,9 +90,9 @@ document.addEventListener("DOMContentLoaded", function () {
         let apiUrl;
 
         if (lat && lon) {
-            apiUrl = `https://api.aladhan.com/v1/timings/${formattedDate}?latitude=${lat}&longitude=${lon}&method=4`;
+            apiUrl = `https://api.aladhan.com/v1/timings/${formattedDate}?latitude=${lat}&longitude=${lon}&method=3`;
         } else if (city && country) {
-            apiUrl = `https://api.aladhan.com/v1/timingsByCity/${formattedDate}?city=${city}&country=${country}&method=4`;
+            apiUrl = `https://api.aladhan.com/v1/timingsByCity/${formattedDate}?city=${city}&country=${country}&method=3`;
         } else {
             showError("بيانات الموقع غير كافية");
             return;
@@ -286,15 +281,20 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- Event Handlers ---
     function handleCountryChange() {
         currentCountry = elements.countrySelect.value;
+        if (!currentCountry) return;
         populateCountryCities(currentCountry);
         currentCity = elements.citySelect.value;
-        fetchPrayerTimes(null, null, currentCountry, currentCity);
+        if (currentCountry && currentCity) {
+            fetchPrayerTimes(null, null, currentCountry, currentCity);
+        }
     }
     
     function handleCityChange() {
         currentCity = elements.citySelect.value;
         currentCountry = elements.countrySelect.value;
-        fetchPrayerTimes(null, null, currentCountry, currentCity);
+        if (currentCountry && currentCity) {
+            fetchPrayerTimes(null, null, currentCountry, currentCity);
+        }
     }
 
     // --- Helper Functions ---
