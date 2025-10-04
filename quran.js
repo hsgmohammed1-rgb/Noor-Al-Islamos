@@ -471,7 +471,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const reciterName = elements.reciterSelect.options[elements.reciterSelect.selectedIndex].text;
             
             elements.playerReciterName.textContent = reciterName;
-            elements.playerSurahName.textContent = state.currentSurahData.name_arabic;
+            elements.playerSurahName.textContent = `${state.currentSurahData.name_arabic}`;
 
             const data = await api.getChapterRecitation(reciterId, surahId);
             if (data && data.audio_file && data.audio_file.audio_url) {
