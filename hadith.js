@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
         state.currentPlaylist = state.currentCategory.TEXT.map(zikr => ({
             title: zikr.ARABIC_TEXT.substring(0, 30) + '...',
-            src: zikr.AUDIO
+            src: zikr.AUDIO ? zikr.AUDIO.replace('http://', 'https://') : ''
         }));
         state.currentTrackIndex = -1;
     }
@@ -122,37 +122,55 @@ document.addEventListener("DOMContentLoaded", function () {
             </button>
         `;
         elements.categoryHeader.querySelector('.play-all-btn').addEventListener('click', () => {
-            playCategoryAudio(state.currentCategory.AUDIO_URL, state.currentCategory.TITLE);
+            const audioUrl = state.currentCategory.AUDIO_URL ? state.currentCategory.AUDIO_URL.replace('http://', 'https://') : '';
+            playCategoryAudio(audioUrl, state.currentCategory.TITLE);
         });
     }
 
     function displayAzkar() {
         showAzkarLoading(true);
-        elements.azkarList.innerHTML = state.currentCategory.TEXT.map((zikr, index) => `
-            <div class="hisn-zikr-card" data-index="${index}">
-                <p class="zikr-text">${zikr.ARABIC_TEXT}</p>
-                <div class="zikr-meta">
-                    <span class="zikr-source">${zikr.LANGUAGE_ARABIC_TRANSLATED_TEXT}</span>
-                </div>
-                <div class="zikr-footer">
-                    <div class="zikr-actions">
-                        <button class="action-btn zikr-play-btn" title="تشغيل الصوت"><i class="fas fa-play"></i></button>
-                        <button class="action-btn zikr-copy-btn" title="نسخ"><i class="fas fa-copy"></i></button>
+        try {
+            if (!state.currentCategory || !Array.isArray(state.currentCategory.TEXT)) {
+                showError(elements.azkarList, 'بيانات الفئة غير صالحة.');
+                return;
+            }
+
+            if (state.currentCategory.TEXT.length === 0) {
+                elements.azkarList.innerHTML = '<div class="no-results" style="text-align: center; padding: 2rem;">لا توجد أذكار في هذه الفئة.</div>';
+                return;
+            }
+
+            elements.azkarList.innerHTML = state.currentCategory.TEXT.map((zikr, index) => `
+                <div class="hisn-zikr-card" data-index="${index}">
+                    <p class="zikr-text">${zikr.ARABIC_TEXT || 'لا يوجد نص'}</p>
+                    <div class="zikr-meta">
+                        <span class="zikr-source">${zikr.LANGUAGE_ARABIC_TRANSLATED_TEXT || ''}</span>
                     </div>
-                    ${zikr.REPEAT > 1 ? `
-                    <div class="zikr-repeat">
-                        <span class="repeat-text">التكرار:</span>
-                        <button class="repeat-btn" data-goal="${zikr.REPEAT}" data-remaining="${zikr.REPEAT}">
-                            <span class="count">${zikr.REPEAT}</span>
-                        </button>
+                    <div class="zikr-footer">
+                        <div class="zikr-actions">
+                            <button class="action-btn zikr-play-btn" title="تشغيل الصوت"><i class="fas fa-play"></i></button>
+                            <button class="action-btn zikr-copy-btn" title="نسخ"><i class="fas fa-copy"></i></button>
+                        </div>
+                        ${zikr.REPEAT > 1 ? `
+                        <div class="zikr-repeat">
+                            <span class="repeat-text">التكرار:</span>
+                            <button class="repeat-btn" data-goal="${zikr.REPEAT}" data-remaining="${zikr.REPEAT}">
+                                <span class="count">${zikr.REPEAT}</span>
+                            </button>
+                        </div>
+                        ` : ''}
                     </div>
-                    ` : ''}
                 </div>
-            </div>
-        `).join('');
-        showAzkarLoading(false);
-        addAzkarEventListeners();
+            `).join('');
+            
+            addAzkarEventListeners();
+
+        } catch (error) {
+            console.error("Error displaying azkar:", error);
+            showError(elements.azkarList, 'حدث خطأ أثناء عرض الأذكار.');
+        }
     }
+
 
     function addAzkarEventListeners() {
         elements.azkarList.querySelectorAll('.hisn-zikr-card').forEach(card => {
@@ -205,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function playTrack(index) {
         state.currentTrackIndex = index;
         const track = state.currentPlaylist[index];
-        if (!track) return;
+        if (!track || !track.src) return;
 
         elements.audioPlayer.audio.src = track.src;
         elements.audioPlayer.title.textContent = track.title;
@@ -216,6 +234,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     function playCategoryAudio(url, title) {
+        if (!url) return;
         state.currentPlaylist = []; // Clear individual zikr playlist
         state.currentTrackIndex = -1;
         
