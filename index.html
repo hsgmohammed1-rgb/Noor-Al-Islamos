@@ -93,22 +93,48 @@
         </div>
     </section>
 
-    <!-- قسم الأذكار -->
+    <!-- قسم الأذكار المطور -->
     <section id="azkar-section" class="content-section">
         <h2 class="section-title">حصن المسلم</h2>
-        <div class="azkar-container">
-            <div class="azkar-controls-grid">
-                <div class="azkar-search">
+        <div class="azkar-container-new">
+            <div class="azkar-sidebar">
+                <div class="azkar-search-new">
+                    <i class="fas fa-search"></i>
                     <input type="text" id="azkar-search-input" placeholder="ابحث في الأذكار...">
                 </div>
-                <div class="azkar-categories">
-                    <select id="azkar-category-select" class="azkar-select">
-                        <option value="">اختر تصنيف الأذكار...</option>
-                    </select>
+                <div id="azkar-categories-list">
+                    <!-- Category buttons will be generated here by JS -->
                 </div>
             </div>
-            <div id="azkar-content" class="azkar-content"></div>
-            <audio id="azkar-audio-player" controls style="width: 100%; margin-top: 1.5rem; display: none;"></audio>
+            <div class="azkar-main-content">
+                <div class="azkar-header">
+                    <h3 id="current-category-title"></h3>
+                    <div class="azkar-progress-container">
+                        <span>التقدم</span>
+                        <div class="progress-bar">
+                            <div id="azkar-progress-bar-fill" style="width: 0%;"></div>
+                        </div>
+                        <span id="azkar-progress-text">0/0</span>
+                    </div>
+                </div>
+                <div id="azkar-content" class="azkar-content-new">
+                     <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>جاري التحميل...</span>
+                    </div>
+                </div>
+                <div class="azkar-player-container">
+                    <audio id="azkar-audio-player"></audio>
+                    <div id="azkar-player-info" class="player-info">
+                        <i class="fas fa-music"></i>
+                        <span id="player-status-text">اختر دعاء لتشغيله</span>
+                    </div>
+                    <div class="player-controls">
+                        <button id="azkar-player-play" class="player-control-btn"><i class="fas fa-play"></i></button>
+                        <button id="azkar-player-pause" class="player-control-btn"><i class="fas fa-pause"></i></button>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
