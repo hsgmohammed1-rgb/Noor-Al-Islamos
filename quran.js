@@ -220,8 +220,25 @@ document.addEventListener("DOMContentLoaded", function () {
         elements.reciterSelect.addEventListener('change', handleReciterChange);
         elements.audioPlayer.addEventListener('ended', stopAudio);
         elements.tabs.forEach(tab => tab.addEventListener('click', handleTabClick));
-        if (elements.lastRead) elements.lastRead.addEventListener('click', () => {
-            if (state.lastRead) loadSurah(state.lastRead.surah, state.lastRead.ayah);
+        if (elements.lastRead) {
+            elements.lastRead.addEventListener('click', () => {
+                if (state.lastRead) loadSurah(state.lastRead.surah, state.lastRead.ayah);
+            });
+        }
+        
+        elements.juzList.addEventListener('click', (e) => {
+            const surahItem = e.target.closest('.surah-in-juz');
+            if (surahItem) {
+                const surahId = surahItem.dataset.surahId;
+                const ayah = surahItem.dataset.ayah;
+                loadSurah(surahId, ayah);
+                return;
+            }
+    
+            const header = e.target.closest('.juz-card-header');
+            if (header) {
+                header.parentElement.classList.toggle('expanded');
+            }
         });
     }
 
@@ -283,18 +300,42 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderJuzList(juzs) {
         elements.juzList.innerHTML = '';
         juzs.forEach(juz => {
-            const firstSurah = state.allSurahs.find(s => s.id == Object.keys(juz.verse_mapping)[0]);
+            const surahsInJuz = Object.keys(juz.verse_mapping).map(surahId => {
+                const surah = state.allSurahs.find(s => s.id == surahId);
+                const verseRange = juz.verse_mapping[surahId];
+                const startVerse = verseRange.split('-')[0];
+                return {
+                    id: surahId,
+                    name: surah ? surah.name_arabic : `سورة ${surahId}`,
+                    startVerse: startVerse,
+                    range: verseRange
+                };
+            });
+
+            const surahsHtml = surahsInJuz.map(s => `
+                <div class="surah-in-juz" data-surah-id="${s.id}" data-ayah="${s.startVerse}">
+                    <span>${s.name}</span>
+                    <span class="verse-range">الآيات: ${s.range.toLocaleString('ar-EG')}</span>
+                </div>
+            `).join('');
+            
+            const firstSurahName = surahsInJuz.length > 0 ? surahsInJuz[0].name : '';
+
             const card = document.createElement('div');
             card.className = 'juz-card';
             card.dataset.juzId = juz.juz_number;
             card.innerHTML = `
-                <div>
-                    <h3>الجزء ${juz.juz_number}</h3>
-                    <p>يبدأ من سورة ${firstSurah?.name_arabic || ''}</p>
+                <div class="juz-card-header">
+                    <div>
+                        <h3>الجزء ${juz.juz_number}</h3>
+                        <p>يبدأ من ${firstSurahName}</p>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
                 </div>
-                <i class="fas fa-chevron-left"></i>
+                <div class="juz-surah-list">
+                    ${surahsHtml}
+                </div>
             `;
-            card.addEventListener('click', () => loadSurah(Object.keys(juz.verse_mapping)[0], juz.verse_mapping[Object.keys(juz.verse_mapping)[0]].split('-')[0]));
             elements.juzList.appendChild(card);
         });
     }
@@ -421,6 +462,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function populateReciterSelect() {
         const reciters = [
             { id: '7', name: 'مشاري راشد العفاسي' },
+            { id: '16', name: 'ياسر الدوسري' },
             { id: '3', name: 'عبدالرحمن السديس' },
             { id: '4', name: 'سعد الغامدي' },
             { id: '5', name: 'محمود خليل الحصري' },
@@ -471,7 +513,8 @@ document.addEventListener("DOMContentLoaded", function () {
             '4': 'Ghamadi',
             '5': 'Husary',
             '8': 'Shuraym',
-            '9': 'Minshawy_Murattal'
+            '9': 'Minshawy_Murattal',
+            '16': 'yasser_ad-dussary'
         };
         const reciterFolder = reciterMap[reciterId] || 'Alafasy';
         const formattedSurahNumber = String(surahNumber).padStart(3, '0');
