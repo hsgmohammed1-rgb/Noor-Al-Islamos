@@ -37,17 +37,28 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     // --- API Configuration ---
-    const API_BASE = 'https://api.quran.com/api/v4';
-    const TAFSIR_ID = 169; // Tafsir Al-Muyassar (Arabic)
+    const API_BASE_QURAN_CLOUD = 'https://api.alquran.cloud/v1';
+    const API_BASE_QURAN_COM = 'https://api.quran.com/api/v4'; // Keep for Juz and Audio
 
     // --- API Functions ---
     const api = {
-        getChapters: () => fetch(`${API_BASE}/chapters?language=ar`).then(res => res.json()),
-        getJuzs: () => fetch(`${API_BASE}/juzs`).then(res => res.json()),
-        getChapter: (id) => fetch(`${API_BASE}/chapters/${id}?language=ar`).then(res => res.json()),
-        getVerses: (id) => fetch(`${API_BASE}/quran/verses/uthmani?chapter_number=${id}`).then(res => res.json()),
-        getTafsir: (id) => fetch(`${API_BASE}/quran/tafsirs/${TAFSIR_ID}?chapter_number=${id}`).then(res => res.json()),
-        getChapterRecitation: (reciterId, chapterId) => fetch(`${API_BASE}/chapter_recitations/${reciterId}/${chapterId}`).then(res => res.json()),
+        getChapters: async () => {
+            const response = await fetch(`${API_BASE_QURAN_CLOUD}/surah`);
+            if (!response.ok) throw new Error('Failed to fetch surahs');
+            const data = await response.json();
+            const chapters = data.data.map(surah => ({
+                id: surah.number,
+                name_arabic: surah.name,
+                name_simple: surah.englishName,
+                revelation_place: surah.revelationType === 'Meccan' ? 'makkah' : 'madinah',
+                verses_count: surah.numberOfAyahs,
+                translated_name: { name: surah.englishNameTranslation }
+            }));
+            return { chapters };
+        },
+        getJuzs: () => fetch(`${API_BASE_QURAN_COM}/juzs`).then(res => res.json()),
+        getSurahWithTafsir: (id) => fetch(`${API_BASE_QURAN_CLOUD}/surah/${id}/editions/quran-uthmani,ar.muyassar`).then(res => res.json()),
+        getChapterRecitation: (reciterId, chapterId) => fetch(`${API_BASE_QURAN_COM}/chapter_recitations/${reciterId}/${chapterId}`).then(res => res.json()),
     };
 
     // --- Core Functions ---
@@ -171,21 +182,38 @@ document.addEventListener("DOMContentLoaded", function () {
         showReaderView();
         
         try {
-            const [chapterRes, versesRes, tafsirsRes] = await Promise.all([
-                api.getChapter(surahId),
-                api.getVerses(surahId),
-                api.getTafsir(surahId)
-            ]);
-            
+            const response = await api.getSurahWithTafsir(surahId);
+            if (response.code !== 200 || !response.data || response.data.length < 2) {
+                throw new Error('Invalid API response from alquran.cloud');
+            }
+    
+            const quranData = response.data[0];
+            const tafsirData = response.data[1];
+    
+            const mappedVerses = quranData.ayahs.map(ayah => ({
+                verse_key: `${quranData.number}:${ayah.numberInSurah}`,
+                text_uthmani: ayah.text,
+                verse_number: ayah.numberInSurah,
+            }));
+    
+            const mappedTafsirs = tafsirData.ayahs.map(ayah => ({
+                verse_key: `${tafsirData.number}:${ayah.numberInSurah}`,
+                text: ayah.text,
+            }));
+    
             state.currentSurahData = { 
-                ...chapterRes.chapter, 
-                verses: versesRes.verses, 
-                tafsirs: tafsirsRes.tafsirs 
+                id: quranData.number,
+                name_arabic: quranData.name,
+                revelation_place: quranData.revelationType === 'Meccan' ? 'makkah' : 'madinah',
+                verses_count: quranData.numberOfAyahs,
+                bismillah_pre: quranData.number !== 1 && quranData.number !== 9,
+                verses: mappedVerses, 
+                tafsirs: mappedTafsirs,
             };
             
             renderReader(state.currentSurahData, ayahToScrollTo);
             loadSurahAudio(surahId);
-
+    
         } catch (error) {
             console.error(`Failed to load surah ${surahId}:`, error);
             handleError(elements.readerContent, "فشل تحميل السورة.", () => loadSurah(surahId, ayahToScrollTo));
