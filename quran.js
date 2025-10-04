@@ -161,7 +161,38 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- API Functions ---
     const api = {
         getJuzs: () => fetch(`${API_BASE_QURAN_COM}/juzs`).then(res => res.json()),
-        getSurahWithTafsir: (id) => fetch(`${API_BASE_QURAN_CLOUD}/surah/${id}/editions/quran-uthmani,ar.muyassar`).then(res => res.json()),
+        getSurahFromXML: async (id) => {
+            const paddedId = String(id).padStart(3, '0');
+            const response = await fetch(`https://everyayah.com/data/XML/Arabic/Quran_Arabic_${paddedId}.xml`);
+            if (!response.ok) throw new Error(`Failed to fetch Quran XML for Surah ${id}`);
+            
+            const xmlText = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+            const errorNode = xmlDoc.querySelector("parsererror");
+            if (errorNode) {
+                console.error("XML parsing error:", errorNode.textContent);
+                throw new Error(`Failed to parse Quran XML for Surah ${id}`);
+            }
+
+            const suraNode = xmlDoc.querySelector('sura');
+            if (!suraNode) throw new Error(`Invalid XML format for Surah ${id}`);
+
+            const ayahs = Array.from(suraNode.querySelectorAll('aya')).map(ayaNode => ({
+                verse_key: `${suraNode.getAttribute('index')}:${ayaNode.getAttribute('index')}`,
+                text_uthmani: ayaNode.getAttribute('text'),
+                verse_number: parseInt(ayaNode.getAttribute('index'), 10),
+            }));
+
+            return {
+                number: parseInt(suraNode.getAttribute('index'), 10),
+                name: suraNode.getAttribute('name'),
+                ayahs: ayahs,
+                numberOfAyahs: ayahs.length,
+            };
+        },
+        getTafsir: (id) => fetch(`${API_BASE_QURAN_CLOUD}/surah/${id}/ar.muyassar`).then(res => res.json()),
         getChapterRecitation: (reciterId, chapterId) => fetch(`${API_BASE_QURAN_COM}/chapter_recitations/${reciterId}/${chapterId}`).then(res => res.json()),
     };
 
@@ -288,43 +319,30 @@ document.addEventListener("DOMContentLoaded", function () {
         showReaderView();
         
         try {
-            const response = await api.getSurahWithTafsir(surahId);
-            if (response.code !== 200 || !response.data || response.data.length < 2) {
-                throw new Error('Invalid API response from alquran.cloud');
+            const [quranData, tafsirResponse] = await Promise.all([
+                api.getSurahFromXML(surahId),
+                api.getTafsir(surahId)
+            ]);
+    
+            if (!quranData || !tafsirResponse || tafsirResponse.code !== 200) {
+                throw new Error('Invalid API response');
             }
     
-            const quranData = response.data[0];
-            const tafsirData = response.data[1];
-    
-            const mappedVerses = quranData.ayahs.map(ayah => ({
-                verse_key: `${quranData.number}:${ayah.numberInSurah}`,
-                text_uthmani: ayah.text,
-                verse_number: ayah.numberInSurah,
-            }));
-    
+            const tafsirData = tafsirResponse.data;
+            const surahInfo = state.allSurahs.find(s => s.id == surahId);
+            
             const mappedTafsirs = tafsirData.ayahs.map(ayah => ({
                 verse_key: `${tafsirData.number}:${ayah.numberInSurah}`,
                 text: ayah.text,
             }));
-
-            const hasBismillahHeader = quranData.number !== 9;
-            const bismillahRegex = /^بِسْمِ ٱ?للَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/;
-
-            // For surahs other than Al-Fatiha, clean the first verse from any prepended Bismillah
-            if (quranData.number !== 1 && hasBismillahHeader && mappedVerses.length > 0) {
-                let firstVerse = mappedVerses[0];
-                if (bismillahRegex.test(firstVerse.text_uthmani)) {
-                    firstVerse.text_uthmani = firstVerse.text_uthmani.replace(bismillahRegex, '').trim();
-                }
-            }
     
             state.currentSurahData = { 
                 id: quranData.number,
-                name_arabic: quranData.name,
-                revelation_place: quranData.revelationType === 'Meccan' ? 'makkah' : 'madinah',
-                verses_count: quranData.numberOfAyahs,
-                hasBismillahHeader: hasBismillahHeader,
-                verses: mappedVerses, 
+                name_arabic: surahInfo.name_arabic,
+                revelation_place: surahInfo.revelation_place,
+                verses_count: surahInfo.verses_count,
+                hasBismillahHeader: quranData.number !== 9, // Bismillah for all except Surah 9
+                verses: quranData.ayahs, 
                 tafsirs: mappedTafsirs,
             };
             
@@ -333,7 +351,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
         } catch (error) {
             console.error(`Failed to load surah ${surahId}:`, error);
-            handleError(elements.readerContent, "فشل تحميل السورة.", () => loadSurah(surahId, ayahToScrollTo));
+            handleError(elements.readerContent, "فشل تحميل السورة. قد يكون هناك مشكلة في الاتصال.", () => loadSurah(surahId, ayahToScrollTo));
         }
     }
 
@@ -348,11 +366,11 @@ document.addEventListener("DOMContentLoaded", function () {
         let fullTextHTML = '';
 
         if (data.hasBismillahHeader) {
-            // Special handling for Al-Fatiha: make the Bismillah header clickable for tafsir
+            // Special handling for Al-Fatiha: the Bismillah is the first ayah
             if (data.id === 1) {
                 const bismillahAyah = data.verses.find(v => v.verse_number === 1);
                 if (bismillahAyah) {
-                    fullTextHTML += `<div class="reader-bismillah ayah-text-segment" data-verse-key="${bismillahAyah.verse_key}">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
+                    fullTextHTML += `<div class="reader-bismillah ayah-text-segment" data-verse-key="${bismillahAyah.verse_key}">${bismillahAyah.text_uthmani}</div>`;
                 }
             } else {
                 // For all other surahs (except 9), it's a non-interactive header
@@ -382,6 +400,13 @@ document.addEventListener("DOMContentLoaded", function () {
         readerTextContainer.addEventListener('click', (e) => {
             const ayahSegment = e.target.closest('.ayah-text-segment');
             if (ayahSegment) {
+                // Remove highlight from any other ayah
+                const currentlyActive = readerTextContainer.querySelector('.active-ayah');
+                if (currentlyActive) currentlyActive.classList.remove('active-ayah');
+                
+                // Add highlight to the clicked one
+                ayahSegment.classList.add('active-ayah');
+
                 const verseKey = ayahSegment.dataset.verseKey;
                 const ayahData = data.verses.find(v => v.verse_key === verseKey);
                 const tafsirData = data.tafsirs.find(t => t.verse_key === verseKey);
@@ -411,6 +436,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function hideTafsirModal() {
         elements.tafsirModal.classList.add('hidden');
+        const activeAyah = elements.readerContent.querySelector('.active-ayah');
+        if (activeAyah) {
+            activeAyah.classList.remove('active-ayah');
+        }
     }
 
     // --- Audio Logic ---

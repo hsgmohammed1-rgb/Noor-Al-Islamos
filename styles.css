@@ -1201,6 +1201,9 @@ a:hover {
 .ayah-text-segment:hover {
     background-color: rgba(230, 126, 34, 0.15);
 }
+.ayah-text-segment.active-ayah, .ayah-text-segment.active-ayah:hover {
+    background-color: rgba(230, 126, 34, 0.3);
+}
 .ayah-end-symbol {
     display: inline-flex;
     align-items: center;
