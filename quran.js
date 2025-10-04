@@ -356,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function renderReader(data, ayahToScrollTo) {
-        elements.readerSurahName.textContent = data.name_arabic;
+        elements.readerSurahName.textContent = `${data.name_arabic}`;
         elements.readerSurahInfo.textContent = `${data.revelation_place === 'makkah' ? 'مكية' : 'مدنية'} - ${data.verses_count} آيات`;
 
         const readerTextContainer = document.createElement('div');
