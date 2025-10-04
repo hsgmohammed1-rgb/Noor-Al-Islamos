@@ -63,9 +63,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const progressFill = document.getElementById('azkar-progress-bar-fill');
     const progressText = document.getElementById('azkar-progress-text');
     const audioPlayer = document.getElementById('azkar-audio-player');
-    const playerStatus = document.getElementById('player-status-text');
-    const playerPlayBtn = document.getElementById('azkar-player-play');
-    const playerPauseBtn = document.getElementById('azkar-player-pause');
     const clickSound = document.getElementById('azkar-click-sound');
 
     let currentCategoryData = [];
@@ -89,8 +86,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function setupEventListeners() {
         searchInput.addEventListener('input', (e) => filterAzkar(e.target.value));
-        playerPlayBtn.addEventListener('click', () => audioPlayer.play());
-        playerPauseBtn.addEventListener('click', () => audioPlayer.pause());
         audioPlayer.addEventListener('play', () => {
             if(activeAudioBtn) activeAudioBtn.innerHTML = '<i class="fas fa-pause"></i>';
         });
@@ -196,8 +191,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 playBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const audioSrc = playBtn.dataset.audioSrc;
-                    const zikrText = card.querySelector('.azkar-card-text').innerText;
-                    playAudio(audioSrc, playBtn, zikrText);
+                    
+                    // If this button's audio is currently playing, pause it.
+                    if (activeAudioBtn === playBtn && !audioPlayer.paused) {
+                        audioPlayer.pause();
+                    } else { // Otherwise, play this audio.
+                        playAudio(audioSrc, playBtn);
+                    }
                 });
             }
             
@@ -243,17 +243,16 @@ document.addEventListener("DOMContentLoaded", function () {
         updateProgress();
     }
     
-    function playAudio(src, btn, zikrText) {
+    function playAudio(src, btn) {
         if (activeAudioBtn && activeAudioBtn !== btn) {
             activeAudioBtn.innerHTML = '<i class="fas fa-play"></i>';
         }
         activeAudioBtn = btn;
 
-        playerStatus.textContent = zikrText ? `تشغيل: ${zikrText.substring(0, 30)}...` : "جاري تشغيل الصوت...";
         audioPlayer.src = src;
         audioPlayer.play().catch(e => {
             console.error("Audio play failed:", e);
-            playerStatus.textContent = "فشل تشغيل الصوت";
+            showNotification('فشل تشغيل الصوت', 'error');
             if(activeAudioBtn) activeAudioBtn.innerHTML = '<i class="fas fa-play"></i>';
         });
     }
