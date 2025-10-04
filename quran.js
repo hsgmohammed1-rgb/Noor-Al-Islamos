@@ -161,19 +161,33 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- API Functions ---
     const api = {
         getJuzs: () => fetch(`${API_BASE_QURAN_COM}/juzs`).then(res => res.json()),
-        getSurahText: async (id) => {
-            const response = await fetch(`${API_BASE_QURAN_COM}/quran/verses/uthmani?chapter_number=${id}`);
-            if (!response.ok) throw new Error(`Failed to fetch Quran text for Surah ${id}`);
-            const data = await response.json();
-            
-            const ayahs = data.verses.map(verse => ({
-                verse_key: verse.verse_key,
-                text_uthmani: verse.text_uthmani,
-                verse_number: verse.id,
+        getSurahFromXML: async (id) => {
+            const paddedId = String(id).padStart(3, '0');
+            const response = await fetch(`https://everyayah.com/data/XML/Arabic/Quran_Arabic_${paddedId}.xml`);
+            if (!response.ok) throw new Error(`Failed to fetch Quran XML for Surah ${id}`);
+
+            const xmlText = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+            const errorNode = xmlDoc.querySelector("parsererror");
+            if (errorNode) {
+                console.error("XML parsing error:", errorNode.textContent);
+                throw new Error(`Failed to parse Quran XML for Surah ${id}`);
+            }
+
+            const suraNode = xmlDoc.querySelector('sura');
+            if (!suraNode) throw new Error(`Invalid XML format for Surah ${id}`);
+
+            const ayahs = Array.from(suraNode.querySelectorAll('aya')).map(ayaNode => ({
+                verse_key: `${suraNode.getAttribute('index')}:${ayaNode.getAttribute('index')}`,
+                text_uthmani: ayaNode.getAttribute('text'),
+                verse_number: parseInt(ayaNode.getAttribute('index'), 10),
             }));
-    
+
             return {
-                number: id,
+                number: parseInt(suraNode.getAttribute('index'), 10),
+                name: suraNode.getAttribute('name'),
                 ayahs: ayahs,
                 numberOfAyahs: ayahs.length,
             };
@@ -186,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
     async function init() {
         if (state.isInitialized) return;
         state.isInitialized = true;
-        
+
         setupEventListeners();
         renderLastRead();
 
@@ -236,12 +250,12 @@ document.addEventListener("DOMContentLoaded", function () {
         elements.surahListView.classList.remove('hidden');
         stopAudio();
     }
-    
+
     function handleTabClick(e) {
         const view = e.target.dataset.view;
         elements.tabs.forEach(tab => tab.classList.remove('active'));
         e.target.classList.add('active');
-        
+
         document.querySelectorAll('.quran-grid-view').forEach(v => v.classList.remove('active'));
         document.getElementById(`quran-${view === 'surah' ? 'surah-grid' : 'juz-list'}`).classList.add('active');
     }
@@ -250,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderSurahList(surahs, filter = '') {
         const query = filter.trim().toLowerCase();
         const filtered = surahs.filter(s => s.name_arabic.includes(query) || s.name_simple.toLowerCase().includes(query) || String(s.id).includes(query));
-        
+
         elements.surahGrid.innerHTML = '';
         if (filtered.length === 0) {
             elements.surahGrid.innerHTML = `<p class="no-results">لا توجد نتائج مطابقة.</p>`;
@@ -303,25 +317,25 @@ document.addEventListener("DOMContentLoaded", function () {
     async function loadSurah(surahId, ayahToScrollTo = 1) {
         elements.readerContent.innerHTML = `<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> <span>جاري تحميل السورة...</span></div>`;
         showReaderView();
-        
+
         try {
             const [quranData, tafsirResponse] = await Promise.all([
-                api.getSurahText(surahId),
+                api.getSurahFromXML(surahId),
                 api.getTafsir(surahId)
             ]);
-    
+
             if (!quranData || !tafsirResponse || tafsirResponse.code !== 200) {
                 throw new Error('Invalid API response');
             }
-    
+
             const tafsirData = tafsirResponse.data;
             const surahInfo = state.allSurahs.find(s => s.id == surahId);
-            
+
             const mappedTafsirs = tafsirData.ayahs.map(ayah => ({
                 verse_key: `${tafsirData.number}:${ayah.numberInSurah}`,
                 text: ayah.text,
             }));
-    
+
             state.currentSurahData = { 
                 id: quranData.number,
                 name_arabic: surahInfo.name_arabic,
@@ -331,10 +345,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 verses: quranData.ayahs, 
                 tafsirs: mappedTafsirs,
             };
-            
+
             renderReader(state.currentSurahData, ayahToScrollTo);
             loadSurahAudio(surahId);
-    
+
         } catch (error) {
             console.error(`Failed to load surah ${surahId}:`, error);
             handleError(elements.readerContent, "فشل تحميل السورة. قد يكون هناك مشكلة في الاتصال.", () => loadSurah(surahId, ayahToScrollTo));
@@ -342,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function renderReader(data, ayahToScrollTo) {
-        elements.readerSurahName.textContent = data.name_arabic;
+        elements.readerSurahName.textContent = `${data.name_arabic}`;
         elements.readerSurahInfo.textContent = `${data.revelation_place === 'makkah' ? 'مكية' : 'مدنية'} - ${data.verses_count} آيات`;
 
         const readerTextContainer = document.createElement('div');
@@ -351,16 +365,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let fullTextHTML = '';
 
-        if (data.id === 1) {
-            // In Al-Fatiha, Bismillah is the first verse and included in the verses array.
-            // So we don't need a special header.
-        } else if (data.hasBismillahHeader) {
-            // For all other surahs (except 9), add a non-interactive header
-            fullTextHTML += `<div class="reader-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
+        if (data.hasBismillahHeader) {
+            // Special handling for Al-Fatiha: the Bismillah is the first ayah
+            if (data.id === 1) {
+                const bismillahAyah = data.verses.find(v => v.verse_number === 1);
+                if (bismillahAyah) {
+                    fullTextHTML += `<div class="reader-bismillah ayah-text-segment" data-verse-key="${bismillahAyah.verse_key}">${bismillahAyah.text_uthmani}</div>`;
+                }
+            } else {
+                // For all other surahs (except 9), it's a non-interactive header
+                fullTextHTML += `<div class="reader-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
+            }
         }
-        
+
         fullTextHTML += '<p class="ayah-paragraph">';
         data.verses.forEach(ayah => {
+            // Since we rendered Al-Fatiha's first verse (Bismillah) as a header, skip it here.
+            if (data.id === 1 && ayah.verse_number === 1) {
+                return;
+            }
+
+            // Only render if there is text.
             if (ayah.text_uthmani && ayah.text_uthmani.trim().length > 0) {
                 fullTextHTML += `<span class="ayah-text-segment" data-verse-key="${ayah.verse_key}">${ayah.text_uthmani}</span>`;
                 fullTextHTML += `<span class="ayah-end-symbol">${ayah.verse_number.toLocaleString('ar-EG')}</span>`;
@@ -378,7 +403,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Remove highlight from any other ayah
                 const currentlyActive = readerTextContainer.querySelector('.active-ayah');
                 if (currentlyActive) currentlyActive.classList.remove('active-ayah');
-                
+
                 // Add highlight to the clicked one
                 ayahSegment.classList.add('active-ayah');
 
@@ -444,7 +469,7 @@ document.addEventListener("DOMContentLoaded", function () {
             stopAudio();
             const reciterId = state.currentReciterId;
             const reciterName = elements.reciterSelect.options[elements.reciterSelect.selectedIndex].text;
-            
+
             elements.playerReciterName.textContent = reciterName;
             elements.playerSurahName.textContent = state.currentSurahData.name_arabic;
 
@@ -462,7 +487,7 @@ document.addEventListener("DOMContentLoaded", function () {
             useFallbackAudioSource(surahId);
         }
     }
-    
+
     function useFallbackAudioSource(surahNumber) {
         const reciterId = state.currentReciterId;
         const reciterMap = {
@@ -475,12 +500,12 @@ document.addEventListener("DOMContentLoaded", function () {
         };
         const reciterFolder = reciterMap[reciterId] || 'Alafasy';
         const formattedSurahNumber = String(surahNumber).padStart(3, '0');
-        
+
         elements.audioPlayer.src = `https://download.quranicaudio.com/quran/${reciterFolder}/${formattedSurahNumber}.mp3`;
         elements.audioPlayerContainer.style.display = 'grid';
         elements.audioPlayer.load();
     }
-    
+
     function stopAudio() {
         elements.audioPlayer.pause();
         elements.audioPlayer.currentTime = 0;
@@ -492,7 +517,7 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.setItem('quranLastRead', JSON.stringify(state.lastRead));
         renderLastRead();
     }
-    
+
     function renderLastRead() {
         if (state.lastRead && state.lastRead.name) {
             elements.lastRead.innerHTML = `
