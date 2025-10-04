@@ -184,7 +184,7 @@ a:hover {
     background: #e67e22; /* Orange color */
     color: var(--text-color); /* White icon */
     transform: translateY(-3px);
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.5); /* Matching blue shadow */
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.5); /* Matching orange shadow */
 }
 
 /* القسم الرئيسي */
