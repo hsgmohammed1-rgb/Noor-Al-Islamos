@@ -148,36 +148,63 @@
     <section id="prayer-times" class="content-section">
         <div class="prayer-container-modern">
             <div class="prayer-main-display">
-                <div class="location-and-date">
-                    <h3 id="prayer-location-display"><i class="fas fa-map-marker-alt"></i> جاري تحديد الموقع...</h3>
-                    <p id="hijri-date-display">التاريخ الهجري</p>
+                <div id="prayer-initial-prompt" class="prayer-initial-prompt">
+                    <i class="fas fa-globe-asia"></i>
+                    <h2>أوقات الصلاة حول العالم</h2>
+                    <p>ابدأ بتحديد موقعك لعرض أوقات الصلاة الدقيقة.</p>
+                    <p class="prompt-hint">استخدم القائمة لاختيار دولتك ومدينتك، أو اسمح للمتصفح بتحديد موقعك تلقائياً.</p>
                 </div>
-                <div class="next-prayer-info-modern">
-                    <p>الصلاة القادمة</p>
-                    <h2 id="next-prayer-name">--</h2>
+
+                <div id="prayer-main-content" class="hidden">
+                    <div class="location-and-date">
+                        <h3 id="prayer-location-display"><i class="fas fa-map-marker-alt"></i> <span>جاري تحديد الموقع...</span></h3>
+                        <p id="hijri-date-display">التاريخ الهجري</p>
+                    </div>
+                    <div class="next-prayer-info-modern">
+                        <p>الصلاة القادمة</p>
+                        <h2 id="next-prayer-name">--</h2>
+                    </div>
                     <div id="countdown-timer" class="countdown-timer">
-                        <div class="time-part">
-                            <span id="countdown-h">00</span>
-                            <small>ساعة</small>
+                        <div class="time-part seconds">
+                            <svg class="countdown-svg" viewBox="0 0 100 100">
+                                <circle class="countdown-bg-circle" cx="50" cy="50" r="45"></circle>
+                                <circle id="countdown-s-ring" class="countdown-fg-circle" cx="50" cy="50" r="45"></circle>
+                            </svg>
+                            <div class="time-text">
+                                <span id="countdown-s">00</span>
+                                <small>ثانية</small>
+                            </div>
                         </div>
-                        <div class="time-part">
-                            <span id="countdown-m">00</span>
-                            <small>دقيقة</small>
+                        <div class="time-part minutes">
+                             <svg class="countdown-svg" viewBox="0 0 100 100">
+                                <circle class="countdown-bg-circle" cx="50" cy="50" r="45"></circle>
+                                <circle id="countdown-m-ring" class="countdown-fg-circle" cx="50" cy="50" r="45"></circle>
+                            </svg>
+                            <div class="time-text">
+                                <span id="countdown-m">00</span>
+                                <small>دقيقة</small>
+                            </div>
                         </div>
-                        <div class="time-part">
-                            <span id="countdown-s">00</span>
-                            <small>ثانية</small>
+                        <div class="time-part hours">
+                             <svg class="countdown-svg" viewBox="0 0 100 100">
+                                <circle class="countdown-bg-circle" cx="50" cy="50" r="45"></circle>
+                                <circle id="countdown-h-ring" class="countdown-fg-circle" cx="50" cy="50" r="45"></circle>
+                            </svg>
+                            <div class="time-text">
+                                <span id="countdown-h">00</span>
+                                <small>ساعة</small>
+                            </div>
                         </div>
                     </div>
-                </div>
-                 <div class="prayer-timeline">
-                    <!-- سيتم تعبئتها بواسطة JS -->
+                    <div class="prayer-timeline">
+                        <!-- سيتم تعبئتها بواسطة JS -->
+                    </div>
                 </div>
             </div>
 
             <div class="prayer-sidebar">
                 <div class="location-controls-modern">
-                    <h4>تغيير الموقع</h4>
+                    <h4><i class="fas fa-map-location-dot"></i> تغيير الموقع</h4>
                     <select id="country-select" class="location-input-modern">
                         <option value="SA">المملكة العربية السعودية</option>
                         <option value="EG">مصر</option>
@@ -197,7 +224,7 @@
                     </select>
                 </div>
                 <div class="all-prayer-times">
-                    <h4>أوقات اليوم</h4>
+                    <h4><i class="fas fa-calendar-day"></i> أوقات اليوم</h4>
                     <ul id="prayer-times-list">
                         <!-- سيتم تعبئتها بواسطة JS -->
                     </ul>

@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const elements = {
         countrySelect: document.getElementById('country-select'),
         citySelect: document.getElementById('city-select'),
-        locationDisplay: document.getElementById('prayer-location-display'),
+        locationDisplay: document.getElementById('prayer-location-display').querySelector('span'),
         hijriDateDisplay: document.getElementById('hijri-date-display'),
         nextPrayerName: document.getElementById('next-prayer-name'),
         countdownH: document.getElementById('countdown-h'),
@@ -12,6 +12,11 @@ document.addEventListener("DOMContentLoaded", function () {
         prayerTimesList: document.getElementById('prayer-times-list'),
         prayerSection: document.getElementById('prayer-times'),
         prayerTimeline: document.querySelector('.prayer-timeline'),
+        prayerInitialPrompt: document.getElementById('prayer-initial-prompt'),
+        prayerMainContent: document.getElementById('prayer-main-content'),
+        countdownHRing: document.getElementById('countdown-h-ring'),
+        countdownMRing: document.getElementById('countdown-m-ring'),
+        countdownSRing: document.getElementById('countdown-s-ring'),
     };
 
     // --- State ---
@@ -19,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let countdownInterval = null;
     let currentCity = 'Riyadh';
     let currentCountry = 'SA';
+    let countdownRingCircumference;
 
     // List of cities by country
     const citiesByCountry = {
@@ -39,6 +45,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- Initialization ---
     function init() {
         setupEventListeners();
+        elements.prayerMainContent.classList.add('hidden');
+        elements.prayerInitialPrompt.classList.remove('hidden');
+        
+        // Setup for SVG rings
+        [elements.countdownHRing, elements.countdownMRing, elements.countdownSRing].forEach(ring => {
+            if(ring) {
+                const radius = ring.r.baseVal.value;
+                countdownRingCircumference = 2 * Math.PI * radius;
+                ring.style.strokeDasharray = `${countdownRingCircumference} ${countdownRingCircumference}`;
+                ring.style.strokeDashoffset = countdownRingCircumference;
+            }
+        });
+        
         loadInitialData();
     }
 
@@ -135,17 +154,22 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateUI(data, locationName) {
         if (!data || !data.timings || !data.date || !data.date.hijri) {
             showError("بيانات أوقات الصلاة غير مكتملة");
+            elements.prayerMainContent.classList.add('hidden');
+            elements.prayerInitialPrompt.classList.remove('hidden');
             return;
         }
+
+        elements.prayerInitialPrompt.classList.add('hidden');
+        elements.prayerMainContent.classList.remove('hidden');
+
         updateLocationAndDate(locationName, data.date.hijri);
         updatePrayerList(data.timings);
         updateTimeline(data.timings);
         startCountdown(data.timings);
-        updateDynamicBackground(data.timings);
     }
     
     function updateLocationAndDate(locationName, hijriDate) {
-        elements.locationDisplay.innerHTML = `${locationName} <i class="fas fa-map-marker-alt"></i>`;
+        elements.locationDisplay.textContent = locationName;
         elements.hijriDateDisplay.textContent = `${hijriDate.weekday.ar}، ${hijriDate.day} ${hijriDate.month.ar} ${hijriDate.year}`;
     }
 
@@ -205,38 +229,6 @@ document.addEventListener("DOMContentLoaded", function () {
         indicator.style.right = `${indicatorPosition}%`;
     }
 
-    function updateDynamicBackground(timings) {
-        const now = new Date();
-        const currentTime = now.getTime();
-        
-        const getTimeOrZero = (timeStr) => {
-            const date = parseTime(timeStr);
-            return date ? date.getTime() : 0;
-        };
-
-        const fajrTime = getTimeOrZero(timings.Fajr);
-        const sunriseTime = getTimeOrZero(timings.Sunrise);
-        const dhuhrTime = getTimeOrZero(timings.Dhuhr);
-        const asrTime = getTimeOrZero(timings.Asr);
-        const maghribTime = getTimeOrZero(timings.Maghrib);
-        const ishaTime = getTimeOrZero(timings.Isha);
-
-        let newClass = 'theme-isha'; // Default
-        if (fajrTime && sunriseTime && currentTime >= fajrTime && currentTime < sunriseTime) {
-            newClass = 'theme-fajr';
-        } else if (sunriseTime && dhuhrTime && currentTime >= sunriseTime && currentTime < dhuhrTime) {
-            newClass = 'theme-sunrise';
-        } else if (dhuhrTime && asrTime && currentTime >= dhuhrTime && currentTime < asrTime) {
-            newClass = 'theme-dhuhr';
-        } else if (asrTime && maghribTime && currentTime >= asrTime && currentTime < maghribTime) {
-            newClass = 'theme-asr';
-        } else if (maghribTime && ishaTime && currentTime >= maghribTime && currentTime < ishaTime) {
-            newClass = 'theme-maghrib';
-        }
-        
-        elements.prayerSection.className = `content-section active ${newClass}`;
-    }
-
     // --- Countdown Logic ---
     function startCountdown(timings) {
         if (countdownInterval) clearInterval(countdownInterval);
@@ -253,6 +245,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!nextPrayer) {
                 elements.nextPrayerName.textContent = "انتهى اليوم";
+                 if (countdownRingCircumference) {
+                    elements.countdownSRing.style.strokeDashoffset = countdownRingCircumference;
+                    elements.countdownMRing.style.strokeDashoffset = countdownRingCircumference;
+                    elements.countdownHRing.style.strokeDashoffset = countdownRingCircumference;
+                }
                 return;
             }
 
@@ -268,6 +265,15 @@ document.addEventListener("DOMContentLoaded", function () {
             elements.countdownH.textContent = String(hours).padStart(2, '0');
             elements.countdownM.textContent = String(minutes).padStart(2, '0');
             elements.countdownS.textContent = String(seconds).padStart(2, '0');
+
+            if (countdownRingCircumference) {
+                const sOffset = countdownRingCircumference * (1 - (seconds / 60));
+                const mOffset = countdownRingCircumference * (1 - (minutes / 60));
+                const hOffset = countdownRingCircumference * (1 - (hours / 24)); // Assuming max 24 hours
+                elements.countdownSRing.style.strokeDashoffset = sOffset;
+                elements.countdownMRing.style.strokeDashoffset = mOffset;
+                elements.countdownHRing.style.strokeDashoffset = hOffset;
+            }
 
             document.querySelectorAll('#prayer-times-list li').forEach(li => li.classList.remove('active'));
             const activePrayerEl = document.getElementById(`prayer-${nextPrayer.nameEn}`);
