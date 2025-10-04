@@ -238,7 +238,11 @@ document.addEventListener("DOMContentLoaded", function () {
     function showTafsir(ayah, tafsir, surahName) {
         if (!ayah) return;
         elements.tafsirModalTitle.textContent = `تفسير الآية ${ayah.verse_number} - سورة ${surahName}`;
-        elements.tafsirModalBody.innerHTML = tafsir ? `<p>${tafsir.text}</p>` : `<p>لا يتوفر تفسير لهذه الآية.</p>`;
+        if (tafsir && tafsir.text) {
+             elements.tafsirModalBody.innerHTML = `<p>${tafsir.text}</p>`;
+        } else {
+            elements.tafsirModalBody.innerHTML = `<p>لا يتوفر تفسير لهذه الآية.</p>`;
+        }
         elements.tafsirModal.classList.remove('hidden');
     }
 
@@ -280,6 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await api.getChapterRecitation(reciterId, surahId);
             if (data && data.audio_file && data.audio_file.audio_url) {
                 elements.audioPlayer.src = data.audio_file.audio_url;
+                elements.audioPlayer.load();
                 elements.audioPlayerContainer.style.display = 'grid';
             } else {
                 throw new Error('Invalid data format from API');

@@ -1,5 +1,5 @@
 /* أساسيات التصميم */
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Amiri:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap');
 
 :root {
     --primary-color: #1e3a5f;
@@ -24,6 +24,7 @@
     --hadith-border: rgba(46, 204, 113, 0.2);
     --radio-bg: rgba(52, 152, 219, 0.1);
     --radio-border: rgba(52, 152, 219, 0.2);
+    --font-quran: 'Aref Ruqaa', serif;
 }
 
 * {
@@ -1163,14 +1164,15 @@ a:hover {
 }
 
 .reader-content {
-    background: #fdfaf6;
-    color: #333;
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--text-color);
     padding: 2.5rem;
     border-radius: var(--border-radius-md);
     max-height: 65vh;
     overflow-y: auto;
-    font-family: 'Amiri', serif;
+    font-family: var(--font-quran);
     scroll-behavior: smooth;
+    border: 1px solid var(--card-border);
 }
 
 .reader-bismillah {
@@ -1178,14 +1180,14 @@ a:hover {
     font-size: 2rem;
     margin-bottom: 2rem;
     font-weight: bold;
-    color: #222;
 }
 
-/* New Quran Reader Styles */
 .reader-text-container {
-    font-size: 2.2rem;
-    line-height: 2.8;
+    font-size: 1.8rem;
+    line-height: 2.6;
     text-align: justify;
+    direction: rtl;
+    word-spacing: 3px;
 }
 .ayah-paragraph {
     word-spacing: 2px;
@@ -1204,21 +1206,16 @@ a:hover {
     align-items: center;
     justify-content: center;
     font-family: 'Tajawal', sans-serif;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: bold;
-    color: #fdfaf6;
-    background-color: var(--primary-color);
-    width: 32px;
-    height: 32px;
+    color: var(--accent-color);
+    background-color: transparent;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     margin: 0 8px;
     vertical-align: middle;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3e%3cpath fill='%231e3a5f' d='M50,0,61.2,19.5,80.9,22.1,67.6,37.3l4.4,20.3L50,47.5,28.1,57.6l4.4-20.3L19.1,22.1,38.8,19.5Z' transform='scale(1.2) translate(-8, -8)'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 150%;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 2px solid var(--accent-color);
 }
 
 
@@ -1235,8 +1232,16 @@ a:hover {
 }
 #continuous-audio-player {
     width: 100%;
-    filter: invert(1) hue-rotate(180deg) contrast(0.8);
 }
+#continuous-audio-player::-webkit-media-controls-panel {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+#continuous-audio-player::-webkit-media-controls-play-button,
+#continuous-audio-player::-webkit-media-controls-mute-button {
+    background-color: var(--accent-color);
+    border-radius: 50%;
+}
+
 .player-info {
     text-align: right;
 }
@@ -1279,8 +1284,10 @@ a:hover {
     animation: fadeIn 0.3s ease;
 }
 .modal-content {
-    background: #f8f5ef;
-    color: #333;
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(15px);
     border-radius: var(--border-radius-md);
     width: 90%;
     max-width: 700px;
@@ -1295,25 +1302,32 @@ a:hover {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-bottom: 1px solid var(--card-border);
 }
 #tafsir-modal-title {
     margin: 0;
     font-size: 1.5rem;
     font-family: 'Amiri', serif;
+    color: var(--accent-color);
 }
 .modal-close-btn {
     background: transparent;
     border: none;
     font-size: 2rem;
     cursor: pointer;
-    color: #888;
+    color: var(--light-text);
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+.modal-close-btn:hover {
+    opacity: 1;
 }
 .modal-body {
     padding: 1.5rem;
     overflow-y: auto;
     font-size: 1.2rem;
     line-height: 2;
+    color: var(--light-text);
 }
 /* Skeleton Loaders */
 .skeleton-card {
