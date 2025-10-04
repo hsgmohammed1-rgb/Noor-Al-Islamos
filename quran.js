@@ -198,7 +198,17 @@ document.addEventListener("DOMContentLoaded", function () {
         // Load Juzs from network, but don't block UI
         try {
             const juzsRes = await api.getJuzs();
-            state.allJuzs = juzsRes.juzs;
+            
+            // Use a map to ensure uniqueness by juz_number, preventing duplicates
+            const uniqueJuzsMap = new Map();
+            if (juzsRes && juzsRes.juzs) {
+                juzsRes.juzs.forEach(juz => {
+                    uniqueJuzsMap.set(juz.juz_number, juz);
+                });
+            }
+            const uniqueJuzs = Array.from(uniqueJuzsMap.values());
+            
+            state.allJuzs = uniqueJuzs;
             renderJuzList(state.allJuzs);
         } catch (juzError) {
             console.error("Failed to load Juz data:", juzError);
@@ -300,7 +310,10 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderJuzList(juzs) {
         elements.juzList.innerHTML = '';
         juzs.forEach(juz => {
-            const surahsInJuz = Object.keys(juz.verse_mapping).map(surahId => {
+            // Sort surah IDs numerically to ensure correct order
+            const surahIds = Object.keys(juz.verse_mapping).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    
+            const surahsInJuz = surahIds.map(surahId => {
                 const surah = state.allSurahs.find(s => s.id == surahId);
                 const verseRange = juz.verse_mapping[surahId];
                 const startVerse = verseRange.split('-')[0];
@@ -311,7 +324,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     range: verseRange
                 };
             });
-
+    
             const surahsHtml = surahsInJuz.map(s => `
                 <div class="surah-in-juz" data-surah-id="${s.id}" data-ayah="${s.startVerse}">
                     <span>${s.name}</span>
@@ -320,14 +333,14 @@ document.addEventListener("DOMContentLoaded", function () {
             `).join('');
             
             const firstSurahName = surahsInJuz.length > 0 ? surahsInJuz[0].name : '';
-
+    
             const card = document.createElement('div');
             card.className = 'juz-card';
             card.dataset.juzId = juz.juz_number;
             card.innerHTML = `
                 <div class="juz-card-header">
                     <div>
-                        <h3>الجزء ${juz.juz_number}</h3>
+                        <h3>الجزء ${juz.juz_number.toLocaleString('ar-EG')}</h3>
                         <p>يبدأ من ${firstSurahName}</p>
                     </div>
                     <i class="fas fa-chevron-down"></i>
