@@ -30,13 +30,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const state = {
         allSurahs: [],
         allJuzs: [],
-        reciters: [],
         currentSurahData: null,
-        currentReciterId: '7', // Mishary Rashid Alafasy
-        audioTimestamps: null,
-        audioSyncInterval: null,
+        currentReciterId: '7', // Default: Mishary Rashid Alafasy
         lastRead: JSON.parse(localStorage.getItem('quranLastRead')) || null,
-        bookmarks: JSON.parse(localStorage.getItem('quranBookmarks')) || {},
         isInitialized: false,
     };
 
@@ -51,8 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
         getChapter: (id) => fetch(`${API_BASE}/chapters/${id}?language=ar`).then(res => res.json()),
         getVerses: (id) => fetch(`${API_BASE}/quran/verses/uthmani?chapter_number=${id}`).then(res => res.json()),
         getTafsir: (id) => fetch(`${API_BASE}/quran/tafsirs/${TAFSIR_ID}?chapter_number=${id}`).then(res => res.json()),
-        getRecitations: () => fetch(`${API_BASE}/resources/recitations?language=ar`).then(res => res.json()),
-        getTimestamps: (reciterId, chapterId) => fetch(`${API_BASE}/quran/recitations/${reciterId}/by_chapter/${chapterId}?word_timing=true`).then(res => res.json()),
+        getChapterRecitation: (reciterId, chapterId) => fetch(`${API_BASE}/chapter_recitations/${reciterId}/${chapterId}`).then(res => res.json()),
     };
 
     // --- Core Functions ---
@@ -65,15 +60,13 @@ document.addEventListener("DOMContentLoaded", function () {
         renderLastRead();
 
         try {
-            const [surahsRes, juzsRes, recitationsRes] = await Promise.all([
+            const [surahsRes, juzsRes] = await Promise.all([
                 api.getChapters(),
                 api.getJuzs(),
-                api.getRecitations()
             ]);
 
             state.allSurahs = surahsRes.chapters;
             state.allJuzs = juzsRes.juzs;
-            state.reciters = recitationsRes.recitations.filter(r => r.style);
 
             populateReciterSelect();
             renderSurahList(state.allSurahs);
@@ -91,7 +84,6 @@ document.addEventListener("DOMContentLoaded", function () {
         elements.tafsirModalClose.addEventListener('click', hideTafsirModal);
         elements.tafsirModal.addEventListener('click', (e) => e.target === elements.tafsirModal && hideTafsirModal());
         elements.reciterSelect.addEventListener('change', handleReciterChange);
-        elements.audioPlayer.addEventListener('timeupdate', syncAyahWithAudio);
         elements.audioPlayer.addEventListener('ended', stopAudio);
         elements.tabs.forEach(tab => tab.addEventListener('click', handleTabClick));
         if (elements.lastRead) elements.lastRead.addEventListener('click', () => {
@@ -168,7 +160,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
                 <i class="fas fa-chevron-left"></i>
             `;
-            // Note: Juz click functionality can be complex. Starting with Surah 1 of the Juz.
             card.addEventListener('click', () => loadSurah(Object.keys(juz.verse_mapping)[0], juz.verse_mapping[Object.keys(juz.verse_mapping)[0]].split('-')[0]));
             elements.juzList.appendChild(card);
         });
@@ -204,69 +195,48 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderReader(data, ayahToScrollTo) {
         elements.readerSurahName.textContent = `سورة ${data.name_arabic}`;
         elements.readerSurahInfo.textContent = `${data.revelation_place === 'makkah' ? 'مكية' : 'مدنية'} - ${data.verses_count} آيات`;
-        elements.readerContent.innerHTML = '';
 
+        const readerTextContainer = document.createElement('div');
+        readerTextContainer.className = 'reader-text-container';
+        readerTextContainer.lang = 'ar';
+
+        let fullTextHTML = '';
         if (data.bismillah_pre) {
-            const bismillah = document.createElement('div');
-            bismillah.className = 'reader-bismillah';
-            bismillah.textContent = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
-            elements.readerContent.appendChild(bismillah);
+            fullTextHTML += `<div class="reader-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
         }
-
+        
+        fullTextHTML += '<p class="ayah-paragraph">';
         data.verses.forEach(ayah => {
-            const isBookmarked = state.bookmarks[ayah.verse_key];
-            const ayahContainer = document.createElement('div');
-            ayahContainer.className = 'ayah-container';
-            ayahContainer.id = `ayah-${ayah.verse_key}`;
-            
-            ayahContainer.innerHTML = `
-                <div class="ayah-header">
-                    <div class="ayah-number-badge">${ayah.verse_number}</div>
-                    <div class="ayah-actions">
-                        <button class="ayah-action-btn" data-action="play" title="تشغيل الآية"><i class="fas fa-play"></i></button>
-                        <button class="ayah-action-btn" data-action="tafsir" title="عرض التفسير"><i class="fas fa-book-open"></i></button>
-                        <button class="ayah-action-btn ${isBookmarked ? 'bookmarked' : ''}" data-action="bookmark" title="حفظ الآية"><i class="fas fa-bookmark"></i></button>
-                        <button class="ayah-action-btn" data-action="copy" title="نسخ الآية"><i class="fas fa-copy"></i></button>
-                    </div>
-                </div>
-                <p class="ayah-text-arabic">${ayah.text_uthmani}</p>
-            `;
-            
-            ayahContainer.querySelector('.ayah-actions').addEventListener('click', (e) => handleAyahAction(e, ayah, data));
-            elements.readerContent.appendChild(ayahContainer);
+            fullTextHTML += `<span class="ayah-text-segment" data-verse-key="${ayah.verse_key}">${ayah.text_uthmani}</span>`;
+            fullTextHTML += `<span class="ayah-end-symbol">${ayah.verse_number.toLocaleString('ar-EG')}</span>`;
+        });
+        fullTextHTML += '</p>';
+
+        readerTextContainer.innerHTML = fullTextHTML;
+        elements.readerContent.innerHTML = '';
+        elements.readerContent.appendChild(readerTextContainer);
+
+        readerTextContainer.addEventListener('click', (e) => {
+            const ayahSegment = e.target.closest('.ayah-text-segment');
+            if (ayahSegment) {
+                const verseKey = ayahSegment.dataset.verseKey;
+                const ayahData = data.verses.find(v => v.verse_key === verseKey);
+                const tafsirData = data.tafsirs.find(t => t.verse_key === verseKey);
+                showTafsir(ayahData, tafsirData, data.name_arabic);
+            }
         });
 
         // Save last read and scroll
         saveLastRead(data.id, ayahToScrollTo);
-        const targetAyah = document.getElementById(`ayah-${data.id}:${ayahToScrollTo}`);
+        const targetAyah = readerTextContainer.querySelector(`[data-verse-key="${data.id}:${ayahToScrollTo}"]`);
         if(targetAyah) {
             setTimeout(() => targetAyah.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
         }
     }
 
-    function handleAyahAction(e, ayah, surahData) {
-        const button = e.target.closest('.ayah-action-btn');
-        if (!button) return;
-        const tafsir = surahData.tafsirs.find(t => t.verse_key === ayah.verse_key);
-
-        switch(button.dataset.action) {
-            case 'play':
-                playSingleAyah(ayah.verse_key);
-                break;
-            case 'tafsir':
-                showTafsir(ayah, tafsir, surahData.name_arabic);
-                break;
-            case 'copy':
-                copyAyah(ayah, surahData.name_arabic);
-                break;
-            case 'bookmark':
-                toggleBookmark(ayah.verse_key, button);
-                break;
-        }
-    }
-
     // --- Ayah Actions ---
     function showTafsir(ayah, tafsir, surahName) {
+        if (!ayah) return;
         elements.tafsirModalTitle.textContent = `تفسير الآية ${ayah.verse_number} - سورة ${surahName}`;
         elements.tafsirModalBody.innerHTML = tafsir ? `<p>${tafsir.text}</p>` : `<p>لا يتوفر تفسير لهذه الآية.</p>`;
         elements.tafsirModal.classList.remove('hidden');
@@ -276,36 +246,18 @@ document.addEventListener("DOMContentLoaded", function () {
         elements.tafsirModal.classList.add('hidden');
     }
 
-    function copyAyah(ayah, surahName) {
-        const text = `﴿${ayah.text_uthmani}﴾ [سورة ${surahName} : ${ayah.verse_number}]`;
-        navigator.clipboard.writeText(text).then(() => showNotification('تم نسخ الآية')).catch(() => showNotification('فشل النسخ', 'error'));
-    }
-
-    function toggleBookmark(verseKey, button) {
-        if(state.bookmarks[verseKey]) {
-            delete state.bookmarks[verseKey];
-            button.classList.remove('bookmarked');
-            showNotification('تمت إزالة العلامة المرجعية');
-        } else {
-            state.bookmarks[verseKey] = true;
-            button.classList.add('bookmarked');
-            showNotification('تم حفظ الآية');
-        }
-        localStorage.setItem('quranBookmarks', JSON.stringify(state.bookmarks));
-    }
-
     // --- Audio Logic ---
     function populateReciterSelect() {
-        const preferred = ["7", "3", "4", "1"]; // Mishary, Sudais, Ghamdi, Basfar
-        const sorted = state.reciters.sort((a, b) => {
-            const aPref = preferred.indexOf(String(a.id));
-            const bPref = preferred.indexOf(String(b.id));
-            if (aPref > -1 && bPref > -1) return aPref - bPref;
-            if (aPref > -1) return -1;
-            if (bPref > -1) return 1;
-            return a.reciter_name.localeCompare(b.reciter_name);
-        });
-        elements.reciterSelect.innerHTML = sorted.map(r => `<option value="${r.id}">${r.reciter_name}</option>`).join('');
+        const reciters = [
+            { id: '7', name: 'مشاري راشد العفاسي' },
+            { id: '3', name: 'عبدالرحمن السديس' },
+            { id: '4', name: 'سعد الغامدي' },
+            { id: '5', name: 'محمود خليل الحصري' },
+            { id: '8', name: 'سعود الشريم' },
+            { id: '9', name: 'محمد صديق المنشاوي' }
+        ];
+        elements.reciterSelect.innerHTML = reciters.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+        state.currentReciterId = '7';
         elements.reciterSelect.value = state.currentReciterId;
     }
 
@@ -319,72 +271,47 @@ document.addEventListener("DOMContentLoaded", function () {
     async function loadSurahAudio(surahId) {
         try {
             stopAudio();
-            const reciterName = state.reciters.find(r => r.id == state.currentReciterId)?.reciter_name || '';
+            const reciterId = state.currentReciterId;
+            const reciterName = elements.reciterSelect.options[elements.reciterSelect.selectedIndex].text;
+            
             elements.playerReciterName.textContent = reciterName;
             elements.playerSurahName.textContent = `سورة ${state.currentSurahData.name_arabic}`;
-            
-            const audioData = await api.getTimestamps(state.currentReciterId, surahId);
-            if (audioData.audio_files && audioData.audio_files[0].audio_url) {
-                elements.audioPlayer.src = audioData.audio_files[0].audio_url;
-                state.audioTimestamps = audioData.audio_files[0].timestamps;
+
+            const data = await api.getChapterRecitation(reciterId, surahId);
+            if (data && data.audio_file && data.audio_file.audio_url) {
+                elements.audioPlayer.src = data.audio_file.audio_url;
                 elements.audioPlayerContainer.style.display = 'grid';
             } else {
-                 throw new Error('Audio URL or timestamps not found');
+                throw new Error('Invalid data format from API');
             }
         } catch (error) {
-            console.error("Failed to load audio:", error);
-            elements.audioPlayerContainer.style.display = 'none';
-            showNotification('تعذر تحميل الملف الصوتي لهذا القارئ', 'error');
+            console.error("Failed to load audio from main API:", error);
+            showNotification('فشل تحميل الصوت من المصدر الرئيسي، سيتم استخدام مصدر بديل.', 'warning');
+            useFallbackAudioSource(surahId);
         }
     }
-
-    function playSingleAyah(verseKey) {
-        if (!state.audioTimestamps) {
-            showNotification('بيانات الصوت غير متاحة', 'warning');
-            return;
-        }
-        const ayahTimestamp = state.audioTimestamps.find(t => t.verse_key === verseKey);
-        if (ayahTimestamp) {
-            stopAudio();
-            elements.audioPlayer.currentTime = ayahTimestamp.start_time / 1000;
-            elements.audioPlayer.play();
-
-            const endListener = () => {
-                if (elements.audioPlayer.currentTime >= ayahTimestamp.end_time / 1000) {
-                    elements.audioPlayer.pause();
-                    elements.audioPlayer.removeEventListener('timeupdate', endListener);
-                }
-            };
-            elements.audioPlayer.addEventListener('timeupdate', endListener);
-        }
-    }
-
-    function syncAyahWithAudio() {
-        if (!state.audioTimestamps || elements.audioPlayer.paused) return;
-        const currentTimeMs = elements.audioPlayer.currentTime * 1000;
+    
+    function useFallbackAudioSource(surahNumber) {
+        const reciterId = state.currentReciterId;
+        const reciterMap = {
+            '7': 'Alafasy',
+            '3': 'Abdurrahmaan_As-Sudais',
+            '4': 'Ghamadi',
+            '5': 'Husary',
+            '8': 'Shuraym',
+            '9': 'Minshawy_Murattal'
+        };
+        const reciterFolder = reciterMap[reciterId] || 'Alafasy';
+        const formattedSurahNumber = String(surahNumber).padStart(3, '0');
         
-        const currentAyah = state.audioTimestamps.find(t => currentTimeMs >= t.start_time && currentTimeMs <= t.end_time);
-        
-        document.querySelectorAll('.ayah-container.active').forEach(el => el.classList.remove('active'));
-        
-        if (currentAyah) {
-            const ayahEl = document.getElementById(`ayah-${currentAyah.verse_key}`);
-            if (ayahEl) {
-                ayahEl.classList.add('active');
-                // Scroll into view if not visible
-                const rect = ayahEl.getBoundingClientRect();
-                const contentRect = elements.readerContent.getBoundingClientRect();
-                if (rect.top < contentRect.top || rect.bottom > contentRect.bottom) {
-                    ayahEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                saveLastRead(state.currentSurahData.id, currentAyah.verse_key.split(':')[1]);
-            }
-        }
+        elements.audioPlayer.src = `https://download.quranicaudio.com/quran/${reciterFolder}/${formattedSurahNumber}.mp3`;
+        elements.audioPlayerContainer.style.display = 'grid';
+        elements.audioPlayer.load();
     }
     
     function stopAudio() {
         elements.audioPlayer.pause();
-        document.querySelectorAll('.ayah-container.active').forEach(el => el.classList.remove('active'));
+        elements.audioPlayer.currentTime = 0;
     }
 
     // --- Persistence & Utilities ---

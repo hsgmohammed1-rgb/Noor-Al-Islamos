@@ -1181,65 +1181,46 @@ a:hover {
     color: #222;
 }
 
-.ayah-container {
-    padding: 1rem 0;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-    transition: background-color 0.5s;
+/* New Quran Reader Styles */
+.reader-text-container {
+    font-size: 2.2rem;
+    line-height: 2.8;
+    text-align: justify;
+}
+.ayah-paragraph {
+    word-spacing: 2px;
+}
+.ayah-text-segment {
+    cursor: pointer;
+    transition: background-color 0.3s;
     border-radius: var(--border-radius-sm);
+    padding: 0 2px;
 }
-.ayah-container.active {
-    background-color: rgba(230, 126, 34, 0.1);
+.ayah-text-segment:hover {
+    background-color: rgba(230, 126, 34, 0.15);
 }
-
-.ayah-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-.ayah-number-badge {
-    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3e%3cpath fill='%231e3a5f' d='M50,0,93.3,25V75L50,100,6.7,75V25Z'/%3e%3c/svg%3e") no-repeat center center;
-    background-size: contain;
-    color: white;
-    width: 40px;
-    height: 40px;
-    display: flex;
+.ayah-end-symbol {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 1rem;
     font-family: 'Tajawal', sans-serif;
-}
-.ayah-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-.ayah-action-btn {
-    background: rgba(0,0,0,0.05);
-    border: none;
-    width: 35px;
-    height: 35px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fdfaf6;
+    background-color: var(--primary-color);
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    cursor: pointer;
-    color: #555;
-    transition: all 0.2s;
-}
-.ayah-action-btn:hover {
-    background: var(--accent-color);
-    color: white;
-}
-.ayah-action-btn.bookmarked {
-    background: var(--accent-color);
-    color: white;
+    margin: 0 8px;
+    vertical-align: middle;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3e%3cpath fill='%231e3a5f' d='M50,0,61.2,19.5,80.9,22.1,67.6,37.3l4.4,20.3L50,47.5,28.1,57.6l4.4-20.3L19.1,22.1,38.8,19.5Z' transform='scale(1.2) translate(-8, -8)'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 150%;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
-
-.ayah-text-arabic {
-    font-size: 2.2rem;
-    line-height: 2.5;
-    text-align: justify;
-    padding: 0 1rem;
-}
 
 .reader-audio-player-new {
     display: grid;
