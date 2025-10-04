@@ -277,7 +277,7 @@ a:hover {
     display: grid;
     grid-template-columns: 300px 1fr;
     gap: 2rem;
-    max-height: 850px;
+    height: 75vh;
 }
 
 .azkar-sidebar {
