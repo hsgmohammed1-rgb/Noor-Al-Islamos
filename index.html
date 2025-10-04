@@ -225,33 +225,46 @@
                         <input type="text" id="quran-search-input-new" placeholder="ابحث عن سورة...">
                     </div>
                 </div>
-                <div id="quran-surah-grid" class="quran-surah-grid">
-                    <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> <span>جاري تحميل قائمة السور...</span></div>
+                <div id="quran-last-read" class="quran-last-read hidden">
+                    <!-- Last Read content will be here -->
+                </div>
+                 <div class="quran-view-tabs">
+                    <button class="tab-btn active" data-view="surah">السور</button>
+                    <button class="tab-btn" data-view="juz">الأجزاء</button>
+                </div>
+                <div id="quran-surah-grid" class="quran-surah-grid quran-grid-view active">
+                    <!-- Skeleton loaders or Surah cards will be here -->
+                </div>
+                 <div id="quran-juz-list" class="quran-juz-list quran-grid-view">
+                    <!-- Skeleton loaders or Juz list will be here -->
                 </div>
             </div>
     
-        <!-- Reader View -->
+            <!-- Reader View -->
             <div id="quran-reader-view" class="hidden">
-                <div class="reader-header">
-                    <button id="reader-back-btn" class="reader-header-btn" title="العودة لقائمة السور"><i class="fas fa-arrow-right"></i></button>
+                <div class="reader-header-new">
+                    <button id="reader-back-btn" class="reader-header-btn" title="العودة"><i class="fas fa-arrow-right"></i></button>
                     <div class="reader-surah-title">
                         <h3 id="reader-surah-name"></h3>
                         <p id="reader-surah-info"></p>
                     </div>
-                    <div class="reader-settings">
-                        <select id="reader-reciter-select">
-                            <!-- Reciters populated by JS -->
-                        </select>
-                    </div>
+                    <button class="reader-header-btn" title="الإعدادات"><i class="fas fa-cog"></i></button> <!-- Placeholder -->
                 </div>
                 <div id="reader-content" class="reader-content">
                     <!-- Bismillah and Ayahs will be generated here -->
                 </div>
-                <div id="reader-audio-player" class="reader-audio-player" style="display: none;">
+                <div id="reader-audio-player" class="reader-audio-player-new" style="display: none;">
                      <div class="player-info">
-                        <span id="player-reciter-name"></span> - <span id="player-surah-name"></span>
+                        <div id="player-surah-name"></div>
+                        <div id="player-reciter-name"></div>
                      </div>
                      <audio id="continuous-audio-player" controls></audio>
+                     <div class="reciter-selection">
+                        <i class="fas fa-user-circle"></i>
+                        <select id="reader-reciter-select">
+                            <!-- Reciters populated by JS -->
+                        </select>
+                     </div>
                 </div>
             </div>
         </div>
