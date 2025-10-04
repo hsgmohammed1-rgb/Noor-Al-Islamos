@@ -326,11 +326,19 @@ a:hover {
     min-height: 0;
 }
 
+.category-item-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
 .category-btn-new {
+    flex-grow: 1;
     display: flex;
     align-items: center;
     gap: 1rem;
-    width: 100%;
     padding: 12px;
     background: transparent;
     border: none;
@@ -355,6 +363,24 @@ a:hover {
 
 .category-btn-new.active i, .category-btn-new:hover i {
     color: var(--accent-color);
+}
+
+.category-play-btn {
+    flex-shrink: 0;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 0.9rem !important;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--card-border);
+    color: var(--light-text);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.category-play-btn:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: scale(1.1);
 }
 
 .azkar-main-content {
