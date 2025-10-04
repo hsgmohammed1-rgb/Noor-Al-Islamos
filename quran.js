@@ -161,33 +161,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- API Functions ---
     const api = {
         getJuzs: () => fetch(`${API_BASE_QURAN_COM}/juzs`).then(res => res.json()),
-        getSurahFromXML: async (id) => {
-            const paddedId = String(id).padStart(3, '0');
-            const response = await fetch(`https://everyayah.com/data/XML/Arabic/Quran_Arabic_${paddedId}.xml`);
-            if (!response.ok) throw new Error(`Failed to fetch Quran XML for Surah ${id}`);
+        getSurahText: async (id) => {
+            const response = await fetch(`${API_BASE_QURAN_COM}/quran/verses/uthmani?chapter_number=${id}`);
+            if (!response.ok) throw new Error(`Failed to fetch Quran text for Surah ${id}`);
+            const data = await response.json();
             
-            const xmlText = await response.text();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "application/xml");
-
-            const errorNode = xmlDoc.querySelector("parsererror");
-            if (errorNode) {
-                console.error("XML parsing error:", errorNode.textContent);
-                throw new Error(`Failed to parse Quran XML for Surah ${id}`);
-            }
-
-            const suraNode = xmlDoc.querySelector('sura');
-            if (!suraNode) throw new Error(`Invalid XML format for Surah ${id}`);
-
-            const ayahs = Array.from(suraNode.querySelectorAll('aya')).map(ayaNode => ({
-                verse_key: `${suraNode.getAttribute('index')}:${ayaNode.getAttribute('index')}`,
-                text_uthmani: ayaNode.getAttribute('text'),
-                verse_number: parseInt(ayaNode.getAttribute('index'), 10),
+            const ayahs = data.verses.map(verse => ({
+                verse_key: verse.verse_key,
+                text_uthmani: verse.text_uthmani,
+                verse_number: verse.id,
             }));
-
+    
             return {
-                number: parseInt(suraNode.getAttribute('index'), 10),
-                name: suraNode.getAttribute('name'),
+                number: id,
                 ayahs: ayahs,
                 numberOfAyahs: ayahs.length,
             };
@@ -320,7 +306,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
         try {
             const [quranData, tafsirResponse] = await Promise.all([
-                api.getSurahFromXML(surahId),
+                api.getSurahText(surahId),
                 api.getTafsir(surahId)
             ]);
     
@@ -356,7 +342,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function renderReader(data, ayahToScrollTo) {
-        elements.readerSurahName.textContent = `${data.name_arabic}`;
+        elements.readerSurahName.textContent = data.name_arabic;
         elements.readerSurahInfo.textContent = `${data.revelation_place === 'makkah' ? 'مكية' : 'مدنية'} - ${data.verses_count} آيات`;
 
         const readerTextContainer = document.createElement('div');
@@ -365,27 +351,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let fullTextHTML = '';
 
-        if (data.hasBismillahHeader) {
-            // Special handling for Al-Fatiha: the Bismillah is the first ayah
-            if (data.id === 1) {
-                const bismillahAyah = data.verses.find(v => v.verse_number === 1);
-                if (bismillahAyah) {
-                    fullTextHTML += `<div class="reader-bismillah ayah-text-segment" data-verse-key="${bismillahAyah.verse_key}">${bismillahAyah.text_uthmani}</div>`;
-                }
-            } else {
-                // For all other surahs (except 9), it's a non-interactive header
-                fullTextHTML += `<div class="reader-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
-            }
+        if (data.id === 1) {
+            // In Al-Fatiha, Bismillah is the first verse and included in the verses array.
+            // So we don't need a special header.
+        } else if (data.hasBismillahHeader) {
+            // For all other surahs (except 9), add a non-interactive header
+            fullTextHTML += `<div class="reader-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
         }
         
         fullTextHTML += '<p class="ayah-paragraph">';
         data.verses.forEach(ayah => {
-            // Since we rendered Al-Fatiha's first verse (Bismillah) as a header, skip it here.
-            if (data.id === 1 && ayah.verse_number === 1) {
-                return;
-            }
-
-            // Only render if there is text.
             if (ayah.text_uthmani && ayah.text_uthmani.trim().length > 0) {
                 fullTextHTML += `<span class="ayah-text-segment" data-verse-key="${ayah.verse_key}">${ayah.text_uthmani}</span>`;
                 fullTextHTML += `<span class="ayah-end-symbol">${ayah.verse_number.toLocaleString('ar-EG')}</span>`;
@@ -471,7 +446,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const reciterName = elements.reciterSelect.options[elements.reciterSelect.selectedIndex].text;
             
             elements.playerReciterName.textContent = reciterName;
-            elements.playerSurahName.textContent = `${state.currentSurahData.name_arabic}`;
+            elements.playerSurahName.textContent = state.currentSurahData.name_arabic;
 
             const data = await api.getChapterRecitation(reciterId, surahId);
             if (data && data.audio_file && data.audio_file.audio_url) {
@@ -523,7 +498,7 @@ document.addEventListener("DOMContentLoaded", function () {
             elements.lastRead.innerHTML = `
                 <div class="quran-last-read-info">
                     <p>آخر قراءة</p>
-                    <h4>متابعة: سورة ${state.lastRead.name}، الآية ${state.lastRead.ayah}</h4>
+                    <h4>متابعة: ${state.lastRead.name}، الآية ${state.lastRead.ayah}</h4>
                 </div>
                 <div class="quran-last-read-action"><i class="fas fa-arrow-circle-left"></i></div>
             `;
