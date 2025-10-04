@@ -523,7 +523,7 @@ document.addEventListener("DOMContentLoaded", function () {
             elements.lastRead.innerHTML = `
                 <div class="quran-last-read-info">
                     <p>آخر قراءة</p>
-                    <h4>متابعة: ${state.lastRead.name}، الآية ${state.lastRead.ayah}</h4>
+                    <h4>متابعة: سورة ${state.lastRead.name}، الآية ${state.lastRead.ayah}</h4>
                 </div>
                 <div class="quran-last-read-action"><i class="fas fa-arrow-circle-left"></i></div>
             `;
