@@ -356,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function renderReader(data, ayahToScrollTo) {
-        elements.readerSurahName.textContent = `سورة ${data.name_arabic}`;
+        elements.readerSurahName.textContent = data.name_arabic;
         elements.readerSurahInfo.textContent = `${data.revelation_place === 'makkah' ? 'مكية' : 'مدنية'} - ${data.verses_count} آيات`;
 
         const readerTextContainer = document.createElement('div');
@@ -425,7 +425,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- Ayah Actions ---
     function showTafsir(ayah, tafsir, surahName) {
         if (!ayah) return;
-        elements.tafsirModalTitle.textContent = `تفسير الآية ${ayah.verse_number} - سورة ${surahName}`;
+        elements.tafsirModalTitle.textContent = `تفسير الآية ${ayah.verse_number} - ${surahName}`;
         if (tafsir && tafsir.text) {
              elements.tafsirModalBody.innerHTML = `<p>${tafsir.text}</p>`;
         } else {
@@ -471,7 +471,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const reciterName = elements.reciterSelect.options[elements.reciterSelect.selectedIndex].text;
             
             elements.playerReciterName.textContent = reciterName;
-            elements.playerSurahName.textContent = `سورة ${state.currentSurahData.name_arabic}`;
+            elements.playerSurahName.textContent = state.currentSurahData.name_arabic;
 
             const data = await api.getChapterRecitation(reciterId, surahId);
             if (data && data.audio_file && data.audio_file.audio_url) {
@@ -523,7 +523,7 @@ document.addEventListener("DOMContentLoaded", function () {
             elements.lastRead.innerHTML = `
                 <div class="quran-last-read-info">
                     <p>آخر قراءة</p>
-                    <h4>متابعة: سورة ${state.lastRead.name}، الآية ${state.lastRead.ayah}</h4>
+                    <h4>متابعة: ${state.lastRead.name}، الآية ${state.lastRead.ayah}</h4>
                 </div>
                 <div class="quran-last-read-action"><i class="fas fa-arrow-circle-left"></i></div>
             `;
