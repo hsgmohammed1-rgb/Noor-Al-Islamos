@@ -199,11 +199,13 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const juzsRes = await api.getJuzs();
             
-            // Use a map to ensure uniqueness by juz_number, preventing duplicates
+            // Use a map to ensure uniqueness by juz_number, preventing duplicates from API
             const uniqueJuzsMap = new Map();
-            if (juzsRes && juzsRes.juzs) {
+            if (juzsRes && Array.isArray(juzsRes.juzs)) {
                 juzsRes.juzs.forEach(juz => {
-                    uniqueJuzsMap.set(juz.juz_number, juz);
+                    if (juz && typeof juz.juz_number !== 'undefined') {
+                       uniqueJuzsMap.set(juz.juz_number, juz);
+                    }
                 });
             }
             const uniqueJuzs = Array.from(uniqueJuzsMap.values());
