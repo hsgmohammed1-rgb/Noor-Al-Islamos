@@ -1,0 +1,7 @@
+{
+  "name": "Copy of نور الإسلام",
+  "description": "موقع إسلامي شامل يحتوي على الأذكار، أوقات الصلاة، دليل المساجد، والمزيد",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
