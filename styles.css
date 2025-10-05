@@ -1,5 +1,5 @@
 /* أساسيات التصميم */
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Amiri+Quran&display=swap');
 
 :root {
     --primary-color: #1e3a5f;
@@ -24,7 +24,7 @@
     --hadith-border: rgba(46, 204, 113, 0.2);
     --radio-bg: rgba(52, 152, 219, 0.1);
     --radio-border: rgba(52, 152, 219, 0.2);
-    --font-quran: 'Aref Ruqaa', serif;
+    --font-quran: 'Amiri Quran', serif;
 }
 
 * {

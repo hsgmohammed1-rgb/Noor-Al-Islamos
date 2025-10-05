@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function () {
         isInitialized: false,
         quranSettings: {
             fontSize: 100, // percentage
-            fontFamily: "'Aref Ruqaa', serif",
+            fontFamily: "'Amiri Quran', serif",
         },
     };
 
@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
             
             const ayahs = data.verses.map(verse => ({
                 verse_key: verse.verse_key,
-                text_uthmani: verse.text_uthmani,
+                text_uthmani: verse.text_uthmani.replace(/۟/g, ''),
                 verse_number: parseInt(verse.verse_key.split(':')[1], 10),
             }));
     
