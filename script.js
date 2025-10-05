@@ -335,4 +335,119 @@ document.addEventListener("DOMContentLoaded", function () {
 
         init();
     }
+
+    // كود البث المباشر من الكعبة
+    const kaabaLiveSection = document.getElementById('kaaba-live-section');
+    if (kaabaLiveSection) {
+        const streamOptions = document.querySelectorAll('#kaaba-live-section .stream-option');
+        const iframe = document.getElementById('live-stream-iframe');
+        const infoTitle = document.getElementById('info-panel-title');
+        const infoText = document.getElementById('info-panel-text');
+        const prayerTimesContainer = document.querySelector('.prayer-times-content');
+        
+        const streamData = {
+            makkah_live: {
+                url: "https://www.youtube.com/embed/zIl0NYIsBCE?autoplay=1&mute=1",
+                title: "مكة مباشر",
+                text: "بث مباشر على مدار الساعة من مكة المكرمة."
+            },
+            al_haram: {
+                url: "https://www.youtube.com/embed/yBuMRKLHDK0?autoplay=1&mute=1",
+                title: "المسجد الحرام",
+                text: "بث مباشر من المسجد الحرام."
+            },
+            kaaba_live: {
+                url: "https://www.youtube.com/embed/-PR51PBK_yY?autoplay=1&mute=1",
+                title: "الكعبة مباشر",
+                text: "بث مباشر للكعبة المشرفة."
+            },
+            quran: {
+                url: "https://www.youtube.com/watch?v=3OMrH7Lk",
+                title: "قناة القرآن الكريم",
+                text: "بث مباشر على مدار الساعة لتلاوات عطرة من القرآن الكريم بأصوات نخبة من أشهر القراء."
+            }
+        };
+        
+        streamOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const streamKey = this.dataset.stream;
+                const data = streamData[streamKey];
+                
+                if (data) {
+                    if (streamKey === 'quran') {
+                        window.open(data.url, '_blank');
+                    } else {
+                        iframe.src = data.url;
+                        infoTitle.textContent = data.title;
+                        infoText.textContent = data.text;
+                        
+                        streamOptions.forEach(opt => opt.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                }
+            });
+        });
+        
+        function convertToMinutes(timeString) {
+            if (!timeString) return 0;
+            const [hours, minutes] = timeString.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+
+        async function fetchMakkahPrayerTimes() {
+            try {
+                const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=Mecca&country=SA&method=4`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                if (data.code === 200 && data.status === 'OK') {
+                    const timings = data.data.timings;
+                    const date = data.data.date;
+                    
+                    const prayerSchedule = [
+                        { name: 'الفجر', nameEn: 'Fajr', time: convertToMinutes(timings.Fajr) },
+                        { name: 'الشروق', nameEn: 'Sunrise', time: convertToMinutes(timings.Sunrise) },
+                        { name: 'الظهر', nameEn: 'Dhuhr', time: convertToMinutes(timings.Dhuhr) },
+                        { name: 'العصر', nameEn: 'Asr', time: convertToMinutes(timings.Asr) },
+                        { name: 'المغرب', nameEn: 'Maghrib', time: convertToMinutes(timings.Maghrib) },
+                        { name: 'العشاء', nameEn: 'Isha', time: convertToMinutes(timings.Isha) }
+                    ];
+
+                    const now = new Date();
+                    const currentTime = now.getHours() * 60 + now.getMinutes();
+                    let nextPrayer = null;
+
+                    for (const prayer of prayerSchedule) {
+                        if (prayer.time > currentTime) {
+                            nextPrayer = prayer;
+                            break;
+                        }
+                    }
+                    if (!nextPrayer) {
+                        nextPrayer = prayerSchedule[0]; // Next prayer is Fajr tomorrow
+                    }
+                    
+                    prayerTimesContainer.innerHTML = `
+                        <div class="makkah-date">${date.hijri.day} ${date.hijri.month.ar} ${date.hijri.year} هـ</div>
+                        <div class="makkah-prayers-grid">
+                            ${prayerSchedule.map(p => `
+                                <div class="makkah-prayer-item ${p.nameEn === nextPrayer.nameEn ? 'next' : ''}">
+                                    <span class="prayer-name">${p.name}</span>
+                                    <span class="prayer-time">${timings[p.nameEn]}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    throw new Error('Invalid data from API');
+                }
+            } catch (error) {
+                console.error('Error fetching Makkah prayer times:', error);
+                prayerTimesContainer.innerHTML = '<div class="error-message">تعذر تحميل أوقات الصلاة</div>';
+            }
+        }
+        
+        fetchMakkahPrayerTimes();
+        setInterval(fetchMakkahPrayerTimes, 60000); // Refresh every minute
+    }
 });
