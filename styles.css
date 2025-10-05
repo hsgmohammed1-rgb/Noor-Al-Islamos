@@ -24,7 +24,7 @@
     --hadith-border: rgba(46, 204, 113, 0.2);
     --radio-bg: rgba(52, 152, 219, 0.1);
     --radio-border: rgba(52, 152, 219, 0.2);
-    --font-quran: 'Aref Ruqaa', serif;
+    --font-quran: 'Amiri', serif;
 }
 
 * {
@@ -1234,11 +1234,12 @@ a:hover {
 }
 
 .reader-text-container {
-    font-size: 1.8rem;
-    line-height: 2.6;
+    font-size: 2rem;
+    line-height: 2.8;
     text-align: justify;
     direction: rtl;
     word-spacing: 3px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 .ayah-paragraph {
     word-spacing: 2px;
