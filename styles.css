@@ -1593,16 +1593,17 @@ a:hover {
 /* منطقة العداد الرئيسي */
 .tasbih-counter-area {
     position: relative;
-    width: 280px;
-    height: 280px;
+    width: clamp(220px, 75vw, 280px);
+    aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 2rem;
+    flex-shrink: 0;
 }
 #tasbih-main-button {
-    width: 210px;
-    height: 210px;
+    width: 75%;
+    height: 75%;
     background: linear-gradient(145deg, var(--accent-color), #f39c12);
     border-radius: 50%;
     cursor: pointer;
@@ -2703,7 +2704,7 @@ a:hover {
         min-height: 400px;
     }
 
-    /* More Menu Styles */
+    /* More Menu Styles - Redesigned */
     .more-menu-overlay {
         display: block;
         position: fixed;
@@ -2735,7 +2736,7 @@ a:hover {
         border-top-left-radius: var(--border-radius-lg);
         border-top-right-radius: var(--border-radius-lg);
         z-index: 1003;
-        padding: 1.5rem;
+        padding: 1rem 1.5rem 1.5rem;
         box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
         transform: translateY(100%);
         transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -2749,9 +2750,17 @@ a:hover {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0;
         padding-bottom: 1rem;
         border-bottom: 1px solid var(--card-border);
+    }
+
+    .more-menu-handle {
+        width: 40px;
+        height: 4px;
+        background-color: var(--card-border);
+        border-radius: 2px;
+        margin: 0.75rem auto 1.5rem;
     }
 
     .more-menu-header h4 {
@@ -2777,20 +2786,29 @@ a:hover {
 
     .more-menu-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 1.5rem;
         text-align: center;
     }
 
     .more-menu-item {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--border-radius-md);
+        color: var(--light-text);
+        display: flex;
         flex-direction: column;
-        height: auto;
-        padding: 1rem 0.5rem;
-        font-size: 1.5rem;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        height: 90px;
+        padding: 0.5rem;
         opacity: 0;
         transform: translateY(20px);
         animation: menuItemFadeIn 0.5s forwards;
+        transition: all 0.3s ease;
     }
+
     .more-menu-container.visible .more-menu-item:nth-child(1) { animation-delay: 0.1s; }
     .more-menu-container.visible .more-menu-item:nth-child(2) { animation-delay: 0.15s; }
     .more-menu-container.visible .more-menu-item:nth-child(3) { animation-delay: 0.2s; }
@@ -2804,21 +2822,35 @@ a:hover {
         }
     }
 
+    .more-menu-item i {
+        font-size: 1.8rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .more-menu-item img {
+        height: 32px;
+        width: 32px;
+        margin-bottom: 0.25rem;
+    }
+    
     .more-menu-item span {
-        font-size: 0.7rem;
-        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-top: 0;
     }
     
     .more-menu-item.active,
     .more-menu-item:hover {
-        transform: scale(1.05);
-    }
-    .more-menu-item.active i, .more-menu-item:hover i {
-        color: var(--accent-color);
+        transform: translateY(-5px);
+        background: var(--accent-color);
+        border-color: var(--accent-color);
+        color: white;
+        box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4);
     }
     
+    .more-menu-item.active i, .more-menu-item:hover i,
     .more-menu-item.active span, .more-menu-item:hover span {
-        color: var(--accent-color);
+        color: white;
     }
 }
 
@@ -2881,15 +2913,6 @@ a:hover {
         height: 350px;
     }
 
-    .tasbih-counter-area {
-        width: 250px;
-        height: 250px;
-    }
-    #tasbih-main-button {
-        width: 190px;
-        height: 190px;
-    }
-
     .footer-content h3 { font-size: 1.5rem; }
     .social-links a {
         width: 55px;
@@ -2908,8 +2931,6 @@ a:hover {
     .hero-content h1 { font-size: 1.8rem; }
     .hero-content h2 { font-size: 1.3rem; }
     .section-title { font-size: 1.6rem; }
-    .tasbih-counter-area { width: 220px; height: 220px; }
-    #tasbih-main-button { width: 160px; height: 160px; }
     #tasbih-main-text { font-size: 1.4rem; }
     #tasbih-score-pro { font-size: 2.8rem; }
 
