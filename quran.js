@@ -142,6 +142,13 @@ document.addEventListener("DOMContentLoaded", function () {
         tafsirModalTitle: document.getElementById('tafsir-modal-title'),
         tafsirModalBody: document.getElementById('tafsir-modal-body'),
         tafsirModalClose: document.getElementById('tafsir-modal-close'),
+        // New Settings Elements
+        settingsToggleBtn: document.getElementById('reader-settings-toggle'),
+        settingsPanel: document.getElementById('reader-settings-panel'),
+        fontFamilySelect: document.getElementById('font-family-select'),
+        fontSizeDecrease: document.getElementById('font-size-decrease'),
+        fontSizeIncrease: document.getElementById('font-size-increase'),
+        fontSizeDisplay: document.getElementById('font-size-display'),
     };
 
     // --- State ---
@@ -152,6 +159,10 @@ document.addEventListener("DOMContentLoaded", function () {
         currentReciterId: '7', // Default: Mishary Rashid Alafasy
         lastRead: JSON.parse(localStorage.getItem('quranLastRead')) || null,
         isInitialized: false,
+        quranSettings: {
+            fontSize: 100, // percentage
+            fontFamily: "'Aref Ruqaa', serif",
+        },
     };
 
     // --- API Configuration ---
@@ -187,6 +198,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (state.isInitialized) return;
         state.isInitialized = true;
         
+        loadQuranSettings();
         setupEventListeners();
         renderLastRead();
 
@@ -252,6 +264,40 @@ document.addEventListener("DOMContentLoaded", function () {
                 header.parentElement.classList.toggle('expanded');
             }
         });
+
+        // Settings Listeners
+        if (elements.settingsToggleBtn) {
+            elements.settingsToggleBtn.addEventListener('click', () => {
+                elements.settingsPanel.classList.toggle('hidden');
+            });
+        }
+        if (elements.fontSizeIncrease) {
+            elements.fontSizeIncrease.addEventListener('click', () => {
+                if (state.quranSettings.fontSize < 200) { // Max 200%
+                    state.quranSettings.fontSize += 10;
+                    elements.fontSizeDisplay.textContent = `${state.quranSettings.fontSize}%`;
+                    applyQuranSettings();
+                    saveQuranSettings();
+                }
+            });
+        }
+        if (elements.fontSizeDecrease) {
+            elements.fontSizeDecrease.addEventListener('click', () => {
+                if (state.quranSettings.fontSize > 50) { // Min 50%
+                    state.quranSettings.fontSize -= 10;
+                    elements.fontSizeDisplay.textContent = `${state.quranSettings.fontSize}%`;
+                    applyQuranSettings();
+                    saveQuranSettings();
+                }
+            });
+        }
+        if (elements.fontFamilySelect) {
+            elements.fontFamilySelect.addEventListener('change', (e) => {
+                state.quranSettings.fontFamily = e.target.value;
+                applyQuranSettings();
+                saveQuranSettings();
+            });
+        }
     }
 
     // --- View Management ---
@@ -427,6 +473,8 @@ document.addEventListener("DOMContentLoaded", function () {
         readerTextContainer.innerHTML = fullTextHTML;
         elements.readerContent.innerHTML = '';
         elements.readerContent.appendChild(readerTextContainer);
+        
+        applyQuranSettings(); // Apply settings after content is rendered
 
         readerTextContainer.addEventListener('click', (e) => {
             const ayahSegment = e.target.closest('.ayah-text-segment');
@@ -561,6 +609,36 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="quran-last-read-action"><i class="fas fa-arrow-circle-left"></i></div>
             `;
             elements.lastRead.classList.remove('hidden');
+        }
+    }
+
+    // New Settings Functions
+    function loadQuranSettings() {
+        try {
+            const saved = localStorage.getItem('quranReaderSettings');
+            if (saved) {
+                state.quranSettings = JSON.parse(saved);
+            }
+            // Update controls to reflect loaded state
+            elements.fontFamilySelect.value = state.quranSettings.fontFamily;
+            elements.fontSizeDisplay.textContent = `${state.quranSettings.fontSize}%`;
+        } catch (e) {
+            console.error("Failed to load Quran settings:", e);
+        }
+    }
+
+    function saveQuranSettings() {
+        try {
+            localStorage.setItem('quranReaderSettings', JSON.stringify(state.quranSettings));
+        } catch(e) {
+            console.error("Failed to save Quran settings:", e);
+        }
+    }
+
+    function applyQuranSettings() {
+        if (elements.readerContent) {
+            elements.readerContent.style.fontFamily = state.quranSettings.fontFamily;
+            elements.readerContent.style.fontSize = `${2 * (state.quranSettings.fontSize / 100)}rem`;
         }
     }
 

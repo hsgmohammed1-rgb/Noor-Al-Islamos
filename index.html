@@ -248,7 +248,23 @@
                         <h3 id="reader-surah-name"></h3>
                         <p id="reader-surah-info"></p>
                     </div>
-                    <button class="reader-header-btn" title="الإعدادات"><i class="fas fa-cog"></i></button> <!-- Placeholder -->
+                    <button id="reader-settings-toggle" class="reader-header-btn" title="إعدادات النص"><i class="fas fa-cog"></i></button>
+                </div>
+                <div id="reader-settings-panel" class="reader-settings-panel hidden">
+                    <div class="setting-group">
+                        <label for="font-family-select">الخط:</label>
+                        <select id="font-family-select">
+                            <option value="'Aref Ruqaa', serif">عارف رقعة</option>
+                            <option value="'Amiri', serif">أميري</option>
+                            <option value="'Tajawal', sans-serif">تجوال</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>حجم الخط:</label>
+                        <button id="font-size-decrease" class="setting-btn" title="تصغير الخط"><i class="fas fa-minus"></i></button>
+                        <span id="font-size-display">100%</span>
+                        <button id="font-size-increase" class="setting-btn" title="تكبير الخط"><i class="fas fa-plus"></i></button>
+                    </div>
                 </div>
                 <div id="reader-content" class="reader-content">
                     <!-- Bismillah and Ayahs will be generated here -->

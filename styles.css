@@ -24,7 +24,7 @@
     --hadith-border: rgba(46, 204, 113, 0.2);
     --radio-bg: rgba(52, 152, 219, 0.1);
     --radio-border: rgba(52, 152, 219, 0.2);
-    --font-quran: 'Amiri', serif;
+    --font-quran: 'Aref Ruqaa', serif;
 }
 
 * {
@@ -1177,13 +1177,14 @@ a:hover {
     animation: fadeIn 0.5s ease;
 }
 .reader-header-new {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
+    gap: 1rem;
     padding: 0.75rem 1rem;
     background: var(--card-bg);
     border-radius: var(--border-radius-md);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     border: 1px solid var(--card-border);
 }
 .reader-header-btn {
@@ -1202,6 +1203,15 @@ a:hover {
 }
 .reader-surah-title {
     text-align: center;
+    grid-column: 2;
+}
+#reader-back-btn {
+    grid-column: 1;
+    justify-self: start;
+}
+#reader-settings-toggle {
+    grid-column: 3;
+    justify-self: end;
 }
 #reader-surah-name {
     font-family: 'Amiri', serif;
@@ -1214,6 +1224,71 @@ a:hover {
     opacity: 0.8;
 }
 
+/* Reader Settings Panel */
+.reader-settings-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    padding: 0.75rem;
+    background: var(--card-bg);
+    border-radius: var(--border-radius-md);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--card-border);
+    flex-wrap: wrap;
+    transition: all 0.3s ease-out;
+    max-height: 200px;
+    overflow: hidden;
+}
+.reader-settings-panel.hidden {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    opacity: 0;
+    border: none;
+}
+.setting-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.setting-group label {
+    font-weight: 500;
+}
+.setting-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--card-border);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.setting-btn:hover {
+    background: var(--accent-color);
+}
+#font-size-display {
+    font-weight: bold;
+    width: 50px;
+    text-align: center;
+}
+#font-family-select {
+    background: rgba(0,0,0,0.2);
+    color: white;
+    border: 1px solid var(--card-border);
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    font-family: 'Tajawal', sans-serif;
+}
+#font-family-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+
 .reader-content {
     background: rgba(0, 0, 0, 0.2);
     color: var(--text-color);
@@ -1224,17 +1299,18 @@ a:hover {
     font-family: var(--font-quran);
     scroll-behavior: smooth;
     border: 1px solid var(--card-border);
+    font-size: 2rem;
+    transition: font-size 0.3s, font-family 0.3s;
 }
 
 .reader-bismillah {
     text-align: center;
-    font-size: 2rem;
-    margin-bottom: 2rem;
+    font-size: 1em; /* Relative to container */
+    margin-bottom: 1.5em; /* Relative to container */
     font-weight: bold;
 }
 
 .reader-text-container {
-    font-size: 2rem;
     line-height: 2.8;
     text-align: justify;
     direction: rtl;
@@ -1261,14 +1337,14 @@ a:hover {
     align-items: center;
     justify-content: center;
     font-family: 'Tajawal', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.45em; /* Relative to container */
     font-weight: bold;
     color: var(--accent-color);
     background-color: transparent;
-    width: 28px;
-    height: 28px;
+    width: 1.4em; /* Relative to its own font size */
+    height: 1.4em; /* Relative to its own font size */
     border-radius: 50%;
-    margin: 0 8px;
+    margin: 0 0.4em; /* Relative to container */
     vertical-align: middle;
     border: 2px solid var(--accent-color);
 }
