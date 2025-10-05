@@ -316,7 +316,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (error) {
             console.error("Failed to initialize Azkar section:", error);
             azkarContent.innerHTML = `<div class="error-message" style="text-align: center; padding: 2rem;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;" aria-hidden="true"></i>
                 <span>حدث خطأ أثناء تحميل الأذكار. يرجى تحديث الصفحة والمحاولة مرة أخرى.</span>
             </div>`;
         }
@@ -325,14 +325,14 @@ document.addEventListener("DOMContentLoaded", function () {
     function setupEventListeners() {
         searchInput.addEventListener('input', (e) => filterAzkar(e.target.value));
         audioPlayer.addEventListener('play', () => {
-            if(activeAudioBtn) activeAudioBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            if(activeAudioBtn) activeAudioBtn.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
         });
         audioPlayer.addEventListener('pause', () => {
-            if(activeAudioBtn) activeAudioBtn.innerHTML = '<i class="fas fa-play"></i>';
+            if(activeAudioBtn) activeAudioBtn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
         });
         audioPlayer.addEventListener('ended', () => {
              if(activeAudioBtn) {
-                activeAudioBtn.innerHTML = '<i class="fas fa-play"></i>';
+                activeAudioBtn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
                 activeAudioBtn = null;
              }
         });
@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", function () {
             btn.className = 'category-btn-new';
             btn.dataset.id = category.ID;
             if (index === 0) btn.classList.add('active');
-            btn.innerHTML = `<i class="fas ${category.ICON}"></i> <span>${category.TITLE}</span>`;
+            btn.innerHTML = `<i class="fas ${category.ICON}" aria-hidden="true"></i> <span>${category.TITLE}</span>`;
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.category-btn-new').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
@@ -359,7 +359,7 @@ document.addEventListener("DOMContentLoaded", function () {
             playBtn.className = 'category-play-btn action-btn';
             playBtn.dataset.audioSrc = category.AUDIO_URL;
             playBtn.title = `تشغيل صوت ${category.TITLE}`;
-            playBtn.innerHTML = `<i class="fas fa-play"></i>`;
+            playBtn.innerHTML = `<i class="fas fa-play" aria-hidden="true"></i>`;
             playBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const audioSrc = playBtn.dataset.audioSrc;
@@ -419,11 +419,11 @@ document.addEventListener("DOMContentLoaded", function () {
             card.innerHTML = `
                 ${zikr.REFERENCE ? `<span class="azkar-card-source">${zikr.REFERENCE}</span>` : ''}
                 <p class="azkar-card-text">${zikr.ARABIC_TEXT.replace(/\n/g, '<br>')}</p>
-                ${zikr.FADL ? `<div class="azkar-card-fadl"><i class="fas fa-lightbulb"></i><p>${zikr.FADL}</p></div>` : ''}
+                ${zikr.FADL ? `<div class="azkar-card-fadl"><i class="fas fa-lightbulb" aria-hidden="true"></i><p>${zikr.FADL}</p></div>` : ''}
                 <div class="azkar-card-footer">
                     <div class="azkar-card-actions">
-                        <button class="action-btn copy-btn" title="نسخ النص"><i class="fas fa-copy"></i></button>
-                        <button class="action-btn share-btn" title="مشاركة"><i class="fas fa-share-alt"></i></button>
+                        <button class="action-btn copy-btn" title="نسخ النص"><i class="fas fa-copy" aria-hidden="true"></i></button>
+                        <button class="action-btn share-btn" title="مشاركة"><i class="fas fa-share-alt" aria-hidden="true"></i></button>
                     </div>
                     ${zikr.REPEAT_COUNT > 1 ? `
                     <div class="azkar-card-counter" data-goal="${zikr.REPEAT_COUNT}" data-count="0">
@@ -480,7 +480,7 @@ document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => btn.style.transform = 'scale(1)', 100);
 
         if (count >= goal) {
-            btn.querySelector('.counter-text').innerHTML = '<i class="fas fa-check"></i>';
+            btn.querySelector('.counter-text').innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
             btn.classList.add('done');
             card.dataset.completed = "true";
             card.classList.add('completed');
@@ -490,7 +490,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     function playAudio(src, btn) {
         if (activeAudioBtn && activeAudioBtn !== btn) {
-            activeAudioBtn.innerHTML = '<i class="fas fa-play"></i>';
+            activeAudioBtn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
         }
         activeAudioBtn = btn;
 
@@ -498,7 +498,7 @@ document.addEventListener("DOMContentLoaded", function () {
         audioPlayer.play().catch(e => {
             console.error("Audio play failed:", e);
             showNotification('فشل تشغيل الصوت', 'error');
-            if(activeAudioBtn) activeAudioBtn.innerHTML = '<i class="fas fa-play"></i>';
+            if(activeAudioBtn) activeAudioBtn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
         });
     }
 
@@ -547,7 +547,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
-        notification.innerHTML = `<i class="fas fa-info-circle"></i> <span>${message}</span>`;
+        notification.innerHTML = `<i class="fas fa-info-circle" aria-hidden="true"></i> <span>${message}</span>`;
         document.body.appendChild(notification);
         setTimeout(() => {
             notification.classList.add('hide');

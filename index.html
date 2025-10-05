@@ -66,39 +66,39 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Amiri+Quran&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="/index.js"></script>
 </head>
 <body>
     <!-- الهيدر والقائمة -->
     <header class="main-header">
         <div class="nav-container">
             <div class="logo">
-                <h1><i class="fas fa-mosque"></i> نور الإسلام</h1>
+                <h1><i class="fas fa-mosque" aria-hidden="true"></i> نور الإسلام</h1>
             </div>
             <nav class="top-nav">
                 <button class="nav-btn active" data-section="home-section" title="الرئيسية">
-                    <i class="fas fa-home"></i>
+                    <i class="fas fa-home" aria-hidden="true"></i>
                 </button>
                 <button class="nav-btn" data-section="azkar-section" title="الأذكار">
-                    <i class="fas fa-book-open"></i>
+                    <i class="fas fa-book-open" aria-hidden="true"></i>
                 </button>
                 <button class="nav-btn" data-section="prayer-times" title="أوقات الصلاة">
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-clock" aria-hidden="true"></i>
                 </button>
                 <button class="nav-btn" data-section="quran-section" title="القرآن الكريم">
-                    <i class="fas fa-quran"></i>
+                    <i class="fas fa-quran" aria-hidden="true"></i>
                 </button>
                 <button class="nav-btn" data-section="tasbih-section" title="المسبحة">
                     <img src="https://i.postimg.cc/g0ZCF8s9/20251005-053936.png" alt="المسبحة" style="width: 32px; height: 32px;">
                 </button>
                 <button class="nav-btn" data-section="radio-section" title="الإذاعة">
-                    <i class="fas fa-broadcast-tower"></i>
+                    <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
                 </button>
                 <button class="nav-btn" data-section="kaaba-live-section" title="بث مباشر من الكعبة">
-                    <i class="fas fa-kaaba"></i>
+                    <i class="fas fa-kaaba" aria-hidden="true"></i>
                 </button>
                 <button class="nav-btn" data-section="qibla-section" title="اتجاه القبلة">
-                    <i class="fas fa-compass"></i>
+                    <i class="fas fa-compass" aria-hidden="true"></i>
                 </button>
                 <button class="nav-btn" data-section="mosques-section" title="دليل المساجد">
                     <img src="https://i.postimg.cc/xjwb929V/20251005-053936.png" alt="دليل المساجد" style="width: 32px; height: 32px;">
@@ -117,17 +117,17 @@
                 <p>موقع إسلامي شامل يقدم لكم مجموعة من الخدمات الإسلامية المتنوعة</p>
                 <div class="feature-cards">
                     <div class="feature-card">
-                        <i class="fas fa-clock"></i>
+                        <i class="fas fa-clock" aria-hidden="true"></i>
                         <h3>مواقيت الصلاة</h3>
                         <p>تعرف على أوقات الصلاة في مدينتك بدقة</p>
                     </div>
                     <div class="feature-card">
-                        <i class="fas fa-quran"></i>
+                        <i class="fas fa-quran" aria-hidden="true"></i>
                         <h3>القرآن الكريم</h3>
                         <p>قراءة وتلاوة القرآن الكريم كاملاً</p>
                     </div>
                     <div class="feature-card">
-                        <i class="fas fa-compass"></i>
+                        <i class="fas fa-compass" aria-hidden="true"></i>
                         <h3>اتجاه القبلة</h3>
                         <p>تحديد اتجاه القبلة بدقة من أي مكان</p>
                     </div>
@@ -135,14 +135,14 @@
 
                 <div class="whatsapp-cta-card">
                     <div class="whatsapp-logo">
-                        <i class="fas fa-mosque"></i>
+                        <i class="fas fa-mosque" aria-hidden="true"></i>
                     </div>
                     <div class="whatsapp-info">
                         <h3>انضم إلى مجموعة نور الإسلام</h3>
                         <p>تابعنا على الواتساب للحصول على تذكيرات يومية، آيات، وأحاديث نبوية.</p>
                     </div>
                     <a href="https://whatsapp.com/channel/0029VauX49o6WaKrquKvGJ3j" target="_blank" rel="noopener noreferrer" class="whatsapp-join-btn">
-                        <i class="fab fa-whatsapp"></i> انضم الآن
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i> انضم الآن
                     </a>
                 </div>
 
@@ -164,7 +164,7 @@
         <div class="azkar-container-new">
             <div class="azkar-sidebar">
                 <div class="azkar-search-new">
-                    <i class="fas fa-search"></i>
+                    <i class="fas fa-search" aria-hidden="true"></i>
                     <input type="text" id="azkar-search-input" placeholder="ابحث في الأذكار...">
                 </div>
                 <div id="azkar-categories-list">
@@ -184,7 +184,7 @@
                 </div>
                 <div id="azkar-content" class="azkar-content-new">
                      <div class="loading-spinner">
-                        <i class="fas fa-spinner fa-spin"></i>
+                        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
                         <span>جاري التحميل...</span>
                     </div>
                 </div>
@@ -197,7 +197,7 @@
         <div class="prayer-container-modern">
             <div class="prayer-main-display">
                 <div id="prayer-initial-prompt" class="prayer-initial-prompt">
-                    <i class="fas fa-globe-asia"></i>
+                    <i class="fas fa-globe-asia" aria-hidden="true"></i>
                     <h2>أوقات الصلاة حول العالم</h2>
                     <p>ابدأ بتحديد موقعك لعرض أوقات الصلاة الدقيقة.</p>
                     <p class="prompt-hint">استخدم القائمة لاختيار دولتك ومدينتك، أو اسمح للمتصفح بتحديد موقعك تلقائياً.</p>
@@ -205,7 +205,7 @@
 
                 <div id="prayer-main-content" class="hidden">
                     <div class="location-and-date">
-                        <h3 id="prayer-location-display"><i class="fas fa-map-marker-alt"></i> <span>جاري تحديد الموقع...</span></h3>
+                        <h3 id="prayer-location-display"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> <span>جاري تحديد الموقع...</span></h3>
                         <p id="hijri-date-display">التاريخ الهجري</p>
                     </div>
                     <div class="next-prayer-info-modern">
@@ -252,7 +252,7 @@
 
             <div class="prayer-sidebar">
                 <div class="location-controls-modern">
-                    <h4><i class="fas fa-map-location-dot"></i> تغيير الموقع</h4>
+                    <h4><i class="fas fa-map-location-dot" aria-hidden="true"></i> تغيير الموقع</h4>
                     <select id="country-select" class="location-input-modern">
                         <option value="" disabled selected>اختر دولتك</option>
                         <option value="SA">المملكة العربية السعودية</option>
@@ -273,7 +273,7 @@
                     </select>
                 </div>
                 <div class="all-prayer-times">
-                    <h4><i class="fas fa-calendar-day"></i> أوقات اليوم</h4>
+                    <h4><i class="fas fa-calendar-day" aria-hidden="true"></i> أوقات اليوم</h4>
                     <ul id="prayer-times-list">
                         <!-- سيتم تعبئتها بواسطة JS -->
                     </ul>
@@ -290,7 +290,7 @@
                 <div class="quran-header-bar">
                     <h2 class="section-title">القرآن الكريم</h2>
                     <div class="quran-search-container">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-search" aria-hidden="true"></i>
                         <input type="text" id="quran-search-input-new" placeholder="ابحث عن سورة...">
                     </div>
                 </div>
@@ -312,12 +312,12 @@
             <!-- Reader View -->
             <div id="quran-reader-view" class="hidden">
                 <div class="reader-header-new">
-                    <button id="reader-back-btn" class="reader-header-btn" title="العودة"><i class="fas fa-arrow-right"></i></button>
+                    <button id="reader-back-btn" class="reader-header-btn" title="العودة"><i class="fas fa-arrow-right" aria-hidden="true"></i></button>
                     <div class="reader-surah-title">
                         <h3 id="reader-surah-name"></h3>
                         <p id="reader-surah-info"></p>
                     </div>
-                    <button id="reader-settings-toggle" class="reader-header-btn" title="إعدادات النص"><i class="fas fa-cog"></i></button>
+                    <button id="reader-settings-toggle" class="reader-header-btn" title="إعدادات النص"><i class="fas fa-cog" aria-hidden="true"></i></button>
                 </div>
                 <div id="reader-settings-panel" class="reader-settings-panel hidden">
                     <div class="setting-group">
@@ -330,9 +330,9 @@
                     </div>
                     <div class="setting-group">
                         <label>حجم الخط:</label>
-                        <button id="font-size-decrease" class="setting-btn" title="تصغير الخط"><i class="fas fa-minus"></i></button>
+                        <button id="font-size-decrease" class="setting-btn" title="تصغير الخط"><i class="fas fa-minus" aria-hidden="true"></i></button>
                         <span id="font-size-display">100%</span>
-                        <button id="font-size-increase" class="setting-btn" title="تكبير الخط"><i class="fas fa-plus"></i></button>
+                        <button id="font-size-increase" class="setting-btn" title="تكبير الخط"><i class="fas fa-plus" aria-hidden="true"></i></button>
                     </div>
                 </div>
                 <div id="reader-content" class="reader-content">
@@ -345,7 +345,7 @@
                      </div>
                      <audio id="continuous-audio-player" controls></audio>
                      <div class="reciter-selection">
-                        <i class="fas fa-user-circle"></i>
+                        <i class="fas fa-user-circle" aria-hidden="true"></i>
                         <select id="reader-reciter-select">
                             <!-- Reciters populated by JS -->
                         </select>
@@ -393,9 +393,9 @@
             <!-- لوحة التحكم -->
             <div class="tasbih-controls-panel">
                 <div class="control-group main-controls">
-                    <button id="tasbih-reset-pro" class="control-btn" title="إعادة تعيين"><i class="fas fa-undo"></i></button>
-                    <button id="tasbih-sound-toggle" class="control-btn active" title="كتم/تشغيل الصوت"><i class="fas fa-volume-up"></i></button>
-                    <button id="tasbih-auto-toggle" class="control-btn" title="تسبيح تلقائي"><i class="fas fa-robot"></i></button>
+                    <button id="tasbih-reset-pro" class="control-btn" title="إعادة تعيين"><i class="fas fa-undo" aria-hidden="true"></i></button>
+                    <button id="tasbih-sound-toggle" class="control-btn active" title="كتم/تشغيل الصوت"><i class="fas fa-volume-up" aria-hidden="true"></i></button>
+                    <button id="tasbih-auto-toggle" class="control-btn" title="تسبيح تلقائي"><i class="fas fa-robot" aria-hidden="true"></i></button>
                 </div>
                 <div id="tasbih-auto-controls" class="control-group speed-controls hidden">
                     <label>السرعة:</label>
@@ -454,30 +454,30 @@
             </div>
             <div class="broadcast-sidebar">
                 <div class="stream-selector">
-                    <h4><i class="fas fa-tv"></i> اختر البث</h4>
+                    <h4><i class="fas fa-tv" aria-hidden="true"></i> اختر البث</h4>
                     <div class="stream-option active" data-stream="makkah_live">
-                        <i class="fas fa-satellite-dish stream-icon"></i>
+                        <i class="fas fa-satellite-dish stream-icon" aria-hidden="true"></i>
                         <div class="option-text">
                             <h5>مكة مباشر</h5>
                             <span>بث مباشر على مدار الساعة</span>
                         </div>
                     </div>
                     <div class="stream-option" data-stream="al_haram">
-                        <i class="fas fa-mosque stream-icon"></i>
+                        <i class="fas fa-mosque stream-icon" aria-hidden="true"></i>
                         <div class="option-text">
                             <h5>المسجد الحرام</h5>
                             <span>بث من الحرم المكي</span>
                         </div>
                     </div>
                     <div class="stream-option" data-stream="kaaba_live">
-                        <i class="fas fa-kaaba stream-icon"></i>
+                        <i class="fas fa-kaaba stream-icon" aria-hidden="true"></i>
                         <div class="option-text">
                             <h5>الكعبة مباشر</h5>
                             <span>بث مباشر للكعبة المشرفة</span>
                         </div>
                     </div>
                     <div class="stream-option" data-stream="quran">
-                        <i class="fas fa-quran stream-icon"></i>
+                        <i class="fas fa-quran stream-icon" aria-hidden="true"></i>
                          <div class="option-text">
                             <h5>قناة القرآن الكريم</h5>
                             <span>بث تلاوات عطرة</span>
@@ -485,10 +485,10 @@
                     </div>
                 </div>
                 <div class="makkah-prayer-times-widget">
-                     <h3><i class="fas fa-clock"></i> الصلاة في مكة</h3>
+                     <h3><i class="fas fa-clock" aria-hidden="true"></i> الصلاة في مكة</h3>
                      <div class="prayer-times-content">
                         <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin"></i>
+                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
                         </div>
                      </div>
                 </div>
@@ -503,19 +503,19 @@
             <div class="qibla-map-area">
                 <div id="qibla-map">
                      <div class="map-placeholder">
-                        <i class="fas fa-map-marked-alt"></i>
+                        <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
                         <p>سيتم عرض الخريطة هنا بعد تحديد موقعك</p>
                     </div>
                 </div>
             </div>
             <div class="qibla-info-panel">
-                <h3><i class="fas fa-compass"></i> معلومات القبلة</h3>
+                <h3><i class="fas fa-compass" aria-hidden="true"></i> معلومات القبلة</h3>
                 <div id="qibla-results">
                     <p class="initial-message">اضغط على الزر أدناه لبدء تحديد اتجاه القبلة.</p>
                 </div>
                 <div class="qibla-controls">
                     <button id="get-location" class="qibla-btn">
-                        <i class="fas fa-location-arrow"></i> تحديد موقعي
+                        <i class="fas fa-location-arrow" aria-hidden="true"></i> تحديد موقعي
                     </button>
                 </div>
             </div>
@@ -529,11 +529,11 @@
             <div class="radio-main-content">
                 <div class="radio-list-panel">
                     <div class="radio-search">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-search" aria-hidden="true"></i>
                         <input type="text" id="radio-search-input" placeholder="ابحث عن إذاعة...">
                     </div>
                     <div class="featured-stations-wrapper">
-                        <h3><i class="fas fa-star"></i> إذاعات مميزة</h3>
+                        <h3><i class="fas fa-star" aria-hidden="true"></i> إذاعات مميزة</h3>
                         <div class="featured-stations" id="featured-stations-container">
                         </div>
                     </div>
@@ -541,14 +541,14 @@
                     </div>
                     <div class="radio-stations" id="radio-stations-container">
                         <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin"></i> جاري تحميل الإذاعات...
+                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> جاري تحميل الإذاعات...
                         </div>
                     </div>
                 </div>
                 <div class="radio-player-panel">
                     <div class="radio-player">
                         <div class="station-artwork-new" id="station-artwork-new">
-                            <i class="fas fa-broadcast-tower"></i>
+                            <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
                         </div>
                         <div class="station-info">
                             <h3 id="current-station-name">اختر إذاعة للبدء</h3>
@@ -556,12 +556,12 @@
                         </div>
                         <canvas id="visualizer"></canvas>
                         <div class="player-controls">
-                            <button id="radio-play-btn" class="player-btn" disabled title="تشغيل/إيقاف مؤقت"><i class="fas fa-play"></i></button>
+                            <button id="radio-play-btn" class="player-btn" disabled title="تشغيل/إيقاف مؤقت"><i class="fas fa-play" aria-hidden="true"></i></button>
                             <div class="volume-control">
-                                <i id="volume-icon" class="fas fa-volume-up"></i>
+                                <i id="volume-icon" class="fas fa-volume-up" aria-hidden="true"></i>
                                 <input type="range" id="volume-slider" min="0" max="100" value="70" title="التحكم في الصوت">
                             </div>
-                            <button id="radio-stop-btn" class="player-btn" disabled title="إيقاف"><i class="fas fa-stop"></i></button>
+                            <button id="radio-stop-btn" class="player-btn" disabled title="إيقاف"><i class="fas fa-stop" aria-hidden="true"></i></button>
                         </div>
                         <audio id="radio-audio" style="display: none;"></audio>
                     </div>
@@ -577,7 +577,7 @@
             <div class="app-controls">
                 <div class="location-controls">
                     <button id="locate-btn" class="btn locate-btn">
-                        <i class="fas fa-location-crosshairs"></i> تحديد موقعي
+                        <i class="fas fa-location-crosshairs" aria-hidden="true"></i> تحديد موقعي
                     </button>
                     <div class="range-control">
                         <label for="radius">نطاق البحث:</label>
@@ -590,15 +590,15 @@
             <div class="map-container">
                 <div id="map"></div>
                 <div class="map-actions">
-                    <button id="zoom-in" class="map-btn"><i class="fas fa-plus"></i></button>
-                    <button id="zoom-out" class="map-btn"><i class="fas fa-minus"></i></button>
-                    <button id="current-loc" class="map-btn"><i class="fas fa-location-arrow"></i></button>
+                    <button id="zoom-in" class="map-btn"><i class="fas fa-plus" aria-hidden="true"></i></button>
+                    <button id="zoom-out" class="map-btn"><i class="fas fa-minus" aria-hidden="true"></i></button>
+                    <button id="current-loc" class="map-btn"><i class="fas fa-location-arrow" aria-hidden="true"></i></button>
                 </div>
             </div>
 
             <div class="results-container">
                 <div class="results-header">
-                    <h2><i class="fas fa-list"></i> قائمة المساجد</h2>
+                    <h2><i class="fas fa-list" aria-hidden="true"></i> قائمة المساجد</h2>
                     <span id="results-count">0 مسجد</span>
                 </div>
                 <div class="mosques-list" id="mosques-list">
@@ -607,10 +607,10 @@
             </div>
 
             <div class="prayer-times-mosques" id="prayer-times-mosques">
-                <h3><i class="fas fa-clock"></i> أوقات الصلاة لموقعك الحالي</h3>
+                <h3><i class="fas fa-clock" aria-hidden="true"></i> أوقات الصلاة لموقعك الحالي</h3>
                 <div class="times-grid">
                     <div class="loading-spinner">
-                        <i class="fas fa-spinner fa-spin"></i> يرجى تحديد موقعك لعرض الأوقات
+                        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> يرجى تحديد موقعك لعرض الأوقات
                     </div>
                 </div>
             </div>
@@ -624,18 +624,18 @@
             <div class="footer-links-container">
                 <div class="social-links">
                     <a href="https://youtube.com/@noor_al_islame" target="_blank" rel="noopener noreferrer" title="يوتيوب">
-                        <i class="fab fa-youtube"></i>
+                        <i class="fab fa-youtube" aria-hidden="true"></i>
                     </a>
                     <a href="https://www.tiktok.com/@noor_al__islam" target="_blank" rel="noopener noreferrer" title="تيك توك">
-                        <i class="fab fa-tiktok"></i>
+                        <i class="fab fa-tiktok" aria-hidden="true"></i>
                     </a>
                 </div>
                 <div class="contact-links">
                     <a href="https://wa.me/972592311460" target="_blank" rel="noopener noreferrer" title="واتساب">
-                        <i class="fab fa-whatsapp"></i> <span>واتساب</span>
+                        <i class="fab fa-whatsapp" aria-hidden="true"></i> <span>واتساب</span>
                     </a>
                     <a href="mailto:cpshzt@gmail.com" target="_blank" rel="noopener noreferrer" title="البريد الإلكتروني">
-                        <i class="fas fa-envelope"></i> <span>البريد الإلكتروني</span>
+                        <i class="fas fa-envelope" aria-hidden="true"></i> <span>البريد الإلكتروني</span>
                     </a>
                 </div>
             </div>
@@ -646,23 +646,23 @@
     <!-- Mobile Navigation -->
     <nav class="mobile-nav">
         <button class="nav-btn active" data-section="home-section">
-            <i class="fas fa-home"></i>
+            <i class="fas fa-home" aria-hidden="true"></i>
             <span>الرئيسية</span>
         </button>
         <button class="nav-btn" data-section="azkar-section">
-            <i class="fas fa-book-open"></i>
+            <i class="fas fa-book-open" aria-hidden="true"></i>
             <span>الأذكار</span>
         </button>
         <button class="nav-btn" data-section="prayer-times">
-            <i class="fas fa-clock"></i>
+            <i class="fas fa-clock" aria-hidden="true"></i>
             <span>الصلاة</span>
         </button>
         <button class="nav-btn" data-section="quran-section">
-            <i class="fas fa-quran"></i>
+            <i class="fas fa-quran" aria-hidden="true"></i>
             <span>القرآن</span>
         </button>
         <button class="nav-btn" id="more-nav-btn">
-            <i class="fas fa-ellipsis-h"></i>
+            <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
             <span>المزيد</span>
         </button>
     </nav>
@@ -681,15 +681,15 @@
                 <span>المسبحة</span>
             </button>
             <button class="nav-btn more-menu-item" data-section="radio-section">
-                <i class="fas fa-broadcast-tower"></i>
+                <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
                 <span>الإذاعة</span>
             </button>
             <button class="nav-btn more-menu-item" data-section="kaaba-live-section">
-                <i class="fas fa-kaaba"></i>
+                <i class="fas fa-kaaba" aria-hidden="true"></i>
                 <span>بث مباشر</span>
             </button>
             <button class="nav-btn more-menu-item" data-section="qibla-section">
-                <i class="fas fa-compass"></i>
+                <i class="fas fa-compass" aria-hidden="true"></i>
                 <span>القبلة</span>
             </button>
             <button class="nav-btn more-menu-item" data-section="mosques-section">
