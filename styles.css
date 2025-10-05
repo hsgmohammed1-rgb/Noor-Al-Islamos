@@ -2498,17 +2498,24 @@ a:hover {
 }
 
 .footer-content h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    margin-bottom: 2.5rem;
     font-weight: 500;
     color: var(--light-text);
+}
+
+.footer-links-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
 }
 
 .social-links {
     display: flex;
     justify-content: center;
     gap: 2rem;
-    margin-bottom: 2rem;
 }
 
 .social-links a {
@@ -2542,6 +2549,48 @@ a:hover {
     color: white;
     border-color: #00f2ea;
     box-shadow: 0 8px 25px rgba(0,0,0,0.3), 0 0 15px #fe2c55, 0 0 15px #25f4ee;
+}
+
+.contact-links {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.contact-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 12px 24px;
+    border-radius: var(--border-radius-md);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.contact-links a:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4);
+}
+
+.contact-links a i {
+    font-size: 1.5rem;
+}
+
+.contact-links a[href*="wa.me"]:hover {
+    background: #25D366;
+    border-color: #25D366;
+}
+
+.contact-links a[href*="mailto"]:hover {
+    background: #c71610;
+    border-color: #c71610;
 }
 
 .copyright {
