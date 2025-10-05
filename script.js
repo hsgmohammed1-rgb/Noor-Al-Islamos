@@ -1,6 +1,31 @@
 document.addEventListener("DOMContentLoaded", function () {
     const navButtons = document.querySelectorAll('.nav-btn');
     const sections = document.querySelectorAll('.content-section');
+    const moreNavBtn = document.getElementById('more-nav-btn');
+    const moreMenuOverlay = document.querySelector('.more-menu-overlay');
+    const moreMenuContainer = document.querySelector('.more-menu-container');
+    const closeMoreMenuBtn = document.getElementById('close-more-menu-btn');
+
+    // وظائف لإظهار وإخفاء قائمة "المزيد"
+    function showMoreMenu() {
+        if (!moreMenuOverlay || !moreMenuContainer) return;
+        moreMenuOverlay.classList.remove('hidden');
+        moreMenuContainer.classList.remove('hidden');
+        setTimeout(() => {
+            moreMenuOverlay.classList.add('visible');
+            moreMenuContainer.classList.add('visible');
+        }, 10);
+    }
+
+    function hideMoreMenu() {
+        if (!moreMenuOverlay || !moreMenuContainer) return;
+        moreMenuOverlay.classList.remove('visible');
+        moreMenuContainer.classList.remove('visible');
+        setTimeout(() => {
+            moreMenuOverlay.classList.add('hidden');
+            moreMenuContainer.classList.add('hidden');
+        }, 400); // يجب أن تتطابق مع مدة الانتقال في CSS
+    }
 
     // وظيفة للتحكم في الأقسام وتفعيل الأزرار
     function setActiveSection(sectionId) {
@@ -13,12 +38,15 @@ document.addEventListener("DOMContentLoaded", function () {
             targetSection.classList.add('active');
         }
 
+        const moreSections = ["tasbih-section", "radio-section", "kaaba-live-section", "qibla-section", "mosques-section"];
+        const isMoreSection = moreSections.includes(sectionId);
+
         // تحديث أزرار التنقل
         navButtons.forEach(btn => {
-            if (btn.dataset.section === sectionId) {
-                btn.classList.add('active');
+            if (btn.id === 'more-nav-btn') {
+                btn.classList.toggle('active', isMoreSection);
             } else {
-                btn.classList.remove('active');
+                btn.classList.toggle('active', btn.dataset.section === sectionId);
             }
         });
 
@@ -29,9 +57,27 @@ document.addEventListener("DOMContentLoaded", function () {
     // إضافة مستمعي الأحداث لجميع أزرار التنقل
     navButtons.forEach(button => {
         button.addEventListener('click', function () {
-            setActiveSection(this.dataset.section);
+            const sectionId = this.dataset.section;
+            if (sectionId) {
+                setActiveSection(sectionId);
+                // إذا كان الزر من قائمة "المزيد"، قم بإخفاء القائمة
+                if (this.classList.contains('more-menu-item')) {
+                    hideMoreMenu();
+                }
+            }
         });
     });
+
+    // مستمعو الأحداث لعناصر قائمة "المزيد"
+    if (moreNavBtn) {
+        moreNavBtn.addEventListener('click', showMoreMenu);
+    }
+    if (moreMenuOverlay) {
+        moreMenuOverlay.addEventListener('click', hideMoreMenu);
+    }
+    if (closeMoreMenuBtn) {
+        closeMoreMenuBtn.addEventListener('click', hideMoreMenu);
+    }
 
     // المسبحة الإلكترونية المطورة
     const tasbihSection = document.getElementById('tasbih-section');

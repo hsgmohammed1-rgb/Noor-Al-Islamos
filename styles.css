@@ -2611,6 +2611,9 @@ a:hover {
 .mobile-nav {
     display: none;
 }
+.more-menu-overlay, .more-menu-container {
+    display: none;
+}
 
 @media (max-width: 992px) {
     body {
@@ -2698,6 +2701,124 @@ a:hover {
     .azkar-main-content {
         height: calc(100vh - 400px - var(--header-height, 80px));
         min-height: 400px;
+    }
+
+    /* More Menu Styles */
+    .more-menu-overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 1002;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0s 0.3s linear;
+    }
+
+    .more-menu-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease;
+    }
+
+    .more-menu-container {
+        display: block;
+        position: fixed;
+        bottom: 70px; /* Position above mobile nav */
+        left: 0;
+        right: 0;
+        background: var(--bg-gradient);
+        border-top: 1px solid var(--accent-color);
+        border-top-left-radius: var(--border-radius-lg);
+        border-top-right-radius: var(--border-radius-lg);
+        z-index: 1003;
+        padding: 1.5rem;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .more-menu-container.visible {
+        transform: translateY(0);
+    }
+
+    .more-menu-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    .more-menu-header h4 {
+        margin: 0;
+        font-size: 1.3rem;
+        color: var(--accent-color);
+    }
+
+    .close-btn {
+        background: transparent;
+        border: none;
+        color: var(--light-text);
+        font-size: 2rem;
+        line-height: 1;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+
+    .close-btn:hover {
+        opacity: 1;
+    }
+
+    .more-menu-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .more-menu-item {
+        flex-direction: column;
+        height: auto;
+        padding: 1rem 0.5rem;
+        font-size: 1.5rem;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: menuItemFadeIn 0.5s forwards;
+    }
+    .more-menu-container.visible .more-menu-item:nth-child(1) { animation-delay: 0.1s; }
+    .more-menu-container.visible .more-menu-item:nth-child(2) { animation-delay: 0.15s; }
+    .more-menu-container.visible .more-menu-item:nth-child(3) { animation-delay: 0.2s; }
+    .more-menu-container.visible .more-menu-item:nth-child(4) { animation-delay: 0.25s; }
+    .more-menu-container.visible .more-menu-item:nth-child(5) { animation-delay: 0.3s; }
+
+    @keyframes menuItemFadeIn {
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .more-menu-item span {
+        font-size: 0.7rem;
+        margin-top: 0.5rem;
+    }
+    
+    .more-menu-item.active,
+    .more-menu-item:hover {
+        transform: scale(1.05);
+    }
+    .more-menu-item.active i, .more-menu-item:hover i {
+        color: var(--accent-color);
+    }
+    
+    .more-menu-item.active span, .more-menu-item:hover span {
+        color: var(--accent-color);
     }
 }
 

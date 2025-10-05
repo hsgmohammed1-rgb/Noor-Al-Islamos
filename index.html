@@ -610,11 +610,42 @@
             <i class="fas fa-quran"></i>
             <span>القرآن</span>
         </button>
-        <button class="nav-btn" data-section="tasbih-section">
-            <i class="fas fa-hands-praying"></i>
-            <span>المسبحة</span>
+        <button class="nav-btn" id="more-nav-btn">
+            <i class="fas fa-ellipsis-h"></i>
+            <span>المزيد</span>
         </button>
     </nav>
+
+    <!-- More Menu (for mobile) -->
+    <div class="more-menu-overlay hidden"></div>
+    <div class="more-menu-container hidden">
+        <div class="more-menu-header">
+            <h4>المزيد من الأقسام</h4>
+            <button id="close-more-menu-btn" class="close-btn">&times;</button>
+        </div>
+        <div class="more-menu-grid">
+            <button class="nav-btn more-menu-item" data-section="tasbih-section">
+                <img src="https://i.postimg.cc/g0ZCF8s9/20251005-053936.png" alt="المسبحة" style="width: 32px; height: 32px;">
+                <span>المسبحة</span>
+            </button>
+            <button class="nav-btn more-menu-item" data-section="radio-section">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>الإذاعة</span>
+            </button>
+            <button class="nav-btn more-menu-item" data-section="kaaba-live-section">
+                <i class="fas fa-kaaba"></i>
+                <span>بث مباشر</span>
+            </button>
+            <button class="nav-btn more-menu-item" data-section="qibla-section">
+                <i class="fas fa-compass"></i>
+                <span>القبلة</span>
+            </button>
+            <button class="nav-btn more-menu-item" data-section="mosques-section">
+                 <img src="https://i.postimg.cc/xjwb929V/20251005-053936.png" alt="دليل المساجد" style="width: 32px; height: 32px;">
+                <span>المساجد</span>
+            </button>
+        </div>
+    </div>
 
 
     <script src="script.js"></script>
