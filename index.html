@@ -24,7 +24,7 @@
             <div class="logo">
                 <h1><i class="fas fa-mosque"></i> نور الإسلام</h1>
             </div>
-            <nav class="nav-links">
+            <nav class="top-nav">
                 <button class="nav-btn active" data-section="home-section" title="الرئيسية">
                     <i class="fas fa-home"></i>
                 </button>
@@ -57,6 +57,7 @@
     </header>
 
     <!-- القسم الرئيسي -->
+    <main>
     <section id="home-section" class="content-section active">
         <div class="hero-section">
             <div class="hero-content">
@@ -564,6 +565,7 @@
             </div>
         </div>
     </section>
+    </main>
 
     <footer class="main-footer-social">
         <div class="footer-content">
@@ -589,6 +591,31 @@
             <p class="copyright">&copy; 2024 نور الإسلام. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <button class="nav-btn active" data-section="home-section">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </button>
+        <button class="nav-btn" data-section="azkar-section">
+            <i class="fas fa-book-open"></i>
+            <span>الأذكار</span>
+        </button>
+        <button class="nav-btn" data-section="prayer-times">
+            <i class="fas fa-clock"></i>
+            <span>الصلاة</span>
+        </button>
+        <button class="nav-btn" data-section="quran-section">
+            <i class="fas fa-quran"></i>
+            <span>القرآن</span>
+        </button>
+        <button class="nav-btn" data-section="tasbih-section">
+            <i class="fas fa-hands-praying"></i>
+            <span>المسبحة</span>
+        </button>
+    </nav>
+
 
     <script src="script.js"></script>
     <script src="prayer.js"></script>

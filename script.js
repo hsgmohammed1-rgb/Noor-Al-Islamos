@@ -2,14 +2,34 @@ document.addEventListener("DOMContentLoaded", function () {
     const navButtons = document.querySelectorAll('.nav-btn');
     const sections = document.querySelectorAll('.content-section');
 
-    // تنقل بين الأقسام
+    // وظيفة للتحكم في الأقسام وتفعيل الأزرار
+    function setActiveSection(sectionId) {
+        // إخفاء جميع الأقسام
+        sections.forEach(section => section.classList.remove('active'));
+        
+        // إظهار القسم المستهدف
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.classList.add('active');
+        }
+
+        // تحديث أزرار التنقل
+        navButtons.forEach(btn => {
+            if (btn.dataset.section === sectionId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // قم بالتمرير إلى أعلى الصفحة عند تغيير القسم
+        window.scrollTo(0, 0);
+    }
+
+    // إضافة مستمعي الأحداث لجميع أزرار التنقل
     navButtons.forEach(button => {
         button.addEventListener('click', function () {
-            navButtons.forEach(btn => btn.classList.remove('active'));
-            sections.forEach(section => section.classList.remove('active'));
-
-            document.getElementById(button.dataset.section).classList.add('active');
-            button.classList.add('active');
+            setActiveSection(this.dataset.section);
         });
     });
 
